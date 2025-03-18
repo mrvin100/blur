@@ -34,3 +34,30 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+## Authentication flow step and how to it works with the REST APIs
+
+Authentication Flow:
+a. Initial Load:
+When the application starts, the AuthProvider component is initialized
+It automatically runs checkAuth() on mount to verify if there's an existing session
+This checks /api/auth/session endpoint to validate the current session
+b. Login Process:
+User enters credentials on the login page
+The login() function is called with username and password
+It sends a POST request to /api/auth/login
+On successful login:
+User data is stored in the context
+isAuthenticated is set to true
+User is redirected based on their role (admin or user dashboard)
+c. Session Management:
+The DashboardLayout component uses useAuth() hook to protect routes
+If not authenticated, it redirects to the login page
+Different content is shown based on user role (admin vs user)
+d. Logout Process:
+User triggers logout
+Calls /api/auth/logout endpoint
+Clears user data from context
+Redirects to login page
