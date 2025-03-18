@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 interface User {
   id: string;
@@ -31,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/session');
+      const response = await fetch(getApiUrl(API_CONFIG.endpoints.auth.session));
       const session = await response.json();
       
       if (session?.user) {
@@ -50,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(getApiUrl(API_CONFIG.endpoints.auth.login), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -78,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch(getApiUrl(API_CONFIG.endpoints.auth.logout), { method: 'POST' });
       setUser(null);
       setIsAuthenticated(false);
       router.push('/login');
