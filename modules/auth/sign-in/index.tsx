@@ -8,6 +8,8 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { SubmitButton } from '@/components/submit-button';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -50,8 +52,16 @@ export function SignInForm() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-[350px]">
+    <section className="min-h-screen flex flex-col items-center justify-center bg-gray-100 relative px-4">
+      <Link 
+        href="/" 
+        className="absolute top-8 left-8 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Home
+      </Link>
+
+      <Card className="w-full max-w-[350px]">
         <CardHeader>
           <h2 className="text-2xl font-bold text-center">Sign In</h2>
           <p className="text-sm text-muted-foreground text-center">
@@ -89,12 +99,18 @@ export function SignInForm() {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col space-y-4">
             <SubmitButton 
               isLoading={isLoading} 
               buttonText="Sign In" 
               className="w-full"
             />
+            <p className="text-xs text-center text-muted-foreground">
+              By signing in, you agree to our{' '}
+              <Link href="/terms" className="underline hover:text-foreground">Terms</Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>
+            </p>
           </CardFooter>
         </form>
       </Card>

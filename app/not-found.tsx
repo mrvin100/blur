@@ -15,11 +15,7 @@ export default function NotFound() {
       >
         <div>
           <h1 className="text-4xl font-semibold text-foreground mb-2">404</h1>
-          <p className="text-muted-foreground">
-            {" "}
-            Hey guys where are you going?
-            {/* This page could not be found. */}
-          </p>
+          <p className="text-muted-foreground">Hey guys where are you going?</p>
         </div>
 
         <Button asChild variant="default">
