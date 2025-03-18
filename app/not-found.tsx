@@ -9,8 +9,8 @@ export default function NotFound() {
     <div className="min-h-[100dvh] grid place-items-center bg-background px-4">
       <motion.div
         className="text-center space-y-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
         <div>
