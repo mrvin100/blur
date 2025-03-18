@@ -13,37 +13,38 @@ export interface APIConfig {
   endpoints: APIEndpoints;
 }
 
-// Validate that all required environment variables are present
-const validateEnvVariables = () => {
-  const required = [
-    'NEXT_PUBLIC_API_BASE_URL',
-    'NEXT_PUBLIC_AUTH_API_LOGIN',
-    'NEXT_PUBLIC_AUTH_API_LOGOUT',
-    'NEXT_PUBLIC_AUTH_API_SESSION',
-  ];
+// Get environment-specific configuration
+const getEnvironmentConfig = () => {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  return {
+    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? (isDevelopment ? 'http://localhost:3000' : ''),
+    auth: {
+      login: process.env.NEXT_PUBLIC_AUTH_API_LOGIN ?? '/api/auth/login',
+      logout: process.env.NEXT_PUBLIC_AUTH_API_LOGOUT ?? '/api/auth/logout',
+      session: process.env.NEXT_PUBLIC_AUTH_API_SESSION ?? '/api/auth/session',
+    }
+  };
+};
 
-  const missing = required.filter(
-    (key) => !process.env[key]
-  );
-
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(', ')}`
-    );
+// Validate configuration
+const validateConfig = (config: ReturnType<typeof getEnvironmentConfig>) => {
+  if (!config.baseURL) {
+    throw new Error('API base URL is required in production environment');
   }
 };
 
-// Initialize and validate API configuration
-validateEnvVariables();
+const config = getEnvironmentConfig();
+
+// Only validate in production
+if (process.env.NODE_ENV === 'production') {
+  validateConfig(config);
+}
 
 export const API_CONFIG: APIConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL!,
+  baseURL: config.baseURL,
   endpoints: {
-    auth: {
-      login: process.env.NEXT_PUBLIC_AUTH_API_LOGIN!,
-      logout: process.env.NEXT_PUBLIC_AUTH_API_LOGOUT!,
-      session: process.env.NEXT_PUBLIC_AUTH_API_SESSION!,
-    },
+    auth: config.auth,
   },
 };
 
