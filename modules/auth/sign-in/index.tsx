@@ -21,24 +21,32 @@ export function SignInForm() {
     const username = formData.get('username') as string;
     const password = formData.get('password') as string;
 
-    try {
-      const result = await signIn('credentials', {
-        username,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        toast.warning('Invalid credentials');
-      } else {
-        router.push('/dashboard');
-      }
-    } catch (error) {
-      toast.error('An error occurred during sign in');
-      console.error('Sign in error:', error);
-    } finally {
+    if (!username || !password) {
+      toast.error('Please fill in all fields');
       setIsLoading(false);
+      return;
     }
+
+    const promise = signIn('credentials', {
+      username,
+      password,
+      redirect: false,
+    });
+
+    toast.promise(promise, {
+      loading: 'Signing in...',
+      success: (result) => {
+        if (result?.error) {
+          throw new Error(result.error);
+        }
+        router.push('/dashboard');
+        return 'Successfully signed in!';
+      },
+      error: (err) => {
+        setIsLoading(false);
+        return err?.message || 'Invalid credentials';
+      },
+    });
   };
 
   return (
@@ -46,11 +54,14 @@ export function SignInForm() {
       <Card className="w-[350px]">
         <CardHeader>
           <h2 className="text-2xl font-bold text-center">Sign In</h2>
+          <p className="text-sm text-muted-foreground text-center">
+            Enter your credentials to access your account
+          </p>
         </CardHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium">
+              <Label htmlFor="username">
                 Username
               </Label>
               <Input
@@ -59,10 +70,12 @@ export function SignInForm() {
                 type="text"
                 required
                 disabled={isLoading}
+                placeholder="Enter your username"
+                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
+              <Label htmlFor="password">
                 Password
               </Label>
               <Input
@@ -71,11 +84,17 @@ export function SignInForm() {
                 type="password"
                 required
                 disabled={isLoading}
+                placeholder="Enter your password"
+                className="w-full"
               />
             </div>
           </CardContent>
           <CardFooter>
-            <SubmitButton isLoading={isLoading} buttonText="Sign In" />
+            <SubmitButton 
+              isLoading={isLoading} 
+              buttonText="Sign In" 
+              className="w-full"
+            />
           </CardFooter>
         </form>
       </Card>
