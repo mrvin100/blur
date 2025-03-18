@@ -1,9 +1,12 @@
-import { Hero } from "@/modules/home";
+import { HeroSection, StatsSection } from "@/modules/home";
 
 export default function Page() {
   return (
-    <div>
-      <Hero />
-    </div>
+    <main className="relative min-h-screen flex flex-col">
+      <div className="flex-1 pb-16">
+        <HeroSection />
+        <StatsSection />
+      </div>
+    </main>
   );
 }
