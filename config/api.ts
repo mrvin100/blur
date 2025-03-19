@@ -1,17 +1,15 @@
-export interface AuthEndpoints {
-  login: string;
-  logout: string;
-  session: string;
-}
+import { APIConfig } from '@/types';
 
-export interface APIEndpoints {
-  auth: AuthEndpoints;
-}
-
-export interface APIConfig {
-  baseURL: string;
-  endpoints: APIEndpoints;
-}
+export const API_CONFIG: APIConfig = {
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080',
+  endpoints: {
+    auth: {
+      login: '/auth/login',
+      logout: '/auth/logout',
+      session: '/auth/session',
+    },
+  },
+};
 
 // Get environment-specific configuration
 const getEnvironmentConfig = () => {
@@ -40,13 +38,6 @@ const config = getEnvironmentConfig();
 if (process.env.NODE_ENV === 'production') {
   validateConfig(config);
 }
-
-export const API_CONFIG: APIConfig = {
-  baseURL: config.baseURL,
-  endpoints: {
-    auth: config.auth,
-  },
-};
 
 // Helper function to get full API URL
 export const getApiUrl = (endpoint: string): string => {

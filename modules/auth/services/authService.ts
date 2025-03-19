@@ -1,13 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+import { LoginResponse } from '@/types';
 
-interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    username: string;
-    role: 'ADMIN' | 'USER';
-  };
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 export const authService = {
   async login(username: string, password: string): Promise<LoginResponse> {

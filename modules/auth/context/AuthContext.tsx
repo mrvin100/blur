@@ -3,20 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_CONFIG, getApiUrl } from '@/config/api';
-
-interface User {
-  id: string;
-  username: string;
-  role: 'ADMIN' | 'USER';
-}
-
-interface AuthContextType {
-  user: User | null;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  isAdmin: () => boolean;
-  isAuthenticated: boolean;
-}
+import { User, AuthContextType } from '@/types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
