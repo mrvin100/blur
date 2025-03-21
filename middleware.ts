@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
 
   // Handle admin routes
   const isAdminPath = request.nextUrl.pathname.startsWith('/admin');
-  const isAdmin = token.user?.permissions?.some((p: Permission) => p.name === 'ADMIN');
+  const isAdmin = token.user?.permissions?.some((p: Permission) => p.name === 'canCreateUsers');
 
   // If non-admin user tries to access admin route, redirect to user dashboard
   if (isAdminPath && !isAdmin) {

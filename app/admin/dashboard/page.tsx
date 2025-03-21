@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/sign-in');
-    } else if (session?.user && !session.user.permissions.some(p => p.name === 'ADMIN')) {
+    } else if (session?.user && !session.user.permissions.some(p => p.name === 'canCreateUsers')) {
       router.push('/dashboard');
     }
   }, [status, session, router]);
@@ -45,6 +45,7 @@ export default function AdminDashboard() {
       const response = await getUsers();
       setUsers(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
+      console.error('Error fetching users:', error);
       toast.error('Failed to fetch users');
     }
   };
@@ -54,6 +55,7 @@ export default function AdminDashboard() {
       const response = await getPermissions();
       setPermissions(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
+      console.error('Error fetching permissions:', error);
       toast.error('Failed to fetch permissions');
     }
   };
@@ -66,6 +68,7 @@ export default function AdminDashboard() {
       toast.success('User created successfully');
       fetchUsers();
     } catch (error) {
+      console.error('Error creating user:', error);
       toast.error('Failed to create user');
     }
   };
@@ -76,6 +79,7 @@ export default function AdminDashboard() {
       toast.success('User deleted successfully');
       fetchUsers();
     } catch (error) {
+      console.error('Error deleting user:', error);
       toast.error('Failed to delete user');
     }
   };
@@ -88,6 +92,7 @@ export default function AdminDashboard() {
       toast.success('Permission created successfully');
       fetchPermissions();
     } catch (error) {
+      console.error('Error creating permission:', error);
       toast.error('Failed to create permission');
     }
   };
@@ -98,6 +103,7 @@ export default function AdminDashboard() {
       toast.success('Permission deleted successfully');
       fetchPermissions();
     } catch (error) {
+      console.error('Error deleting permission:', error);
       toast.error('Failed to delete permission');
     }
   };

@@ -6,6 +6,7 @@ export interface Permission {
 export interface User {
   id: number;
   userName: string;
+  password: string;
   permissions: Permission[];
 }
 
@@ -14,6 +15,7 @@ export interface UserResponse {
   data: {
     id: number;
     userName: string;
+    password: string;
     permissions: Permission[];
   };
 }

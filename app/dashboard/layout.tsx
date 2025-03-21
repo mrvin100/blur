@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/modules/auth/context/AuthContext';
+import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -10,19 +10,20 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ admin, user }: DashboardLayoutProps) {
-  const { isAdmin, isAuthenticated } = useAuth();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (status === 'unauthenticated') {
       router.push('/sign-in');
-      return;
     }
-  }, [isAuthenticated, router]);
+  }, [status, router]);
 
-  if (!isAuthenticated) {
+  if (status === 'loading' || status === 'unauthenticated') {
     return null;
   }
+
+  const isAdmin = session?.user?.permissions?.some(p => p.name === 'canCreateUsers');
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -39,7 +40,7 @@ export default function DashboardLayout({ admin, user }: DashboardLayoutProps) {
       </nav>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {isAdmin() ? admin : user}
+        {isAdmin ? admin : user}
       </main>
     </div>
   );

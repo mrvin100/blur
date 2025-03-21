@@ -48,7 +48,7 @@ export function SignInForm() {
       }
 
       // Determine user role and redirect accordingly
-      const isAdmin = user.permissions.some(p => p.name === 'ADMIN');
+      const isAdmin = user.permissions.some(p => p.name === 'canCreateUsers');
       const redirectPath = isAdmin ? '/admin/dashboard' : '/dashboard';
       
       router.push(redirectPath);

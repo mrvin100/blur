@@ -1,28 +1,26 @@
 import NextAuth from 'next-auth';
 import type { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { authService } from '@/modules/auth/services/authService';
 import '@/types/nextauth.types';
 import { signIn } from '@/lib/auth';
+import { Permission } from '@/types/auth';
+import type { User } from 'next-auth';
 
 declare module "next-auth" {
   interface User {
     id: string;
-    username: string;
-    role: 'ADMIN' | 'USER';
-    accessToken: string;
+    userName: string;
+    permissions: Permission[];
   }
   
   interface Session {
     user: User;
-    accessToken: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role?: 'ADMIN' | 'USER';
-    accessToken?: string;
+    user: User;
   }
 }
 
@@ -36,7 +34,7 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
-          throw new Error('Missing username or password');
+          return null;
         }
 
         try {
@@ -44,16 +42,17 @@ export const authOptions: AuthOptions = {
           const user = response.data;
 
           if (!user) {
-            throw new Error('Invalid credentials');
+            return null;
           }
 
           return {
             id: user.id.toString(),
             userName: user.userName,
             permissions: user.permissions,
-          };
-        } catch (error) {
-          throw new Error(error instanceof Error ? error.message : 'Invalid credentials');
+          } as User;
+
+        } catch {
+          return null;
         }
       },
     }),

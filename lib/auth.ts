@@ -1,21 +1,40 @@
-import { CreateUserDto, UserResponse, PermissionsResponse, CreatePermissionDto } from '@/types/auth';
+import { CreateUserDto, UserResponse, PermissionsResponse, CreatePermissionDto, User as ApiUser } from '@/types/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://blur-app-d6db06830033.herokuapp.com';
 
 export async function signIn(username: string, password: string): Promise<UserResponse> {
-  const response = await fetch(`${API_URL}/api/v1/users/get-by-id?userId=${username}`, {
+  // First get all users to find the matching username
+  const response = await fetch(`${API_URL}/api/v1/users`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Basic ${btoa(`${username}:${password}`)}`
     },
   });
 
   if (!response.ok) {
+    throw new Error('Failed to authenticate');
+  }
+
+  const users = await response.json();
+  const user = users.data.find((u: ApiUser) => u.userName === username && u.password === password);
+
+  if (!user) {
     throw new Error('Invalid credentials');
   }
 
-  return response.json();
+  // If found, get the specific user data
+  const userResponse = await fetch(`${API_URL}/api/v1/users/get-by-id?userId=${user.id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!userResponse.ok) {
+    throw new Error('Failed to fetch user data');
+  }
+
+  return userResponse.json();
 }
 
 export async function createUser(data: CreateUserDto): Promise<UserResponse> {
