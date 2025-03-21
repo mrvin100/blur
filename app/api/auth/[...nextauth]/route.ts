@@ -104,8 +104,18 @@ export const authOptions: AuthOptions = {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  debug: true,
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };
+
+// Validate required environment variables
+if (!process.env.NEXTAUTH_URL) {
+  throw new Error('NEXTAUTH_URL environment variable is not set');
+}
+
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET environment variable is not set');
+}
 
 const handler = NextAuth(authOptions);
 
