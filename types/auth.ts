@@ -3,11 +3,23 @@ export interface Permission {
   name: string;
 }
 
+export interface Score {
+  id: number;
+  value: number;
+  race?: any; // This is recursive, so we'll use any for now
+}
+
+export interface Race {
+  id: number;
+  scores: Score[];
+}
+
 export interface User {
   id: number;
   userName: string;
   password: string;
   permissions: Permission[];
+  races: Race[];
 }
 
 export interface UserResponse {
@@ -17,6 +29,7 @@ export interface UserResponse {
     userName: string;
     password: string;
     permissions: Permission[];
+    races: Race[];
   };
 }
 

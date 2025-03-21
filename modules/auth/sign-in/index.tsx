@@ -31,9 +31,18 @@ export function SignInForm() {
     }
 
     try {
+      console.log('[SignIn] Starting authentication process...');
+      
       // First, authenticate with the API
+      console.log('[SignIn] Calling API signIn...');
       const response = await apiSignIn(username, password);
+      
+      if (!response || !response.data) {
+        throw new Error('Invalid response from server');
+      }
+      
       const user = response.data;
+      console.log('[SignIn] API authentication successful, proceeding with NextAuth...');
 
       // Then, sign in with NextAuth
       const result = await nextAuthSignIn('credentials', {
@@ -44,6 +53,7 @@ export function SignInForm() {
       });
 
       if (result?.error) {
+        console.error('[SignIn] NextAuth error:', result.error);
         throw new Error(result.error);
       }
 
@@ -51,10 +61,22 @@ export function SignInForm() {
       const isAdmin = user.permissions.some(p => p.name === 'canCreateUsers');
       const redirectPath = isAdmin ? '/admin/dashboard' : '/dashboard';
       
+      console.log('[SignIn] Authentication successful, redirecting to:', redirectPath);
       router.push(redirectPath);
       toast.success('Successfully signed in!');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Invalid credentials');
+      console.error('[SignIn] Authentication error:', error);
+      let errorMessage = 'An error occurred during sign in';
+      
+      if (error instanceof Error) {
+        if (error.message === 'Failed to fetch') {
+          errorMessage = 'Unable to connect to the authentication service. Please check your internet connection and try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -87,6 +109,7 @@ export function SignInForm() {
                 type="text"
                 autoComplete="username"
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -97,6 +120,7 @@ export function SignInForm() {
                 type="password"
                 autoComplete="current-password"
                 required
+                disabled={isLoading}
               />
             </div>
           </CardContent>

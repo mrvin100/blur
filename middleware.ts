@@ -7,14 +7,15 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
 
   // Public paths that don't require authentication
-  const publicPaths = ['/sign-in'];
+  const publicPaths = ['/', '/sign-in'];
   const isPublicPath = publicPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
+    path === '/' ? request.nextUrl.pathname === '/' : request.nextUrl.pathname.startsWith(path)
   );
 
   // If the path is public and user is authenticated, redirect to appropriate dashboard
-  if (isPublicPath && token) {
-    const isAdmin = token.user?.permissions?.some((p: Permission) => p.name === 'ADMIN');
+  // Only redirect from sign-in page, not from home page
+  if (isPublicPath && token && request.nextUrl.pathname === '/sign-in') {
+    const isAdmin = token.user?.permissions?.some((p: Permission) => p.name === 'canCreateUsers');
     return NextResponse.redirect(
       new URL(isAdmin ? '/admin/dashboard' : '/dashboard', request.url)
     );

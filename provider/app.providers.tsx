@@ -1,17 +1,28 @@
 'use client';
 
 import { SessionProvider } from 'next-auth/react';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
+import { AuthProvider } from '@/modules/auth/context/AuthContext';
 
-export function AppProviders({ children }: { children: React.ReactNode }) {
+interface AppProvidersProps {
+  children: React.ReactNode;
+}
+
+export function AppProviders({ children }: AppProvidersProps) {
   return (
     <SessionProvider>
-      {children}
-      <Toaster
-        position="top-right"
-        richColors
-        closeButton
-      />
+      <AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Toaster position="top-center" />
+          {children}
+        </ThemeProvider>
+      </AuthProvider>
     </SessionProvider>
   );
 } 
