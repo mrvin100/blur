@@ -1,23 +1,45 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/modules/auth/context/AuthContext';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-export default function DashboardPage() {
+export default function UserDashboard() {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const { isAdmin, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (status === 'unauthenticated') {
       router.push('/sign-in');
-      return;
     }
+  }, [status, router]);
 
-    // Redirect to the appropriate slot based on role
-    const role = isAdmin() ? 'admin' : 'user';
-    router.push(`/dashboard/@${role}`);
-  }, [isAuthenticated, isAdmin, router]);
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
 
-  return null;
+  return (
+    <div className="container mx-auto py-8 space-y-8">
+      <h1 className="text-3xl font-bold">User Dashboard</h1>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-2xl font-semibold">Welcome, {session?.user?.userName}!</h2>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium">Your Permissions:</h3>
+              <ul className="list-disc list-inside mt-2">
+                {session?.user?.permissions.map((permission: { id: number; name: string }) => (
+                  <li key={permission.id}>{permission.name}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 } 

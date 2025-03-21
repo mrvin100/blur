@@ -3,6 +3,7 @@ import type { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { authService } from '@/modules/auth/services/authService';
 import '@/types/nextauth.types';
+import { signIn } from '@/lib/auth';
 
 declare module "next-auth" {
   interface User {
@@ -30,53 +31,50 @@ export const authOptions: AuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" }
+        username: { label: 'Username', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
-          throw new Error('Missing credentials');
+          throw new Error('Missing username or password');
         }
 
         try {
-          const { user, token } = await authService.login(
-            credentials.username,
-            credentials.password
-          );
+          const response = await signIn(credentials.username, credentials.password);
+          const user = response.data;
+
+          if (!user) {
+            throw new Error('Invalid credentials');
+          }
 
           return {
-            ...user,
-            accessToken: token,
+            id: user.id.toString(),
+            userName: user.userName,
+            permissions: user.permissions,
           };
         } catch (error) {
-          console.error("Error during sign in:", error);
-          return null;
+          throw new Error(error instanceof Error ? error.message : 'Invalid credentials');
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user.accessToken;
-        token.role = user.role;
+        token.user = user;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.role = token.role as 'ADMIN' | 'USER';
-        session.accessToken = token.accessToken as string;
-      }
+      session.user = token.user;
       return session;
-    }
+    },
   },
   pages: {
     signIn: '/sign-in',
   },
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 };
 
