@@ -52,12 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data.user);
       setIsAuthenticated(true);
 
-      // Redirect based on role
-      if (data.user.role === 'ADMIN') {
-        router.push('/dashboard/@admin');
-      } else {
-        router.push('/dashboard/@user');
-      }
+      // Redirect to the appropriate slot based on role
+      const role = data.user?.role.toLowerCase();
+      router.push(`/dashboard/@${role}`);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -66,21 +63,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch(getApiUrl(API_CONFIG.endpoints.auth.logout), { method: 'POST' });
+      const response = await fetch(getApiUrl(API_CONFIG.endpoints.auth.logout), {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+
       setUser(null);
       setIsAuthenticated(false);
-      router.push('/login');
+      router.push('/sign-in');
     } catch (error) {
       console.error('Logout error:', error);
+      throw error;
     }
   };
 
   const isAdmin = () => {
-    return user?.role === 'ADMIN';
+    return user?.role.toLowerCase() === 'admin';
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAdmin, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login, logout, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

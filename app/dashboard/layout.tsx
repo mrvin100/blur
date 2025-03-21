@@ -5,22 +5,18 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
   admin: React.ReactNode;
   user: React.ReactNode;
 }
 
-export default function DashboardLayout({
-  children,
-  admin,
-  user,
-}: DashboardLayoutProps) {
-  const { isAuthenticated, isAdmin } = useAuth();
+export default function DashboardLayout({ admin, user }: DashboardLayoutProps) {
+  const { isAdmin, isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push('/sign-in');
+      return;
     }
   }, [isAuthenticated, router]);
 
@@ -44,7 +40,6 @@ export default function DashboardLayout({
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {isAdmin() ? admin : user}
-        {children}
       </main>
     </div>
   );

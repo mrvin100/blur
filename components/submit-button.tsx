@@ -18,7 +18,7 @@ export const SubmitButton = ({ isLoading, buttonText, className }: SubmitButtonP
       {isLoading && (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       )}
-      {isLoading ? `${buttonText}ing...` : buttonText}
+      {isLoading ? `${buttonText}...` : buttonText}
     </Button>
   );
 };
