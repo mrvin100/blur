@@ -1,6 +1,11 @@
 import { CreateUserDto, UserResponse, PermissionsResponse, CreatePermissionDto, User as ApiUser, Permission } from '@/types/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://blur-app-d6db06830033.herokuapp.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// Validate API URL in production
+if (process.env.NODE_ENV === 'production' && !API_URL) {
+  throw new Error('API base URL is required in production environment');
+}
 
 // Common fetch options for all API calls
 const defaultFetchOptions = {
