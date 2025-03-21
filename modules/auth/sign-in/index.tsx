@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn as nextAuthSignIn } from 'next-auth/react';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { SubmitButton } from '@/components/submit-button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { signIn as apiSignIn } from '@/lib/auth';
 
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -29,26 +30,56 @@ export function SignInForm() {
       return;
     }
 
-    const promise = signIn('credentials', {
-      username,
-      password,
-      redirect: false,
-    });
+    try {
+      console.log('[SignIn] Starting authentication process...');
+      
+      // First, authenticate with the API
+      console.log('[SignIn] Calling API signIn...');
+      const response = await apiSignIn(username, password);
+      
+      if (!response || !response.data) {
+        throw new Error('Invalid response from server');
+      }
+      
+      const user = response.data;
+      console.log('[SignIn] API authentication successful, proceeding with NextAuth...');
 
-    toast.promise(promise, {
-      loading: 'Signing in...',
-      success: (result) => {
-        if (result?.error) {
-          throw new Error(result.error);
+      // Then, sign in with NextAuth
+      const result = await nextAuthSignIn('credentials', {
+        username,
+        password,
+        permissions: JSON.stringify(user.permissions),
+        redirect: false,
+      });
+
+      if (result?.error) {
+        console.error('[SignIn] NextAuth error:', result.error);
+        throw new Error(result.error);
+      }
+
+      // Determine user role and redirect accordingly
+      const isAdmin = user.permissions.some(p => p.name === 'canCreateUsers');
+      const redirectPath = isAdmin ? '/admin/dashboard' : '/dashboard';
+      
+      console.log('[SignIn] Authentication successful, redirecting to:', redirectPath);
+      router.push(redirectPath);
+      toast.success('Successfully signed in!');
+    } catch (error) {
+      console.error('[SignIn] Authentication error:', error);
+      let errorMessage = 'An error occurred during sign in';
+      
+      if (error instanceof Error) {
+        if (error.message === 'Failed to fetch') {
+          errorMessage = 'Unable to connect to the authentication service. Please check your internet connection and try again.';
+        } else {
+          errorMessage = error.message;
         }
-        router.push('/dashboard');
-        return 'Successfully signed in!';
-      },
-      error: (err) => {
-        setIsLoading(false);
-        return err?.message || 'Invalid credentials';
-      },
-    });
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -71,46 +102,34 @@ export function SignInForm() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">
-                Username
-              </Label>
+              <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 name="username"
                 type="text"
+                autoComplete="username"
                 required
                 disabled={isLoading}
-                placeholder="Enter your username"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">
-                Password
-              </Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 required
                 disabled={isLoading}
-                placeholder="Enter your password"
-                className="w-full"
               />
             </div>
           </CardContent>
-          <CardFooter className="flex-col space-y-4">
+          <CardFooter>
             <SubmitButton 
               isLoading={isLoading} 
-              buttonText="Sign In" 
+              buttonText="Sign In"
               className="w-full"
             />
-            <p className="text-xs text-center text-muted-foreground">
-              By signing in, you agree to our{' '}
-              <Link href="/terms" className="underline hover:text-foreground">Terms</Link>{' '}
-              and{' '}
-              <Link href="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>
-            </p>
           </CardFooter>
         </form>
       </Card>

@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Car, Timer, Trophy, Users } from "lucide-react";
+import { Stat } from '@/types';
 
-const stats = [
+const stats: Stat[] = [
   {
     value: "60+",
     label: "Race Tracks",
@@ -28,7 +29,7 @@ const stats = [
     description: "Compete for glory and rewards",
     icon: Trophy,
   },
-] as const;
+];
 
 export function StatsSection() {
   return (

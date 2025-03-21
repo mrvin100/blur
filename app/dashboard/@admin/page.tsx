@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/modules/auth/context/AuthContext';
+import { useAuth } from '@/modules/auth/context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -10,12 +10,12 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated || !isAdmin()) {
-      router.push('/login');
+    if (!isAuthenticated || !isAdmin) {
+      router.push('/sign-in');
     }
   }, [isAuthenticated, isAdmin, router]);
 
-  if (!isAuthenticated || !isAdmin()) {
+  if (!isAuthenticated || !isAdmin) {
     return null;
   }
 

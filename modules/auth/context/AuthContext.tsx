@@ -1,102 +1,48 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import { API_CONFIG, getApiUrl } from '@/config/api';
-
-interface User {
-  id: string;
-  username: string;
-  role: 'ADMIN' | 'USER';
-}
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import type { Permission } from '@/types/auth';
 
 interface AuthContextType {
-  user: User | null;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  isAdmin: () => boolean;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  isAdmin: boolean;
+  user: {
+    id?: string;
+    userName?: string;
+    permissions?: Permission[];
+  } | null;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  isLoading: true,
+  isAdmin: false,
+  user: null,
+});
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const router = useRouter();
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored session on mount
-    checkAuth();
-  }, []);
+    setIsLoading(status === 'loading');
+  }, [status]);
 
-  const checkAuth = async () => {
-    try {
-      const response = await fetch(getApiUrl(API_CONFIG.endpoints.auth.session));
-      const session = await response.json();
-      
-      if (session?.user) {
-        setUser(session.user);
-        setIsAuthenticated(true);
-      } else {
-        setUser(null);
-        setIsAuthenticated(false);
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      setUser(null);
-      setIsAuthenticated(false);
-    }
+  const isAuthenticated = !!session?.user;
+  const isAdmin = session?.user?.permissions?.some(
+    (p: Permission) => p.name === 'canCreateUsers'
+  ) ?? false;
+
+  const value = {
+    isAuthenticated,
+    isLoading,
+    isAdmin,
+    user: session?.user ?? null,
   };
 
-  const login = async (username: string, password: string) => {
-    try {
-      const response = await fetch(getApiUrl(API_CONFIG.endpoints.auth.login), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      const data = await response.json();
-      setUser(data.user);
-      setIsAuthenticated(true);
-
-      // Redirect based on role
-      if (data.user.role === 'ADMIN') {
-        router.push('/dashboard/@admin');
-      } else {
-        router.push('/dashboard/@user');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await fetch(getApiUrl(API_CONFIG.endpoints.auth.logout), { method: 'POST' });
-      setUser(null);
-      setIsAuthenticated(false);
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
-  const isAdmin = () => {
-    return user?.role === 'ADMIN';
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, login, logout, isAdmin, isAuthenticated }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
@@ -105,4 +51,8 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+}
+
+// Export the context for type usage
+export type { AuthContextType };
+export { AuthContext }; 

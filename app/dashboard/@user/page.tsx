@@ -1,9 +1,9 @@
 'use client';
 
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/modules/auth/context/AuthContext';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/modules/auth/context';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 
 export default function UserDashboard() {
   const { isAuthenticated, user } = useAuth();
@@ -11,7 +11,7 @@ export default function UserDashboard() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push('/sign-in');
     }
   }, [isAuthenticated, router]);
 
@@ -23,7 +23,7 @@ export default function UserDashboard() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <h2 className="text-2xl font-bold">Welcome, {user?.username}!</h2>
+          <h2 className="text-2xl font-bold">Welcome, {user?.userName}!</h2>
         </CardHeader>
         <CardContent>
           <p>Welcome to your personal dashboard. Here you can manage your account and view your data.</p>
