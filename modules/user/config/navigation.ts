@@ -1,11 +1,10 @@
 import {
   LayoutDashboard,
   Trophy,
-  Users,
   Calendar,
   Gamepad2,
-  Settings,
   Bell,
+  Settings,
 } from 'lucide-react';
 
 export const userNavigationItems = [
@@ -18,11 +17,6 @@ export const userNavigationItems = [
     title: 'My Tournaments',
     href: '/dashboard/tournaments',
     icon: Trophy,
-  },
-  {
-    title: 'Community',
-    href: '/dashboard/community',
-    icon: Users,
   },
   {
     title: 'Schedule',
@@ -44,4 +38,4 @@ export const userNavigationItems = [
     href: '/dashboard/settings',
     icon: Settings,
   },
-]; 
+];

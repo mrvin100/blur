@@ -1,11 +1,10 @@
 import {
   LayoutDashboard,
-  Users,
   Settings,
-  Trophy,
+  Shield,
   Calendar,
   Activity,
-  Shield,
+  Trophy,
 } from 'lucide-react';
 
 export const adminNavigationItems = [
@@ -13,11 +12,6 @@ export const adminNavigationItems = [
     title: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
-  },
-  {
-    title: 'User Management',
-    href: '/dashboard/users',
-    icon: Users,
   },
   {
     title: 'Tournaments',

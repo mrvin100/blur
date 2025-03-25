@@ -8,11 +8,9 @@ import { adminNavigationItems } from "@/modules/admin/config/navigation";
 import { userNavigationItems } from "@/modules/user/config/navigation";
 
 export default function DashboardLayout({
-  admin,
-  user,
+  children,
 }: {
-  admin: React.ReactNode;
-  user: React.ReactNode;
+  children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -20,30 +18,32 @@ export default function DashboardLayout({
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/sign-in");
+      return;
     }
-  }, [status, router]);
+
+    if (status === "authenticated" && session?.user) {
+      const isAdmin = session.user.permissions?.some(p => p.name === 'canCreateUsers');
+      // The layout will handle showing the appropriate dashboard
+      // We just need to ensure we're on the correct route
+      if (isAdmin && !window.location.pathname.includes('/dashboard')) {
+        router.push('/dashboard');
+      }
+    }
+  }, [status, session, router]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
   }
 
-  if (!session) {
-    return null;
-  }
-
-  const isAdmin = session.user.permissions.some(
-    (p) => p.name === "canCreateUsers"
-  );
+  const isAdmin = session?.user?.permissions?.some(p => p.name === 'canCreateUsers');
   const navigationItems = isAdmin ? adminNavigationItems : userNavigationItems;
 
   return (
-    <div className="flex min-h-screen">
-      <AppSidebar items={navigationItems} />
-      <div className="flex-1 overflow-auto">
-        <main className="container mx-auto py-6">
-          {isAdmin ? admin : user}
-        </main>
-      </div>
+    <div className="flex h-screen">
+      <AppSidebar navigationItems={navigationItems} />
+      <main className="flex-1 overflow-y-auto">
+        {children}
+      </main>
     </div>
   );
 }

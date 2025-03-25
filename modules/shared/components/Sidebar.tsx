@@ -2,16 +2,16 @@
 
 import Link from 'next/link';
 import {
-  SidebarContent,
+  Sidebar,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarProvider,
   SidebarFooter,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { LucideIcon, Menu } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,21 +24,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useSidebar } from '@/components/ui/sidebar';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
+import { usePathname } from 'next/navigation';
 
 interface SidebarProps {
-  items: {
+  navigationItems: {
     title: string;
     href: string;
     icon: LucideIcon;
   }[];
 }
 
-function SidebarContentWrapper({ items }: { items: SidebarProps['items'] }) {
-  const { isMobile } = useSidebar();
+function SidebarWrapper({ navigationItems }: SidebarProps) {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const { isMobile } = useSidebar();
 
   const userName = session?.user?.name || session?.user?.userName || 'User';
   const userEmail = session?.user?.email || '';
@@ -46,18 +47,10 @@ function SidebarContentWrapper({ items }: { items: SidebarProps['items'] }) {
   const userInitial = userName.charAt(0).toUpperCase();
 
   return (
-    <>
-      <SidebarHeader className="border-b px-4 py-2">
+    <Sidebar className="w-64 border-r">
+      <SidebarHeader className="border-b px-4 py-3">
         <div className="flex items-center justify-between">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href="/dashboard">
-                  <span className="text-base font-semibold">Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+          <h2 className="text-lg font-semibold">Dashboard</h2>
           <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
             <SidebarTrigger>
               <Menu className="h-4 w-4" />
@@ -67,24 +60,25 @@ function SidebarContentWrapper({ items }: { items: SidebarProps['items'] }) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <div className="flex-1 overflow-y-auto">
         <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.href}>
-                      {item.icon && <item.icon className="h-4 w-4" />}
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors hover:bg-accent ${
+                  pathname === item.href ? 'bg-accent' : ''
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
         </SidebarGroup>
-      </SidebarContent>
+      </div>
 
       <SidebarFooter className="border-t">
         <SidebarMenu>
@@ -148,16 +142,14 @@ function SidebarContentWrapper({ items }: { items: SidebarProps['items'] }) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-    </>
+    </Sidebar>
   );
 }
 
-export function AppSidebar({ items }: SidebarProps) {
+export function AppSidebar(props: SidebarProps) {
   return (
     <SidebarProvider>
-      <div className="w-[240px] flex-col border-r">
-        <SidebarContentWrapper items={items} />
-      </div>
+      <SidebarWrapper navigationItems={props.navigationItems} />
     </SidebarProvider>
   );
 } 
