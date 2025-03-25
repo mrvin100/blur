@@ -74,7 +74,7 @@ const handler = NextAuth({
             id: user.id.toString(),
             userName: user.userName,
             permissions: user.permissions,
-          } as User;
+          };
 
         } catch (error) {
           console.error('[NextAuth] Authentication error:', {
@@ -91,15 +91,26 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        console.log('[NextAuth] Updating JWT with user data');
         token.user = user;
       }
       return token;
     },
     async session({ session, token }) {
-      console.log('[NextAuth] Creating session for user');
-      session.user = token.user;
+      if (token.user) {
+        session.user = token.user;
+      }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // If the url is relative, prefix it with the base URL
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
+      }
+      // If the url is external, redirect to the dashboard
+      if (url.startsWith('http')) {
+        return `${baseUrl}/dashboard`;
+      }
+      return url;
     },
   },
   pages: {
@@ -110,8 +121,8 @@ const handler = NextAuth({
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET,
 });
 
 export { handler as GET, handler as POST }; 

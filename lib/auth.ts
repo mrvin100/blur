@@ -1,4 +1,4 @@
-import { CreateUserDto, UserResponse, PermissionsResponse, CreatePermissionDto, User as ApiUser, Permission } from '@/types/auth';
+import { CreateUserDto, UserResponse, PermissionsResponse, CreatePermissionDto, Permission } from '@/types/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -52,101 +52,25 @@ export async function signIn(username: string, password: string): Promise<UserRe
     throw new Error('API URL is not configured. Please check your environment variables.');
   }
 
-  const fetchOptions = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    mode: 'cors' as RequestMode,
-    credentials: 'include' as RequestCredentials,
-  };
-
   try {
-    // First get all users to find the matching username
-    console.log('[Auth] Fetching all users...');
-    const response = await fetch(`${API_URL}/api/v1/users`, fetchOptions);
+    const response = await fetch(`${API_URL}/api/v1/users/log-in`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': '*/*',
+      },
+      body: JSON.stringify({
+        userName: username,
+        password: password
+      }),
+    });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[Auth] Failed to fetch users:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorText
-      });
-
-      // Handle specific HTTP status codes
-      switch (response.status) {
-        case 401:
-          throw new Error('Authentication failed: Invalid credentials');
-        case 403:
-          throw new Error('Authentication failed: Access denied');
-        case 429:
-          throw new Error('Too many requests. Please try again later.');
-        case 500:
-          throw new Error('Server error. Please try again later.');
-        default:
-          throw new Error(`Failed to authenticate: ${response.statusText} - ${errorText}`);
-      }
-    }
-
-    const users = await response.json();
-    console.log('[Auth] API Response:', users);
-    console.log(`[Auth] Successfully fetched ${users.data?.length ?? 0} users`);
-
-    if (!users.data || !Array.isArray(users.data)) {
-      console.error('[Auth] Invalid API response format:', users);
-      throw new Error('Invalid API response format');
-    }
-
-    // Find user with matching username and password
-    const user = users.data.find((u: ApiUser) => u.userName === username && u.password === password);
-
-    if (!user) {
-      console.log('[Auth] No matching user found with provided credentials');
-      throw new Error('Invalid credentials');
-    }
-
-    console.log(`[Auth] Found matching user with ID: ${user.id}`);
-
-    // If found, get the specific user data
-    console.log(`[Auth] Fetching specific user data for ID: ${user.id}`);
-    const userResponse = await fetch(`${API_URL}/api/v1/users/get-by-id?userId=${user.id}`, fetchOptions);
-
-    if (!userResponse.ok) {
-      const errorText = await userResponse.text();
-      console.error('[Auth] Failed to fetch specific user data:', {
-        status: userResponse.status,
-        statusText: userResponse.statusText,
-        error: errorText
-      });
-
-      // Handle specific HTTP status codes
-      switch (userResponse.status) {
-        case 401:
-          throw new Error('Authentication failed: Invalid credentials');
-        case 403:
-          throw new Error('Authentication failed: Access denied');
-        case 429:
-          throw new Error('Too many requests. Please try again later.');
-        case 500:
-          throw new Error('Server error. Please try again later.');
-        default:
-          throw new Error(`Failed to fetch user data: ${userResponse.statusText} - ${errorText}`);
-      }
-    }
-
-    const userData = await userResponse.json();
-    console.log('[Auth] User data response:', userData);
-
-    if (!userData.data) {
-      console.error('[Auth] Invalid user data format:', userData);
-      throw new Error('Invalid user data format');
-    }
-
-    console.log('[Auth] Successfully fetched user data with permissions:', 
-      userData.data.permissions?.map((p: Permission) => p.name) ?? []);
+    const userData = await handleApiResponse<UserResponse>(response, 'Failed to authenticate');
     
+    console.log('[Auth] Successfully authenticated user:', userData);
+    console.log('[Auth] User permissions:', 
+      userData.data?.permissions?.map((p: Permission) => p.name) ?? []);
+
     return userData;
   } catch (error) {
     console.error('[Auth] Authentication error:', error);

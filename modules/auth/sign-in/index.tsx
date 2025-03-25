@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn as nextAuthSignIn } from 'next-auth/react';
+import { signIn as nextAuthSignIn, getSession } from 'next-auth/react';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { SubmitButton } from '@/components/submit-button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { signIn as apiSignIn } from '@/lib/auth';
 
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,22 +32,10 @@ export function SignInForm() {
     try {
       console.log('[SignIn] Starting authentication process...');
       
-      // First, authenticate with the API
-      console.log('[SignIn] Calling API signIn...');
-      const response = await apiSignIn(username, password);
-      
-      if (!response || !response.data) {
-        throw new Error('Invalid response from server');
-      }
-      
-      const user = response.data;
-      console.log('[SignIn] API authentication successful, proceeding with NextAuth...');
-
-      // Then, sign in with NextAuth
+      // Sign in with NextAuth directly
       const result = await nextAuthSignIn('credentials', {
         username,
         password,
-        permissions: JSON.stringify(user.permissions),
         redirect: false,
       });
 
@@ -57,12 +44,15 @@ export function SignInForm() {
         throw new Error(result.error);
       }
 
-      // Determine user role and redirect accordingly
-      const isAdmin = user.permissions.some(p => p.name === 'canCreateUsers');
-      const redirectPath = isAdmin ? '/admin/dashboard' : '/dashboard';
-      
-      console.log('[SignIn] Authentication successful, redirecting to:', redirectPath);
-      router.push(redirectPath);
+      // Get the session to check user permissions
+      const session = await getSession();
+      if (!session?.user) {
+        throw new Error('Failed to get user session');
+      }
+
+      // Redirect to dashboard - the layout will handle showing the correct view
+      console.log('[SignIn] Authentication successful, redirecting to dashboard');
+      router.push('/dashboard');
       toast.success('Successfully signed in!');
     } catch (error) {
       console.error('[SignIn] Authentication error:', error);
