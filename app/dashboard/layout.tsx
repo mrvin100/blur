@@ -18,8 +18,18 @@ export default function DashboardLayout({
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/sign-in");
+      return;
     }
-  }, [status, router]);
+
+    if (status === "authenticated" && session?.user) {
+      const isAdmin = session.user.permissions?.some(p => p.name === 'canCreateUsers');
+      // The layout will handle showing the appropriate dashboard
+      // We just need to ensure we're on the correct route
+      if (isAdmin && !window.location.pathname.includes('/dashboard')) {
+        router.push('/dashboard');
+      }
+    }
+  }, [status, session, router]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -29,8 +39,8 @@ export default function DashboardLayout({
   const navigationItems = isAdmin ? adminNavigationItems : userNavigationItems;
 
   return (
-    <div className="flex min-h-screen">
-      <AppSidebar items={navigationItems} />
+    <div className="flex h-screen">
+      <AppSidebar navigationItems={navigationItems} />
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
