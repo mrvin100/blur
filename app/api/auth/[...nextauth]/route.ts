@@ -101,9 +101,21 @@ const handler = NextAuth({
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // If the url is relative, prefix it with the base URL
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
+      }
+      // If the url is external, redirect to the dashboard
+      if (url.startsWith('http')) {
+        return `${baseUrl}/dashboard`;
+      }
+      return url;
+    },
   },
   pages: {
     signIn: '/sign-in',
+    error: '/sign-in',
   },
   session: {
     strategy: 'jwt',
