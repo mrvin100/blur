@@ -8,11 +8,9 @@ import { adminNavigationItems } from "@/modules/admin/config/navigation";
 import { userNavigationItems } from "@/modules/user/config/navigation";
 
 export default function DashboardLayout({
-  admin,
-  user,
+  children,
 }: {
-  admin: React.ReactNode;
-  user: React.ReactNode;
+  children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -27,23 +25,15 @@ export default function DashboardLayout({
     return <div>Loading...</div>;
   }
 
-  if (!session) {
-    return null;
-  }
-
-  const isAdmin = session.user.permissions.some(
-    (p) => p.name === "canCreateUsers"
-  );
+  const isAdmin = session?.user?.permissions?.some(p => p.name === 'canCreateUsers');
   const navigationItems = isAdmin ? adminNavigationItems : userNavigationItems;
 
   return (
     <div className="flex min-h-screen">
       <AppSidebar items={navigationItems} />
-      <div className="flex-1 overflow-auto">
-        <main className="container mx-auto py-6">
-          {isAdmin ? admin : user}
-        </main>
-      </div>
+      <main className="flex-1 overflow-y-auto">
+        {children}
+      </main>
     </div>
   );
 }
