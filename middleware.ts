@@ -1,50 +1,36 @@
 import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
-import { Permission } from '@/types/auth';
+import { getToken } from 'next-auth/jwt';
+
+const publicPaths = ['/', '/sign-in', '/sign-up'];
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
+  const { pathname } = request.nextUrl;
 
-  // Public paths that don't require authentication
-  const publicPaths = ['/', '/sign-in'];
-  const isPublicPath = publicPaths.some((path) =>
-    path === '/' ? request.nextUrl.pathname === '/' : request.nextUrl.pathname.startsWith(path)
-  );
-
-  // If the path is public and user is authenticated, redirect to appropriate dashboard
-  // Only redirect from sign-in page, not from home page
-  if (isPublicPath && token && request.nextUrl.pathname === '/sign-in') {
-    const isAdmin = token.user?.permissions?.some((p: Permission) => p.name === 'canCreateUsers');
-    return NextResponse.redirect(
-      new URL(isAdmin ? '/admin/dashboard' : '/dashboard', request.url)
-    );
-  }
-
-  // If the path is public and user is not authenticated, allow access
-  if (isPublicPath) {
-    return NextResponse.next();
-  }
-
-  // If user is not authenticated and tries to access protected route, redirect to sign-in
-  if (!token) {
-    const signInUrl = new URL('/sign-in', request.url);
-    signInUrl.searchParams.set('callbackUrl', request.url);
-    return NextResponse.redirect(signInUrl);
-  }
-
-  // Handle admin routes
-  const isAdminPath = request.nextUrl.pathname.startsWith('/admin');
-  const isAdmin = token.user?.permissions?.some((p: Permission) => p.name === 'canCreateUsers');
-
-  // If non-admin user tries to access admin route, redirect to user dashboard
-  if (isAdminPath && !isAdmin) {
+  // If the path is public and user is authenticated, redirect to dashboard
+  if (publicPaths.includes(pathname) && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // If admin user tries to access user dashboard, redirect to admin dashboard
-  if (!isAdminPath && isAdmin && request.nextUrl.pathname === '/dashboard') {
-    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+  // If the path is protected and user is not authenticated, redirect to sign-in
+  if (!publicPaths.includes(pathname) && !token) {
+    return NextResponse.redirect(new URL('/sign-in', request.url));
+  }
+
+  // Handle dashboard routes
+  if (pathname.startsWith('/dashboard')) {
+    const isAdmin = token?.user?.permissions?.some((p: any) => p.name === 'canCreateUsers');
+    
+    // If user tries to access admin-specific routes without admin permissions
+    if (pathname.startsWith('/dashboard/admin') && !isAdmin) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    
+    // If admin tries to access user-specific routes
+    if (pathname.startsWith('/dashboard/user') && isAdmin) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
 
   return NextResponse.next();

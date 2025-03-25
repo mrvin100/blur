@@ -20,8 +20,9 @@ export function UserActions() {
     signOut({ callbackUrl: '/' });
   };
 
-  const handleDashboardClick = () => {
-    router.push(isAdmin ? '/admin/dashboard' : '/dashboard');
+  const handleProfileClick = () => {
+    const isAdmin = session?.user?.permissions.some(p => p.name === 'canCreateUsers');
+    router.push('/dashboard');
   };
 
   return (
@@ -35,7 +36,7 @@ export function UserActions() {
         <DropdownMenuItem className="font-medium">
           {user?.userName}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDashboardClick}>
+        <DropdownMenuItem onClick={handleProfileClick}>
           Dashboard
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleSignOut}>

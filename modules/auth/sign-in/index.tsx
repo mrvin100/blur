@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { SubmitButton } from '@/components/submit-button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { Permission } from '@/types/auth';
 
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -51,12 +50,9 @@ export function SignInForm() {
         throw new Error('Failed to get user session');
       }
 
-      // Determine user role and redirect accordingly
-      const isAdmin = session.user.permissions.some((p: Permission) => p.name === 'canCreateUsers');
-      const redirectPath = isAdmin ? '/admin/dashboard' : '/dashboard';
-      
-      console.log('[SignIn] Authentication successful, redirecting to:', redirectPath);
-      router.push(redirectPath);
+      // Redirect to dashboard - the layout will handle showing the correct view
+      console.log('[SignIn] Authentication successful, redirecting to dashboard');
+      router.push('/dashboard');
       toast.success('Successfully signed in!');
     } catch (error) {
       console.error('[SignIn] Authentication error:', error);
