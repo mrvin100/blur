@@ -1,22 +1,22 @@
-export {};
+import { Permission } from '@/types/auth';
+import type { User } from "next-auth";
 
 declare module "next-auth" {
   interface User {
     id: string;
-    username: string;
-    role: 'ADMIN' | 'USER';
-    accessToken: string;
+    userName: string;
+    permissions: Permission[];
   }
   
   interface Session {
     user: User;
-    accessToken: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role?: 'ADMIN' | 'USER';
-    accessToken?: string;
+    user: User;
   }
-} 
+}
+
+export type { User, Session } from "next-auth"; 

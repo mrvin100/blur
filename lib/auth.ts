@@ -1,4 +1,4 @@
-import { CreateUserDto, UserResponse, PermissionsResponse, CreatePermissionDto, User as ApiUser, Permission } from '@/types/auth';
+import { CreateUserDto, UserResponse, PermissionsResponse, CreatePermissionDto, Permission } from '@/types/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
