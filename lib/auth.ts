@@ -53,22 +53,18 @@ export async function signIn(username: string, password: string): Promise<UserRe
   }
 
   try {
-    // Nouvelle requête POST avec le corps de requête
-    const response = await fetch(`${API_URL}/users/log-in`, {
+    const response = await fetch(`${API_URL}/api/v1/users/log-in`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Accept': '*/*',
       },
-      mode: 'cors',
-      credentials: 'include',
       body: JSON.stringify({
-        userName: username, // Correspond au DTO Java
+        userName: username,
         password: password
       }),
     });
 
-    // Traitement unique de la réponse
     const userData = await handleApiResponse<UserResponse>(response, 'Failed to authenticate');
     
     console.log('[Auth] Successfully authenticated user:', userData);

@@ -27,9 +27,7 @@ export interface UserResponse {
   data: {
     id: number;
     userName: string;
-    password: string;
     permissions: Permission[];
-    races: Race[];
   };
 }
 
