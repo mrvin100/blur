@@ -53,7 +53,7 @@ export async function signIn(username: string, password: string): Promise<UserRe
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/users/log-in`, {
+    const response = await fetch(`${API_URL}/users/log-in`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export async function signIn(username: string, password: string): Promise<UserRe
 }
 
 export async function createUser(data: CreateUserDto): Promise<UserResponse> {
-  const response = await fetch(`${API_URL}/api/v1/users/create`, {
+  const response = await fetch(`${API_URL}/users/create`, {
     ...defaultFetchOptions,
     method: 'POST',
     body: JSON.stringify(data),
@@ -93,7 +93,7 @@ export async function createUser(data: CreateUserDto): Promise<UserResponse> {
 }
 
 export async function getUsers(): Promise<UserResponse> {
-  const response = await fetch(`${API_URL}/api/v1/users`, {
+  const response = await fetch(`${API_URL}/users`, {
     ...defaultFetchOptions,
     method: 'GET',
   });
@@ -102,7 +102,7 @@ export async function getUsers(): Promise<UserResponse> {
 }
 
 export async function deleteUser(userId: number): Promise<UserResponse> {
-  const response = await fetch(`${API_URL}/api/v1/users/delete?userId=${userId}`, {
+  const response = await fetch(`${API_URL}/users/delete?userId=${userId}`, {
     ...defaultFetchOptions,
     method: 'DELETE',
   });
@@ -111,7 +111,7 @@ export async function deleteUser(userId: number): Promise<UserResponse> {
 }
 
 export async function getPermissions(): Promise<PermissionsResponse> {
-  const response = await fetch(`${API_URL}/api/v1/permissions`, {
+  const response = await fetch(`${API_URL}/permissions`, {
     ...defaultFetchOptions,
     method: 'GET',
   });
@@ -120,7 +120,7 @@ export async function getPermissions(): Promise<PermissionsResponse> {
 }
 
 export async function createPermission(data: CreatePermissionDto): Promise<PermissionsResponse> {
-  const response = await fetch(`${API_URL}/api/v1/permissions/create`, {
+  const response = await fetch(`${API_URL}/permissions/create`, {
     ...defaultFetchOptions,
     method: 'POST',
     body: JSON.stringify(data),
@@ -130,7 +130,7 @@ export async function createPermission(data: CreatePermissionDto): Promise<Permi
 }
 
 export async function deletePermission(permissionId: number): Promise<PermissionsResponse> {
-  const response = await fetch(`${API_URL}/api/v1/permissions/delete?permissionId=${permissionId}`, {
+  const response = await fetch(`${API_URL}/permissions/delete?permissionId=${permissionId}`, {
     ...defaultFetchOptions,
     method: 'DELETE',
   });

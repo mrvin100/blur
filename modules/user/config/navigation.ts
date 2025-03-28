@@ -35,6 +35,11 @@ export const userNavigationItems = [
     icon: Gamepad2,
   },
   {
+    title: 'History',
+    href: '/dashboard/history',
+    icon: Calendar,
+  },
+  {
     title: 'Notifications',
     href: '/dashboard/notifications',
     icon: Bell,
