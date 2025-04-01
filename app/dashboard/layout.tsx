@@ -6,7 +6,8 @@ import { useEffect } from "react";
 import { AppSidebar } from "@/modules/shared/components/Sidebar";
 import { adminNavigationItems } from "@/modules/admin/config/navigation";
 import { userNavigationItems } from "@/modules/user/config/navigation";
-
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+export const queryClient = new QueryClient();
 export default function DashboardLayout({
   children,
 }: {
@@ -42,7 +43,9 @@ export default function DashboardLayout({
     <div className="flex h-screen">
       <AppSidebar navigationItems={navigationItems} />
       <main className="flex-1 overflow-y-auto">
-        {children}
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
       </main>
     </div>
   );

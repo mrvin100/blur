@@ -4,7 +4,7 @@ import {
   Calendar,
   Gamepad2,
   Bell,
-  Settings,
+  Settings, Car
 } from 'lucide-react';
 
 export const userNavigationItems = [
@@ -32,6 +32,11 @@ export const userNavigationItems = [
     title: 'Notifications',
     href: '/dashboard/notifications',
     icon: Bell,
+  },
+  {
+    title: 'Party',
+    href: '/party',
+    icon: Car
   },
   {
     title: 'Settings',
