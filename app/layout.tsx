@@ -20,7 +20,6 @@ export const metadata: Metadata = {
   title: "Blur App",
   description: "Gestion des évènements pour Blur Game | build by 48 Students",
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
