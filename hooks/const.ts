@@ -11,16 +11,28 @@ export const PartiesCacheKeys = Object.freeze({
 })
 
 export const RaceParametersCacheKeys = Object.freeze({
-  Parameters:"Parameters"
+  Parameters: "Parameters"
 })
 
 export const CarsCacheKeys = Object.freeze({
-  AllCars:"AllCars",
-  IndividualCar:"IndividualCar",
-  GlobalCar:"GlobalCar"
+  AllCars: "AllCars",
+  IndividualCar: "IndividualCar",
+  GlobalCar: "GlobalCar"
 })
 
 export const MapsCacheKey = Object.freeze({
-  AllMaps:"AllMaps",
-  IndividualMap:"IndividualMap"
+  AllMaps: "AllMaps",
+  IndividualMap: "IndividualMap"
+})
+
+export const UsersCacheKey = Object.freeze({
+  AllUsers: "AllUsers"
+})
+
+export const RaceCacheKeys = Object.freeze({
+  Race: "Race"
+})
+
+export const ScoreCacheKeys = Object.freeze({
+  Score: "Score"
 })

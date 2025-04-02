@@ -1,9 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { queryClient } from "@/app/dashboard/layout";
 import { PartyManagementCacheKeys } from "./const";
-import { createPartyApi } from "@/app/api/party/route";
+import { createPartyApi, getPartyById } from "@/app/api/party/route";
 
-export const useParty = () => {
+export const useParty = (partyId?: string) => {
   const createParty = useMutation({
     mutationFn: () =>
       createPartyApi(),
@@ -12,6 +12,10 @@ export const useParty = () => {
         queryKey: [PartyManagementCacheKeys.Party],
       }),
   })
+  const fetchPartyById = useQuery({
+    queryKey: [PartyManagementCacheKeys.Party],
+    queryFn: () => getPartyById(partyId as string)
+  })
 
-  return { createParty }
+  return { createParty, fetchPartyById }
 }
