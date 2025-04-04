@@ -5,8 +5,8 @@ export interface Car {
 }
 
 export interface CarAttribution {
-  id: bigint,
+  id: string,
   name: string,
   imageUrl: string,
-  uerName: string
+  userName: string
 }

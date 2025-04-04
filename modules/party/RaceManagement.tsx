@@ -18,70 +18,47 @@ import { useRace } from "@/hooks/useRace"
 import { useRaceParty } from "@/hooks/useRaceParty"
 
 const RaceManagement = () => {
-  const [party, setParty] = useState<Party | null>(null)
-  const [races, setRaces] = useState<Race[]>([])
   const [currentRace, setCurrentRace] = useState<Race | null>(null)
-  const [selectedRace, setSelectedRace] = useState<Race | null>(null)
+  const [selectedRace, setSelectedRace] = useState<string | null>(null)
   const [isAddParticipantsModalOpen, setIsAddParticipantsModalOpen] = useState(false)
   const [isRaceDetailsModalOpen, setIsRaceDetailsModalOpen] = useState(false)
-  const [partyId, setPartyId] = useState<string>("1")
-  const { fetchPartyById } = useParty(partyId)
-  const { fetchRaceByPartyId, createRace } = useRaceParty(partyId)
-  const { fetchRaceById } = useRace(currentRace?.id)
-  const params = useParams();
-
+  const { partyId } = useParams()
+  const { fetchPartyById } = useParty(partyId as string)
+  const { fetchRaceByPartyId, createRace } = useRaceParty(partyId as string)
+  const { fetchRaceById } = useRace(currentRace?.id || "1")
+  const party = fetchPartyById.data
+  const races = fetchRaceByPartyId.data
   useEffect(() => {
+    setCurrentRace(getMostRecentRace(fetchRaceByPartyId.data || []))
+  }, [fetchRaceByPartyId.isLoading, fetchRaceById.data])
 
-    const { slug } = params;
-    if (slug) {
-      setPartyId(slug as string)
-    }
-    fetchPartyData(partyId)
-  }, [])
+  console.log("Party", party)
+  console.log("Party Id", partyId)
+  console.log("Current Race", currentRace)
 
-  const fetchPartyData = (id: string) => {
-    if (fetchPartyById.data) {
-      setParty(fetchPartyById.data)
-      fetchRaces(id)
+  function getMostRecentRace(races: Race[]): Race | null {
+    if (races.length === 0) return null;
+    const sorted = [...races].sort((a, b) =>
+      b.createdAt.localeCompare(a.createdAt)
+    );
+    return sorted[0];
+  }
+
+  
+
+  const createNewRace = async () => {
+    try {
+      await createRace.mutateAsync().then(res => {
+        setCurrentRace(res)
+      }).catch(error => console.error(error))
+    } catch (error) {
+      return console.error(error)
     }
   }
 
-  const fetchRaces = (partyId: string) => {
-    const racesData = fetchRaceByPartyId.data
-    if (racesData && Array.isArray(racesData)) {
-      setRaces(racesData)
-      if (racesData.length > 0) {
-        const mostRecentRace = racesData[racesData.length - 1]
-        setCurrentRace(mostRecentRace)
-      }
-    }
-  }
-
-  const fetchRaceDetails = (raceId: bigint) => {
-
-    const raceData = fetchRaceById.data
-    if (raceData.data) {
-      return raceData
-    }
-    return null
-  }
-
-  const createNewRace = () => {
-    return createRace.mutateAsync().then(() => {
-      const newRaceData = createRace.data
-      if (newRaceData) {
-        setCurrentRace(newRaceData)
-        fetchRaces(partyId)
-      }
-    }).catch(error => console.error(error))
-  }
-
-  const handleRaceSelect = async (raceId: bigint) => {
-    const race = await fetchRaceDetails(raceId)
-    if (race) {
-      setSelectedRace(race)
+  const handleRaceSelect =  (raceId: string) => {
+      setSelectedRace(raceId)
       setIsRaceDetailsModalOpen(true)
-    }
   }
 
   const formatDate = (dateString: string) => {
@@ -95,14 +72,6 @@ const RaceManagement = () => {
     }).format(date)
   }
 
-  const refreshCurrentRace = () => {
-    if (currentRace) {
-      const updatedRace = fetchRaceDetails(currentRace.id)
-      if (updatedRace) {
-        setCurrentRace(updatedRace)
-      }
-    }
-  }
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto py-10 px-4 sm:px-6">
@@ -149,7 +118,7 @@ const RaceManagement = () => {
 
                         <div className="mt-8 bg-muted/30 p-6 rounded-lg">
                           <h3 className="text-xl font-semibold mb-4">Ajouter des scores</h3>
-                          <ScoreForm raceId={currentRace.id} onScoreAdded={refreshCurrentRace} />
+                          <ScoreForm raceId={currentRace.id} />
                         </div>
                       </div>
                     ) : (
@@ -192,8 +161,8 @@ const RaceManagement = () => {
             raceId={currentRace.id}
             onParticipantsAdded={() => {
               setIsAddParticipantsModalOpen(false)
-              refreshCurrentRace()
             }}
+            refresh={fetchRaceById.refetch}
           />
         )}
 
@@ -201,7 +170,7 @@ const RaceManagement = () => {
           <RaceDetailsModal
             isOpen={isRaceDetailsModalOpen}
             onClose={() => setIsRaceDetailsModalOpen(false)}
-            race={selectedRace}
+            raceId={selectedRace}
           />
         )}
       </div>

@@ -1,10 +1,10 @@
-import { addScoreForUser } from "@/app/api/score/route"
+import { addScoreForUser, getScoreByRaceId } from "@/app/api/score/route"
 import { queryClient } from "@/app/dashboard/layout"
 import { AddScoreRequestData } from "@/types/score.types"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { RaceCacheKeys, ScoreCacheKeys } from "./const"
 
-export const useScore = () => {
+export const useScore = (raceId?: string) => {
   const addScore = useMutation({
     mutationFn: (data: AddScoreRequestData) => addScoreForUser(data),
     onSuccess: () => {
@@ -16,5 +16,10 @@ export const useScore = () => {
       })
     }
   })
-  return { addScore }
+  const fetchScoreByRaceId = useQuery({
+    queryKey: [ScoreCacheKeys.Score, raceId],
+    queryFn: () => getScoreByRaceId(raceId as string)
+  })
+
+  return { addScore, fetchScoreByRaceId }
 }

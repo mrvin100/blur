@@ -6,7 +6,7 @@ import { Race } from "@/types/party.types"
 
 interface RacesListProps {
   races: Race[]
-  onRaceSelect: (raceId: bigint) => void
+  onRaceSelect: (raceId: string) => void
 }
 
 export default function RacesList({ races, onRaceSelect }: RacesListProps) {
