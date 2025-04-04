@@ -4,7 +4,6 @@
 import { getAllRaces, getRaceById } from "@/app/api/raceManagement/route"
 import { RacesCacheKeys } from "./const"
 import { useQuery } from "@tanstack/react-query"
-import { getRacesByPartyId } from '../app/api/raceManagement/route';
 
 export const useRaces = (id?: bigint) => {
     const getRaces = useQuery({
