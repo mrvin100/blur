@@ -1,12 +1,12 @@
 
 export interface Party {
-id: bigint,
+id: number,
 datePlayed: string,
 racesPlayed: Race[],
 }
 
 export interface Race {
-    id: bigint,
+    id: number,
     party: PartyRace,
     scores: Score[],
     racers: Racer[],
@@ -14,23 +14,23 @@ export interface Race {
 }
 
 export interface Score {
-    id: bigint,
+    id: number,
     value: number,
     user: Racer
 }
 
 export interface PartyRace {
-    id: bigint,
+    id: number,
     datePlayed: string
 }
 
 export interface Racer {
-    id: bigint,
+    id: number,
     userName: string
 }
 
 export interface RaceParameters {
-    id: bigint,
+    id: number,
     name: string,
     isActive: true,
     downloadUrl: string

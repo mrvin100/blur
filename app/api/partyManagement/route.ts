@@ -6,7 +6,7 @@ export const getAllParties = async (): Promise<Party[]> => {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/parties`
     );
-    const data = response.data;
+    const data = response.data.data;
     return data;
   } catch (error) {
     console.error(error);
@@ -14,13 +14,18 @@ export const getAllParties = async (): Promise<Party[]> => {
   }
 };
 
-export const getPartyById = async (id: bigint): Promise<Party>=> {
+export const getPartyById = async (id: number): Promise<Party> => {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/parties/${id}`
+      `${process.env.NEXT_PUBLIC_API_URL}/parties/get-by-id`,
+      {
+        params: {
+          partyId: id.toString(),
+        },
+      }
     );
 
-    const data = response.data;
+    const data = response.data.data;
     return data;
   } catch (error) {
     console.error(error);

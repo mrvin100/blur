@@ -1,26 +1,26 @@
 "use client"
 
 
-import { getAllRaces, getRaceById } from "@/app/api/raceManagement/route"
+import { getAllRaces, getRaceById, getRacesByPartyId } from "@/app/api/raceManagement/route"
 import { RacesCacheKeys } from "./const"
 import { useQuery } from "@tanstack/react-query"
 
-export const useRaces = (id?: bigint) => {
+export const useRaces = (id?: number) => {
     const getRaces = useQuery({
         queryKey: [RacesCacheKeys.RacesDetailsAccess],
         queryFn: getAllRaces
       })
 
-      const getRaceId = useQuery({
-        queryKey: [RacesCacheKeys.RacesDetailsAccess, id],
-        queryFn: () => getRaceById(id as bigint),
-        enabled: !!id
-      })
+      
 
       const getRacesPartyId = useQuery({
         queryKey: [RacesCacheKeys.RacesDetailsAccess, id],
-        queryFn: () => getRacesByPartyId(id as bigint),
+        queryFn: () => getRacesByPartyId(id as number),
         enabled: !!id
       })
-      return { getRaces, getRaceId, getRacesPartyId }
+      const getRaceId = useQuery({
+        queryKey: [RacesCacheKeys.RacesDetailsAccess, id],
+        queryFn: () => getRaceById(id as number)
+      })
+      return { getRaces,  getRacesPartyId,getRaceId }
 }
