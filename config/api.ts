@@ -18,9 +18,9 @@ const getEnvironmentConfig = () => {
   return {
     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? (isDevelopment ? 'http://localhost:3000' : ''),
     auth: {
-      login: process.env.NEXT_PUBLIC_AUTH_API_LOGIN ?? '/api/auth/login',
-      logout: process.env.NEXT_PUBLIC_AUTH_API_LOGOUT ?? '/api/auth/logout',
-      session: process.env.NEXT_PUBLIC_AUTH_API_SESSION ?? '/api/auth/session',
+      login: process.env.NEXT_PUBLIC_AUTH_API_LOGIN ?? '/auth/login',
+      logout: process.env.NEXT_PUBLIC_AUTH_API_LOGOUT ?? '/auth/logout',
+      session: process.env.NEXT_PUBLIC_AUTH_API_SESSION ?? '/auth/session',
     }
   };
 };

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
 import {
   Sidebar,
   SidebarHeader,
@@ -8,13 +8,11 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarGroup,
-  SidebarProvider,
   SidebarFooter,
-  SidebarTrigger,
   useSidebar,
-} from '@/components/ui/sidebar';
-import { LucideIcon, Menu } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+} from "@/components/ui/sidebar";
+import { LucideIcon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,10 +21,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useSession } from 'next-auth/react';
-import { Button } from '@/components/ui/button';
-import { usePathname } from 'next/navigation';
+} from "@/components/ui/dropdown-menu";
+import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 interface SidebarProps {
   navigationItems: {
@@ -36,27 +33,21 @@ interface SidebarProps {
   }[];
 }
 
-function SidebarWrapper({ navigationItems }: SidebarProps) {
+function SidebarWrapper({ navigationItems }: Readonly<SidebarProps>) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const { isMobile } = useSidebar();
 
-  const userName = session?.user?.name || session?.user?.userName || 'User';
-  const userEmail = session?.user?.email || '';
-  const userImage = session?.user?.image || '';
+  const userName = session?.user?.name ?? session?.user?.userName ?? "User";
+  const userEmail = session?.user?.email ?? "";
+  const userImage = session?.user?.image ?? "";
   const userInitial = userName.charAt(0).toUpperCase();
 
   return (
-    <Sidebar className="w-64 border-r">
+    <Sidebar className="w-64 border-r" variant="floating">
       <SidebarHeader className="border-b px-4 py-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Dashboard</h2>
-          <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-            <SidebarTrigger>
-              <Menu className="h-4 w-4" />
-              <span className="sr-only">Toggle sidebar</span>
-            </SidebarTrigger>
-          </Button>
+        <div className="">
+          <h2 className="text-lg font-semibold">{userName}&apos;s Board</h2>
         </div>
       </SidebarHeader>
 
@@ -69,7 +60,7 @@ function SidebarWrapper({ navigationItems }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors hover:bg-accent ${
-                  pathname === item.href ? 'bg-accent' : ''
+                  pathname === item.href ? "bg-accent" : ""
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -148,8 +139,6 @@ function SidebarWrapper({ navigationItems }: SidebarProps) {
 
 export function AppSidebar(props: SidebarProps) {
   return (
-    <SidebarProvider>
-      <SidebarWrapper navigationItems={props.navigationItems} />
-    </SidebarProvider>
+    <SidebarWrapper navigationItems={props.navigationItems} />
   );
-} 
+}
