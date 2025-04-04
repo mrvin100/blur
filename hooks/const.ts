@@ -5,7 +5,10 @@ export const PartiesCacheKeys = Object.freeze({
 
   export const RacesCacheKeys = Object.freeze({
     RacesDetailsAccess: 'racesDetailsAccess'
-  })export const PartyManagementCacheKeys = Object.freeze({
+  })
+
+
+export const PartyManagementCacheKeys = Object.freeze({
   Parties: 'Parties',
   Party: 'Party',
 })
