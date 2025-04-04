@@ -1,26 +1,32 @@
 "use client"
 
+import { useQuery } from '@tanstack/react-query';
+import { Race } from '@/types/party.types';
+import { getAllRaces, getRaceById, getRacesByPartyId } from '@/app/services/raceService';
 
-import { getAllRaces, getRaceById, getRacesByPartyId } from "@/app/api/raceManagement/route"
-import { RacesCacheKeys } from "./const"
-import { useQuery } from "@tanstack/react-query"
+export function useRaces() {
+  const getRaces = useQuery<Race[]>({
+    queryKey: ['races'],
+    queryFn: getAllRaces
+  });
 
-export const useRaces = (id?: number) => {
-    const getRaces = useQuery({
-        queryKey: [RacesCacheKeys.RacesDetailsAccess],
-        queryFn: getAllRaces
-      })
+  const useRaceById = (id: number) => 
+    useQuery<Race>({
+      queryKey: ['race', id],
+      queryFn: () => getRaceById(id),
+      enabled: !!id
+    });
 
-      
+  const useRacesByPartyId = (partyId: number) =>
+    useQuery<Race[]>({
+      queryKey: ['races', 'party', partyId],
+      queryFn: () => getRacesByPartyId(partyId),
+      enabled: !!partyId
+    });
 
-      const getRacesPartyId = useQuery({
-        queryKey: [RacesCacheKeys.RacesDetailsAccess, id],
-        queryFn: () => getRacesByPartyId(id as number),
-        enabled: !!id
-      })
-      const getRaceId = useQuery({
-        queryKey: [RacesCacheKeys.RacesDetailsAccess, id],
-        queryFn: () => getRaceById(id as number)
-      })
-      return { getRaces,  getRacesPartyId,getRaceId }
+  return {
+    getRaces,
+    useRaceById,
+    useRacesByPartyId
+  };
 }

@@ -1,20 +1,22 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { Party } from "@/types/party.types";
 import axios from "axios";
 
-export const getAllParties = async (): Promise<Party[]> => {
+// Move helper functions outside of the module scope
+async function fetchAllParties(): Promise<Party[]> {
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/parties`
     );
-    const data = response.data.data;
-    return data;
+    return response.data.data;
   } catch (error) {
     console.error(error);
-    return Promise.reject(error);
+    throw error;
   }
-};
+}
 
-export const getPartyById = async (id: number): Promise<Party> => {
+async function fetchPartyById(id: number): Promise<Party> {
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/parties/get-by-id`,
@@ -24,11 +26,31 @@ export const getPartyById = async (id: number): Promise<Party> => {
         },
       }
     );
-
-    const data = response.data.data;
-    return data;
+    return response.data.data;
   } catch (error) {
     console.error(error);
-    return Promise.reject(error);
+    throw error;
   }
-};
+}
+
+// Export only the route handlers
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const partyId = searchParams.get('partyId');
+
+    if (partyId) {
+      const party = await fetchPartyById(Number(partyId));
+      return NextResponse.json({ data: party });
+    } else {
+      const parties = await fetchAllParties();
+      return NextResponse.json({ data: parties });
+    }
+  } catch (error) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch party data' },
+      { status: 500 }
+    );
+  }
+}

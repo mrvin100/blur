@@ -40,8 +40,8 @@ export function History() {
 }
 
 function PartyItem({ party }: Readonly<{ party: Party }>) {
-  const { getRacesPartyId } = useRaces(party.id)
-  
+  const { useRacesByPartyId } = useRaces()
+  const { data: races, isLoading, isError } = useRacesByPartyId(party.id)
 
   return (
     <AccordionItem value={`party-${party.id}`}>
@@ -51,23 +51,23 @@ function PartyItem({ party }: Readonly<{ party: Party }>) {
           <span>Party {party.id.toString()}</span>
           <span className="text-xs text-muted-foreground ml-2">{new Date(party.datePlayed).toLocaleDateString()}</span>
           <Badge variant="outline" className="ml-auto">
-            {getRacesPartyId.data?.length ?? party.racesPlayed?.length ?? 0} races
+            {races?.length ?? party.racesPlayed?.length ?? 0} races
           </Badge>
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-4">
-        {getRacesPartyId.isLoading ? (
+        {isLoading ? (
           <div className="space-y-2 py-2">
             <Skeleton className="h-12 w-full" />
             <Skeleton className="h-12 w-full" />
           </div>
-        ) : getRacesPartyId.isError ? (
+        ) : isError ? (
           <div className="text-red-500 py-2">Error loading races</div>
-        ) : getRacesPartyId.data?.length === 0 ? (
+        ) : races?.length === 0 ? (
           <div className="text-muted-foreground py-2">No races found for this party</div>
         ) : (
           <Accordion type="single" collapsible className="w-full">
-            {getRacesPartyId.data?.map((race) => (
+            {races?.map((race) => (
               <RaceItem key={race.id.toString()} race={race} />
             ))}
           </Accordion>
@@ -114,7 +114,7 @@ function RaceItem({ race }: Readonly<{ race: Race }>) {
           </Badge>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="px-4 py-2">
+      <AccordionContent className="px-4">
         <div className="space-y-4">
           {/* Winner section */}
           <div className="bg-muted/50 p-4 rounded-md">
@@ -194,14 +194,17 @@ function RaceItem({ race }: Readonly<{ race: Race }>) {
 
 function HistorySkeleton() {
   return (
-    <Card className="w-full max-w-3xl mx-auto">
+    <Card className="w-full max-w-3xl md:mx-auto md:my-5">
       <CardHeader>
-        <Skeleton className="h-8 w-48" />
+        <CardTitle className="flex items-center justify-center gap-2">
+          <Skeleton className="h-5 w-5" />
+          <Skeleton className="h-6 w-32" />
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
       </CardContent>
     </Card>
   )
