@@ -12,9 +12,9 @@ import { Menu } from "lucide-react";
 
 export default function DashboardLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const { data: session, status } = useSession();
   const router = useRouter();
 
