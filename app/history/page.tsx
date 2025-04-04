@@ -1,4 +1,4 @@
-import History from "@/modules/user/history/History";
+import { History } from "@/modules/user/history";
 
 
 export default function HistoryPage(){

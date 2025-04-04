@@ -9,7 +9,7 @@ import { Trophy, Calendar, Users, Flag, User, Settings } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Party, Race, Racer } from "@/types/party.types"
 
-export default function History() {
+export function History() {
   const { getParties } = useParties()
 
   if (getParties.isLoading) {
@@ -39,7 +39,7 @@ export default function History() {
   )
 }
 
-function PartyItem({ party }: { party: Party }) {
+function PartyItem({ party }: Readonly<{ party: Party }>) {
   const { getRacesPartyId } = useRaces(party.id)
   
 
@@ -51,7 +51,7 @@ function PartyItem({ party }: { party: Party }) {
           <span>Party {party.id.toString()}</span>
           <span className="text-xs text-muted-foreground ml-2">{new Date(party.datePlayed).toLocaleDateString()}</span>
           <Badge variant="outline" className="ml-auto">
-            {getRacesPartyId.data?.length || party.racesPlayed?.length || 0} races
+            {getRacesPartyId.data?.length ?? party.racesPlayed?.length ?? 0} races
           </Badge>
         </div>
       </AccordionTrigger>
@@ -77,7 +77,7 @@ function PartyItem({ party }: { party: Party }) {
   )
 }
 
-function RaceItem({ race }: { race: Race }) {
+function RaceItem({ race }: Readonly<{ race: Race }>) {
   // Find the winner (racer with highest score)
   const getWinner = (): { racer: Racer; score: number } | null => {
     if (!race.scores || race.scores.length === 0) return null
