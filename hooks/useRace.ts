@@ -4,9 +4,9 @@ import { Racer } from "@/types/party.types"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { PartyManagementCacheKeys, RaceCacheKeys } from "./const"
 
-export const useRace = (raceId?:bigint) => {
+export const useRace = (raceId?: string) => {
   const updateRace = useMutation({
-    mutationFn: ({ RaceUpdateRequest, raceId }: { RaceUpdateRequest: Racer[]; raceId: bigint }) => updateRaceById(RaceUpdateRequest, raceId),
+    mutationFn: ({ selectedRacers, raceId }: { selectedRacers: Racer[]; raceId: string }) => updateRaceById(selectedRacers, raceId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [PartyManagementCacheKeys.Party]
@@ -19,7 +19,7 @@ export const useRace = (raceId?:bigint) => {
   })
   const fetchRaceById = useQuery({
     queryKey: [RaceCacheKeys.Race, raceId],
-    queryFn: () => getRaceById(raceId as bigint)
+    queryFn: () => getRaceById(raceId as string)
   })
 
 

@@ -1,7 +1,7 @@
 import { Race } from "./party.types"
 
 export interface Users {
-  id: bigint,
+  id: string,
   userName: string,
   permissions: Permission[],
   races: Race[]

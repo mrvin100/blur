@@ -8,32 +8,36 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Racer } from "@/types/party.types"
 import { useUsers } from "@/hooks/useUsers"
 import { useRace } from "@/hooks/useRace"
+import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query"
 
 interface AddParticipantsModalProps {
   isOpen: boolean
   onClose: () => void
-  raceId: bigint
+  raceId: string
   onParticipantsAdded: () => void
+  refresh: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<any, Error>>
 }
 
 export default function AddParticipantsModal({
   isOpen,
   onClose,
   raceId,
-  onParticipantsAdded,
+  refresh
 }: AddParticipantsModalProps) {
   const [racers, setRacers] = useState<Racer[]>([])
   const [selectedRacers, setSelectedRacers] = useState<Racer[]>([])
   const { getUsers } = useUsers()
-  const { updateRace } = useRace(selectedRacers, raceId)
+  const { updateRace } = useRace(raceId)
   const users = getUsers.data;
   useEffect(() => {
+    setRacers([])
     if (users) {
       users.forEach((user) => {
         const racer: Racer = {
           id: user.id,
           userName: user.userName
         }
+        if (racers.find(racer => racer.id === user.id)) return
         setRacers(prev => [...prev, racer])
       })
     }
@@ -48,7 +52,11 @@ export default function AddParticipantsModal({
 
   const handleAddParticipants = async () => {
     if (selectedRacers.length === 0) return
-    return updateRace.mutateAsync().catch(e => console.error(e))
+    return updateRace.mutateAsync({ selectedRacers, raceId }).then(() => {
+      onClose()
+      setRacers([])
+      refresh()
+    }).catch(e => console.error(e))
   }
 
 
@@ -73,7 +81,7 @@ export default function AddParticipantsModal({
             <div className="space-y-4">
               {racers.map((racer) => (
                 <div
-                  key={racer.id.toString()}
+                  key={racer.id}
                   className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50 transition-colors"
                 >
                   <Checkbox

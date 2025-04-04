@@ -9,6 +9,7 @@ import { Dices } from "lucide-react"
 import { Race, Racer } from "@/types/party.types"
 import { useCars } from "@/hooks/useCars"
 import { Car, CarAttribution } from "@/types/car.types"
+import { useRace } from "@/hooks/useRace"
 
 interface CarAttributionProps {
   race: Race
@@ -20,7 +21,8 @@ export default function CarAttributions({ race }: CarAttributionProps) {
   const [loadingGlobal, setLoadingGlobal] = useState(false)
   const [loadingIndividual, setLoadingIndividual] = useState(false)
   const [activeTab, setActiveTab] = useState<string>("global")
-  const { getIndividualCar, getGlobalCar } = useCars(race.racers.map((racer: Racer) => racer.userName))
+  const { fetchRaceById } = useRace(race.id)
+  const { getIndividualCar, getGlobalCar } = useCars(fetchRaceById?.data?.racers.map((racer: Racer) => racer.userName) || [])
 
   const fetchGlobalCar = async () => {
     try {
@@ -40,6 +42,7 @@ export default function CarAttributions({ race }: CarAttributionProps) {
     try {
       setLoadingIndividual(true)
       await getIndividualCar.refetch()
+      console.log("Individual Attribution", getIndividualCar.data)
       if (getIndividualCar.data) {
         setIndividualCars(getIndividualCar.data)
       }
@@ -109,7 +112,7 @@ export default function CarAttributions({ race }: CarAttributionProps) {
                 variant="outline"
                 size="sm"
                 onClick={fetchIndividualCars}
-                disabled={loadingIndividual || race.racers.length === 0}
+                disabled={loadingIndividual || !fetchRaceById.data || fetchRaceById.data.racers.length === 0}
               >
                 <Dices className="h-4 w-4 mr-1" />
                 Attribuer des voitures
@@ -126,12 +129,12 @@ export default function CarAttributions({ race }: CarAttributionProps) {
             ) : individualCars.length > 0 ? (
               <div className="space-y-4">
                 {individualCars.map((car) => (
-                  <div key={car.id.toString()} className="flex items-center space-x-4 border-b pb-4 last:border-0">
+                  <div key={`${car.id} ${car.imageUrl}`} className="flex items-center space-x-4 border-b pb-4 last:border-0">
                     <div className="relative h-16 w-24 overflow-hidden rounded-md flex-shrink-0 shadow-sm">
                       <Image src={car.imageUrl || "/placeholder.svg"} alt={car.name} fill className="object-cover" />
                     </div>
                     <div>
-                      <h4 className="font-medium">{car.uerName}</h4>
+                      <h4 className="font-medium">{car.userName}</h4>
                       <p className="text-sm text-muted-foreground">{car.name}</p>
                     </div>
                   </div>
@@ -144,7 +147,7 @@ export default function CarAttributions({ race }: CarAttributionProps) {
                     ? "Ajoutez des participants à la course pour pouvoir attribuer des voitures"
                     : "Aucune voiture attribuée aux participants"}
                 </p>
-                {race.racers.length > 0 && (
+                {fetchRaceById.data && fetchRaceById.data.racers.length > 0 && (
                   <Button variant="outline" onClick={fetchIndividualCars}>
                     <Dices className="h-4 w-4 mr-2" />
                     Attribuer des voitures

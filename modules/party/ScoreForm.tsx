@@ -14,11 +14,10 @@ import { useRace } from "@/hooks/useRace"
 import { AddScoreRequestData } from "@/types/score.types"
 
 interface ScoreFormProps {
-  raceId: bigint
-  onScoreAdded: () => void
+  raceId: string
 }
 
-export default function ScoreForm({ raceId, onScoreAdded }: ScoreFormProps) {
+export default function ScoreForm({ raceId }: ScoreFormProps) {
   const [racers, setRacers] = useState<Racer[]>([])
   const [selectedRacer, setSelectedRacer] = useState<string>("")
   const [score, setScore] = useState<string>("")
@@ -55,7 +54,7 @@ export default function ScoreForm({ raceId, onScoreAdded }: ScoreFormProps) {
     const newScore: AddScoreRequestData = {
       value: Number.parseInt(score),
       raceId: raceId,
-      userId: BigInt(selectedRacer)
+      userId: selectedRacer
     }
     return addScore.mutateAsync(newScore).then(res => {
       toast(
@@ -63,9 +62,10 @@ export default function ScoreForm({ raceId, onScoreAdded }: ScoreFormProps) {
         description: "Le score a été ajouté avec succès"
       },
       )
+      setLoading(false)
+      fetchRaceById.refetch()
       setSelectedRacer("")
       setScore("")
-      onScoreAdded()
     }).catch(e => {
       console.error("Erreur lors de l'ajout du score:", e)
       toast("Erreur",
@@ -74,7 +74,7 @@ export default function ScoreForm({ raceId, onScoreAdded }: ScoreFormProps) {
     })
   }
 
-  if (racers.length === 0) {
+  if (fetchRaceById.data && fetchRaceById.data.racers.length === 0) {
     return (
       <div className="text-center py-6 border rounded-md bg-muted/10">
         <p className="text-muted-foreground">Ajoutez des participants à la course pour pouvoir ajouter des scores</p>
@@ -92,8 +92,8 @@ export default function ScoreForm({ raceId, onScoreAdded }: ScoreFormProps) {
               <SelectValue placeholder="Sélectionner un participant" />
             </SelectTrigger>
             <SelectContent>
-              {racers.map((racer) => (
-                <SelectItem key={racer.id.toString()} value={racer.id.toString()}>
+              {fetchRaceById.data && fetchRaceById.data.racers.map((racer) => (
+                <SelectItem key={racer.id} value={racer.id.toString()}>
                   {racer.userName}
                 </SelectItem>
               ))}

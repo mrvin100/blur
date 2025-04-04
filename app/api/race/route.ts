@@ -1,26 +1,19 @@
 import { Race, Racer } from "@/types/party.types";
 import axios from "axios";
 
-export const updateRaceById = async (RaceUpdateRequest: Racer[], raceId: bigint) => {
+export const updateRaceById = async (RaceUpdateRequest: Racer[], raceId: string) => {
   try {
-    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/races/update-race`, { RaceUpdateRequest }, {
-      params: {
-        raceId: raceId
-      }
-    })
+    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/races/update-race?raceId=${raceId}`, RaceUpdateRequest
+    )
   } catch (error) {
     console.error(error);
     return Promise.reject(error)
   }
 }
 
-export const getRaceById = async (raceId: bigint) => {
+export const getRaceById = async (raceId: string): Promise<Race> => {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/races/get-by-id`, {
-      params: {
-        raceId: raceId
-      }
-    })
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/races/get-by-id?raceId=${raceId}`)
     return response.data.data
   } catch (error) {
     return Promise.reject(error)
@@ -42,11 +35,7 @@ export const getRaceByPartyId = async (partyId: string) => {
 
 export const addRace = async (partyId: string): Promise<Race> => {
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/races/create-race`, {
-      params: {
-        partyId: partyId
-      }
-    })
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/races/create-race?partyId=${partyId}`)
     return response.data.data
   } catch (error) {
     console.error(error)

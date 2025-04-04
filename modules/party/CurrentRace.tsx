@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useRace } from "@/hooks/useRace"
+import { useScore } from "@/hooks/useScore"
 import { Race } from "@/types/party.types"
 import Image from "next/image"
 
@@ -8,6 +10,8 @@ interface CurrentRaceProps {
 }
 
 export default function CurrentRace({ race }: CurrentRaceProps) {
+  const { fetchRaceById } = useRace(race.id)
+  const { fetchScoreByRaceId } = useScore(race.id)
   if (!race) {
     return <p>Aucune course sélectionnée</p>
   }
@@ -18,6 +22,8 @@ export default function CurrentRace({ race }: CurrentRaceProps) {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date)
   }
 
@@ -27,7 +33,7 @@ export default function CurrentRace({ race }: CurrentRaceProps) {
         <div>
           <h2 className="text-xl font-semibold">Course #{race.id.toString()}</h2>
           {race.party.datePlayed && (
-            <p className="text-sm text-muted-foreground">Créée le {formatDate(race.party.datePlayed)}</p>
+            <p className="text-sm text-muted-foreground">Créée le {formatDate(race.createdAt)}</p>
           )}
         </div>
       </div>
@@ -38,7 +44,8 @@ export default function CurrentRace({ race }: CurrentRaceProps) {
             <h3 className="font-medium mb-4">Paramètres de la course</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {race.raceParameters.map((param) => (
-                <div key={param.id.toString()} className="flex flex-col items-center">
+
+                param.isActive && <div key={param.id.toString()} className="flex flex-col items-center">
                   <div className="relative h-16 w-16 mb-2 shadow-sm rounded-md overflow-hidden">
                     <Image
                       src={param.downloadUrl || "/placeholder.svg"}
@@ -57,7 +64,7 @@ export default function CurrentRace({ race }: CurrentRaceProps) {
 
       <div>
         <h3 className="font-medium mb-3">Participants</h3>
-        {race.racers && race.racers.length > 0 ? (
+        {fetchRaceById.data && race.racers && fetchRaceById.data.racers.length > 0 ? (
           <div className="border rounded-md overflow-hidden">
             <Table>
               <TableHeader>
@@ -67,8 +74,8 @@ export default function CurrentRace({ race }: CurrentRaceProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {race.racers.map((racer) => {
-                  const score = race.scores.find((s) => s.user.id === racer.id)
+                {fetchScoreByRaceId.data && fetchRaceById.data.racers.map((racer) => {
+                  const score = fetchScoreByRaceId.data.find((s) => s.user.id === racer.id)
                   return (
                     <TableRow key={racer.id.toString()}>
                       <TableCell className="font-medium">{racer.userName}</TableCell>

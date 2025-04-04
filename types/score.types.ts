@@ -1,5 +1,5 @@
 export interface AddScoreRequestData {
   value: number,
-  raceId: bigint,
-  userId: bigint
+  raceId: string,
+  userId: string
 }
