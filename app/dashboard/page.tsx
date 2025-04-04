@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DefaultLoader } from '@/components/shared/DefaultLoader';
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -16,7 +17,7 @@ export default function DashboardPage() {
   }, [status, router]);
 
   if (status === 'loading') {
-    return <div>Loading...</div>;
+    return <DefaultLoader text="Loading..." />;
   }
 
   return (
