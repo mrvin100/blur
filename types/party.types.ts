@@ -1,39 +1,37 @@
-
 export interface Party {
-id: number,
-datePlayed: string,
-racesPlayed: Race[],
+  id: string,
+  datePlayed: string,
+  racesPlayed: Race[],
 }
 
 export interface Race {
-    id: number,
-    party: PartyRace,
-    scores: Score[],
-    racers: Racer[],
-    raceParameters: RaceParameters[]
+  id: string,
+  party: PartyRace,
+  scores: Score[],
+  racers: Racer[],
+  raceParameters: RaceParameters[],
+  createdAt: string
 }
 
 export interface Score {
-    id: number,
-    value: number,
-    user: Racer
+  id: string,
+  value: number,
+  user: Racer
 }
 
 export interface PartyRace {
-    id: number,
-    datePlayed: string
+  id: string,
+  datePlayed: string
 }
 
 export interface Racer {
-    id: number,
-    userName: string
+  id: string,
+  userName: string
 }
 
 export interface RaceParameters {
-    id: number,
-    name: string,
-    isActive: true,
-    downloadUrl: string
+  id: string,
+  name: string,
+  isActive: true,
+  downloadUrl: string
 }
-
-

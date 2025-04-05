@@ -5,6 +5,7 @@ import {
   Calendar,
   Activity,
   Trophy,
+  Car,
 } from 'lucide-react';
 
 export const adminNavigationItems = [
@@ -38,4 +39,9 @@ export const adminNavigationItems = [
     href: '/dashboard/settings',
     icon: Settings,
   },
+  {
+    title: 'Party',
+    href: '/dashboard/party/new',
+    icon: Car
+  }
 ]; 

@@ -12,7 +12,7 @@ export function useParties() {
 
   return {
     getParties,
-    usePartyById: (id: number) => 
+    usePartyById: (id: string) => 
       useQuery<Party>({
         queryKey: ['party', id],
         queryFn: () => getPartyByIdService(id),

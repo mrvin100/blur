@@ -115,8 +115,8 @@ export function SignInForm() {
             </div>
           </CardContent>
           <CardFooter>
-            <SubmitButton 
-              isLoading={isLoading} 
+            <SubmitButton
+              isLoading={isLoading}
               buttonText="Sign In"
               className="w-full"
             />

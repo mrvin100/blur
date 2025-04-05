@@ -9,7 +9,7 @@ export async function getAllRaces(): Promise<Race[]> {
   return data.data;
 }
 
-export async function getRaceById(id: number): Promise<Race> {
+export async function getRaceById(id: string): Promise<Race> {
   const response = await fetch(`/api/raceManagement?raceId=${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch race');
@@ -18,7 +18,7 @@ export async function getRaceById(id: number): Promise<Race> {
   return data.data;
 }
 
-export async function getRacesByPartyId(id: number): Promise<Race[]> {
+export async function getRacesByPartyId(id: string): Promise<Race[]> {
   const response = await fetch(`/api/raceManagement?partyId=${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch races for party');
