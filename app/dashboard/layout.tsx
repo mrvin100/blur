@@ -9,7 +9,7 @@ import { userNavigationItems } from "@/modules/user/config/navigation";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 export const queryClient = new QueryClient();
 export default function DashboardLayout({
   children,

@@ -10,16 +10,6 @@ import { useMaps } from "@/hooks/useMaps"
 import { Commet } from "react-loading-indicators"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// Fallback mock data for maps if API doesn't return any
-const mockMaps = Array(30)
-  .fill(null)
-  .map((_, i) => ({
-    id: i + 1,
-    title: `Map ${i + 1}`,
-    subtitle: `Location ${i + 1}`,
-    image: `/placeholder.svg?height=120&width=200`,
-  }))
-
 export default function PartyDashboard() {
   const { getRaceParameters } = useRaceParameters();
   const { getCars } = useCars();
@@ -31,7 +21,7 @@ export default function PartyDashboard() {
   const isLoading = getRaceParameters.isLoading || getCars.isLoading || getMaps.isLoading;
   if (isLoading) {
     return <div className="h-[70vh] flex items-center justify-center">
-      <Commet color="#01F0D0" size="large" text="Loading" textColor="" />
+      <Commet color="var(--primary)" size="large" text="Loading" textColor="" />
     </div>
   }
   return (
@@ -41,7 +31,7 @@ export default function PartyDashboard() {
           <h1 className="text-3xl font-bold tracking-tight">Blur Racing Dashboard</h1>
           <p className="text-muted-foreground mt-1">Browse cars, maps, and race parameters for your next race</p>
         </div>
-        <Link href="/party/new">
+        <Link href="/dashboard/party/new">
           <Button size="lg" className="gap-2">
             <PlusCircle className="h-5 w-5" />
             Launch a Party
@@ -114,7 +104,7 @@ export default function PartyDashboard() {
       </Tabs>
 
       <div className="mt-12 text-center">
-        <Link href="/party/new">
+        <Link href="/dashboard/party/new">
           <Button size="lg" className="gap-2">
             <PlusCircle className="h-5 w-5" />
             Launch a Party
