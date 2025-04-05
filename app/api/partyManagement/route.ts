@@ -16,7 +16,7 @@ async function fetchAllParties(): Promise<Party[]> {
   }
 }
 
-async function fetchPartyById(id: number): Promise<Party> {
+async function fetchPartyById(id: string): Promise<Party> {
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/parties/get-by-id`,
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     const partyId = searchParams.get('partyId');
 
     if (partyId) {
-      const party = await fetchPartyById(Number(partyId));
+      const party = await fetchPartyById(partyId);
       return NextResponse.json({ data: party });
     } else {
       const parties = await fetchAllParties();

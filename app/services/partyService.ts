@@ -9,7 +9,7 @@ export async function getAllParties(): Promise<Party[]> {
   return data.data;
 }
 
-export async function getPartyById(id: number): Promise<Party> {
+export async function getPartyById(id: string): Promise<Party> {
   const response = await fetch(`/api/partyManagement?partyId=${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch party');

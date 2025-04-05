@@ -15,7 +15,7 @@ async function fetchAllRaces(): Promise<Race[]> {
   }
 }
 
-async function fetchRaceById(id: number): Promise<Race> {
+async function fetchRaceById(id: string): Promise<Race> {
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/races/get-by-id?raceId=${id}`
@@ -27,7 +27,7 @@ async function fetchRaceById(id: number): Promise<Race> {
   }
 }
 
-async function fetchRacesByPartyId(id: number): Promise<Race[]> {
+async function fetchRacesByPartyId(id: string): Promise<Race[]> {
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/races/get-by-party-id`,
@@ -51,10 +51,10 @@ export async function GET(request: NextRequest) {
     const partyId = searchParams.get('partyId');
 
     if (raceId) {
-      const race = await fetchRaceById(Number(raceId));
+      const race = await fetchRaceById(raceId);
       return NextResponse.json({ data: race });
     } else if (partyId) {
-      const races = await fetchRacesByPartyId(Number(partyId));
+      const races = await fetchRacesByPartyId(partyId);
       return NextResponse.json({ data: races });
     } else {
       const races = await fetchAllRaces();

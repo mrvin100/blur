@@ -23,7 +23,7 @@ export default function NewPartyPage() {
       return partyDateString === todayDateString;
     });
     if (todaysParty) {
-      router.push(`/party/${todaysParty.id}`);
+      router.push(`/dashboard/party/${todaysParty.id}`);
       setIsLoading(false)
       toast.error("Une partie a déjà été créée aujourd'hui", { description: "Nous vous redigons vers celle ci" })
       return true;
@@ -48,7 +48,7 @@ export default function NewPartyPage() {
       })
 
       // Redirection côté client
-      router.push(`/party/${newParty.id}`)
+      router.push(`/dashboard/party/${newParty.id}`)
     } catch (error) {
       toast.error(error as string)
       console.error("Erreur détaillée:", error)
@@ -66,10 +66,10 @@ export default function NewPartyPage() {
           <CardContent>
             <form className="space-y-6">
               <div className="flex justify-end space-x-4">
-                <Link href="/party">
-                  <Button variant="outline">Cancel</Button>
+                <Link href="/dashboard">
+                  <Button variant="outline" className="cursor-pointer">Cancel</Button>
                 </Link>
-                <Button type="submit" onClick={(e) => handleCreate(e)}>Create Party</Button>
+                <Button type="submit" className="cursor-pointer" onClick={(e) => handleCreate(e)}>Create Party</Button>
               </div>
             </form>
           </CardContent>

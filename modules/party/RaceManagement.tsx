@@ -16,6 +16,7 @@ import { useParams } from "next/navigation"
 import { useParty } from "@/hooks/useParty"
 import { useRace } from "@/hooks/useRace"
 import { useRaceParty } from "@/hooks/useRaceParty"
+import { toast } from "sonner"
 
 const RaceManagement = () => {
   const [currentRace, setCurrentRace] = useState<Race | null>(null)
@@ -44,21 +45,24 @@ const RaceManagement = () => {
     return sorted[0];
   }
 
-  
+
 
   const createNewRace = async () => {
     try {
       await createRace.mutateAsync().then(res => {
         setCurrentRace(res)
+        toast.success("Succès", {
+          description: "La course a été créée avec succès"
+        })
       }).catch(error => console.error(error))
     } catch (error) {
       return console.error(error)
     }
   }
 
-  const handleRaceSelect =  (raceId: string) => {
-      setSelectedRace(raceId)
-      setIsRaceDetailsModalOpen(true)
+  const handleRaceSelect = (raceId: string) => {
+    setSelectedRace(raceId)
+    setIsRaceDetailsModalOpen(true)
   }
 
   const formatDate = (dateString: string) => {
@@ -87,15 +91,15 @@ const RaceManagement = () => {
                 <h2 className="text-2xl font-semibold">Partie #{party.id}</h2>
                 <p className="text-muted-foreground">Date: {formatDate(party.datePlayed)}</p>
               </div>
-              <Button onClick={() => createNewRace()} className="w-full sm:w-auto">
+              <Button onClick={() => createNewRace()} className="w-full sm:w-auto cursor-pointer">
                 Créer une nouvelle course
               </Button>
             </div>
 
             <Tabs defaultValue="current" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="current">Course Actuelle</TabsTrigger>
-                <TabsTrigger value="history">Historique des Courses</TabsTrigger>
+                <TabsTrigger value="current" className="cursor-pointer">Course Actuelle</TabsTrigger>
+                <TabsTrigger value="history" className="cursor-pointer">Historique des Courses</TabsTrigger>
               </TabsList>
 
               <TabsContent value="current">
@@ -103,7 +107,7 @@ const RaceManagement = () => {
                   <CardHeader className="bg-muted/30">
                     <CardTitle className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                       <span>Course {currentRace?.id ? `#${currentRace.id}` : ""}</span>
-                      <Button onClick={() => setIsAddParticipantsModalOpen(true)}>Ajouter des participants</Button>
+                      <Button onClick={() => setIsAddParticipantsModalOpen(true)} className="cursor-pointer">Ajouter des participants</Button>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">

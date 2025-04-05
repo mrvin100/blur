@@ -3,7 +3,7 @@ import axios from "axios";
 
 export const getAllCars = async (): Promise<Car[]> => {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cars`)
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cars`)
     return response.data.data;
   } catch (error) {
     console.error(error);
@@ -12,7 +12,7 @@ export const getAllCars = async (): Promise<Car[]> => {
 }
 export const getCarsGlobalAttribution = async (): Promise<Car> => {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cars/global-attribution`)
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cars/global-attribution`)
     return response.data.data;
   } catch (error) {
     console.error(error)
@@ -22,7 +22,7 @@ export const getCarsGlobalAttribution = async (): Promise<Car> => {
 
 export const getCarsIndividualAttribution = async (data: string[]): Promise<CarAttribution[]> => {
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cars/individual-attribution`, data)
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/cars/individual-attribution`, data)
     return response.data.data;
   } catch (error) {
     console.error(error)

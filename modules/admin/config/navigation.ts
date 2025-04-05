@@ -41,7 +41,7 @@ export const adminNavigationItems = [
   },
   {
     title: 'Party',
-    href: '/party',
+    href: '/dashboard/party/new',
     icon: Car
   }
 ]; 

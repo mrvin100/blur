@@ -3,7 +3,7 @@ import axios from "axios"
 
 export const getAllMaps = async (): Promise<Map[]> => {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cards`)
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cards`)
     return response.data.data;
   } catch (error) {
     console.error(error)
@@ -13,7 +13,7 @@ export const getAllMaps = async (): Promise<Map[]> => {
 
 export const getRandomMap = async (): Promise<Map> => {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cards/random`)
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cards/random`)
     return response.data.data
   } catch (error) {
     console.error(error)

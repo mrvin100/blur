@@ -40,7 +40,7 @@ export const userNavigationItems = [
   },
   {
     title: 'Party',
-    href: '/party',
+    href: '/dashboard/party',
     icon: Car
   },
   {
