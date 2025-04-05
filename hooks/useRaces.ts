@@ -10,17 +10,17 @@ export function useRaces() {
     queryFn: getAllRaces
   });
 
-  const useRaceById = (id: number) => 
+  const useRaceById = (id: string) => 
     useQuery<Race>({
       queryKey: ['race', id],
-      queryFn: () => getRaceById(id.toString()),
+      queryFn: () => getRaceById(id),
       enabled: !!id
     });
 
-  const useRacesByPartyId = (partyId: number) =>
+  const useRacesByPartyId = (partyId: string) =>
     useQuery<Race[]>({
       queryKey: ['races', 'party', partyId],
-      queryFn: () => getRacesByPartyId(partyId.toString()),
+      queryFn: () => getRacesByPartyId(partyId),
       enabled: !!partyId
     });
 

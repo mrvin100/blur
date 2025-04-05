@@ -8,7 +8,7 @@ import AddParticipantsModal from "@/modules/party/AddParticipantsModal"
 import RaceDetailsModal from "@/modules/party/RaceDetailsModal"
 import CarAttributions from "@/modules/party/CarAttributions"
 import RacesList from "@/modules/party/RacesList"
-import { Party, Race } from "@/types/party.types"
+import { Race } from "@/types/party.types"
 import CurrentRace from "@/modules/party/CurrentRace"
 import ScoreForm from "@/modules/party/ScoreForm"
 import RaceMap from "@/modules/party/RaceMap"
@@ -141,7 +141,7 @@ const RaceManagement = () => {
                     <CardTitle>Historique des Courses</CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
-                    <RacesList races={races} onRaceSelect={handleRaceSelect} />
+                    <RacesList races={races || []} onRaceSelect={handleRaceSelect} />
                   </CardContent>
                 </Card>
               </TabsContent>

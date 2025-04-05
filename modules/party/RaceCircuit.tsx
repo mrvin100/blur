@@ -11,13 +11,14 @@ import { useMaps } from "@/hooks/useMaps"
 export default function RaceCircuit() {
   const [map, setMap] = useState<Map | null>(null)
   const [loadingMap, setLoadingMap] = useState(false)
-  const { getIndividualMap } = useMaps()
+  const { getRandomMapQuery } = useMaps()
+  
   const fetchRandomMap = async () => {
     try {
       setLoadingMap(true)
-      await getIndividualMap.refetch()
-      if (getIndividualMap.data) {
-        setMap(getIndividualMap.data)
+      await getRandomMapQuery.refetch()
+      if (getRandomMapQuery.data) {
+        setMap(getRandomMapQuery.data)
       }
     } catch (error) {
       console.error("Erreur lors de la récupération du circuit:", error)

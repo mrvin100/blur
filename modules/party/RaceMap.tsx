@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button"
 export default function RaceMap() {
   const [map, setMap] = useState<Map | null>(null)
   const [loading, setLoading] = useState(true)
-  const { getIndividualMap } = useMaps()
+  const { getRandomMapQuery } = useMaps()
+  
   useEffect(() => {
     fetchRandomMap()
   }, [])
@@ -19,9 +20,9 @@ export default function RaceMap() {
   const fetchRandomMap = async () => {
     try {
       setLoading(true)
-      await getIndividualMap.refetch()
-      if (getIndividualMap.data) {
-        setMap(getIndividualMap.data)
+      await getRandomMapQuery.refetch()
+      if (getRandomMapQuery.data) {
+        setMap(getRandomMapQuery.data)
       }
     } catch (error) {
       console.error("Erreur lors de la récupération de la carte:", error)
