@@ -1,4 +1,4 @@
-import { getAllMaps, getRandomMap } from "@/app/api/map/route"
+import { getAllMaps, getRandomMap } from "@/app/services/mapService"
 import { useQuery } from "@tanstack/react-query"
 import { MapsCacheKey } from "./const"
 
@@ -8,9 +8,10 @@ export const useMaps = () => {
     queryFn: () => getAllMaps()
   })
 
-  const getIndividualMap = useQuery({
-    queryKey: [MapsCacheKey.IndividualMap],
+  const getRandomMapQuery = useQuery({
+    queryKey: [MapsCacheKey.RandomMap],
     queryFn: () => getRandomMap()
   })
-  return { getMaps, getIndividualMap }
+
+  return { getMaps, getRandomMapQuery }
 }

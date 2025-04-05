@@ -1,4 +1,4 @@
-import { getRaceById, getRaceByPartyId, updateRaceById } from "@/app/api/race/route"
+import { getRaceById, updateRaceById } from "@/app/api/race/route"
 import { queryClient } from "@/app/dashboard/layout"
 import { Racer } from "@/types/party.types"
 import { useMutation, useQuery } from "@tanstack/react-query"

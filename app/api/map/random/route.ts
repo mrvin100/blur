@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import axios from "axios";
 
 // Helper functions
-async function fetchAllCars() {
+async function fetchRandomMap() {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cars`);
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cards/random`);
     return response.data.data;
   } catch (error) {
     console.error(error);
@@ -15,13 +15,13 @@ async function fetchAllCars() {
 // Route handlers
 export async function GET() {
   try {
-    const cars = await fetchAllCars();
-    return NextResponse.json({ data: cars });
+    const map = await fetchRandomMap();
+    return NextResponse.json({ data: map });
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch cars data' },
+      { error: 'Failed to fetch random map' },
       { status: 500 }
     );
   }
-}
+} 

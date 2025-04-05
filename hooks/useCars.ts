@@ -1,4 +1,4 @@
-import { getAllCars, getCarsGlobalAttribution, getCarsIndividualAttribution } from "@/app/api/car/route"
+import { getAllCars, getGlobalCarAttribution, getIndividualCarAttribution } from "../app/services/carService"
 import { useQuery } from "@tanstack/react-query"
 import { CarsCacheKeys } from "./const"
 
@@ -9,11 +9,11 @@ export const useCars = (players?: string[]) => {
   })
   const getIndividualCar = useQuery({
     queryKey: [CarsCacheKeys.IndividualCar],
-    queryFn: () => getCarsIndividualAttribution(players as string[])
+    queryFn: () => getIndividualCarAttribution(players as string[])
   })
   const getGlobalCar = useQuery({
     queryKey: [CarsCacheKeys.GlobalCar],
-    queryFn: () => getCarsGlobalAttribution()
+    queryFn: () => getGlobalCarAttribution()
   })
 
   return { getCars, getIndividualCar, getGlobalCar }

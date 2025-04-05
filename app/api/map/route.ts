@@ -1,22 +1,27 @@
-import { Map } from "@/types/map.types"
+import { NextResponse } from 'next/server';
 import axios from "axios"
 
-export const getAllMaps = async (): Promise<Map[]> => {
+// Helper functions
+async function fetchAllMaps() {
   try {
     const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cards`)
     return response.data.data;
   } catch (error) {
     console.error(error)
-    return Promise.reject(error)
+    throw error;
   }
 }
 
-export const getRandomMap = async (): Promise<Map> => {
+// Route handlers
+export async function GET() {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cards/random`)
-    return response.data.data
+    const maps = await fetchAllMaps();
+    return NextResponse.json({ data: maps });
   } catch (error) {
-    console.error(error)
-    return Promise.reject(error)
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch maps data' },
+      { status: 500 }
+    );
   }
 }

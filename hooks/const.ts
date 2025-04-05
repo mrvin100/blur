@@ -25,7 +25,7 @@ export const CarsCacheKeys = Object.freeze({
 
 export const MapsCacheKey = Object.freeze({
   AllMaps: "AllMaps",
-  IndividualMap: "IndividualMap"
+  RandomMap: "RandomMap"
 })
 
 export const UsersCacheKey = Object.freeze({
