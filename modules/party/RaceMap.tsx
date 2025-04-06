@@ -8,7 +8,7 @@ import { Map } from "@/types/map.types"
 import { useMaps } from "@/hooks/useMaps"
 import { Button } from "@/components/ui/button"
 
-export default function RaceMap() {
+export function RaceMap() {
   const [map, setMap] = useState<Map | null>(null)
   const [loading, setLoading] = useState(true)
   const { getRandomMapQuery } = useMaps()

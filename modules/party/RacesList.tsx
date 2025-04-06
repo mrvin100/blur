@@ -9,7 +9,7 @@ interface RacesListProps {
   onRaceSelect: (raceId: string) => void
 }
 
-export default function RacesList({ races, onRaceSelect }: RacesListProps) {
+export function RacesList({ races, onRaceSelect }: RacesListProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("fr-FR", {

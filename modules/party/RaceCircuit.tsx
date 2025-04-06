@@ -8,7 +8,7 @@ import { Dices, MapPin } from "lucide-react"
 import { Map } from "@/types/map.types"
 import { useMaps } from "@/hooks/useMaps"
 
-export default function RaceCircuit() {
+export function RaceCircuit() {
   const [map, setMap] = useState<Map | null>(null)
   const [loadingMap, setLoadingMap] = useState(false)
   const { getRandomMapQuery } = useMaps()

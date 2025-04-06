@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
-import { Race } from "@/types/party.types"
 import { useRace } from "@/hooks/useRace"
 
 interface RaceDetailsModalProps {
@@ -11,7 +10,7 @@ interface RaceDetailsModalProps {
   raceId: string
 }
 
-export default function RaceDetailsModal({ isOpen, onClose, raceId }: RaceDetailsModalProps) {
+export function RaceDetailsModal({ isOpen, onClose, raceId }: RaceDetailsModalProps) {
   const { fetchRaceById } = useRace(raceId)
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)

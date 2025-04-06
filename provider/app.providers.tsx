@@ -37,9 +37,10 @@ export function AppProviders({ children }: AppProvidersProps) {
             storageKey="theme-preference" // Persistance automatique du thème
           >
             <Toaster
-              position="top-center"
+              position="top-right"
               theme="system" // Synchronisation avec le thème
               closeButton
+              richColors
             />
             {children}
             <ReactQueryDevtools initialIsOpen={false}/>
