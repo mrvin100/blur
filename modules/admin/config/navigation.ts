@@ -20,9 +20,9 @@ export const adminNavigationItems = [
     icon: Trophy,
   },
   {
-    title: 'Schedule',
-    href: '/dashboard/schedule',
-    icon: Calendar,
+    title: 'Permissions',
+    href: '/dashboard/permissions',
+    icon: Shield,
   },
   {
     title: 'Activity',
