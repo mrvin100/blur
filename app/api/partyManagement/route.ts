@@ -19,12 +19,7 @@ async function fetchAllParties(): Promise<Party[]> {
 async function fetchPartyById(id: string): Promise<Party> {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/parties/get-by-id`,
-      {
-        params: {
-          partyId: id.toString(),
-        },
-      }
+      `${process.env.NEXT_PUBLIC_API_URL}/parties/get-party/${id}`
     );
     return response.data.data;
   } catch (error) {
