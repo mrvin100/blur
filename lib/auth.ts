@@ -15,8 +15,8 @@ interface AuthResponse {
 export async function signIn(username: string, password: string): Promise<AuthResponse> {
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/sign-in`,
-      { username, password }
+      `${process.env.NEXT_PUBLIC_API_URL}/users/log-in`,
+      { userName: username, password }
     );
     
     return response.data;

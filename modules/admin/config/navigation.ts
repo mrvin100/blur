@@ -40,6 +40,11 @@ export const adminNavigationItems = [
     icon: Settings,
   },
   {
+    title: 'History',
+    href: '/dashboard/history',
+    icon: Calendar,
+  },
+  {
     title: 'Party',
     href: '/dashboard/party/new',
     icon: Car
