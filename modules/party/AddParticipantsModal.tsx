@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Racer } from "@/types/party.types"
+import { Race, Racer } from "@/types/party.types"
 import { useUsers } from "@/hooks/useUsers"
 import { useRace } from "@/hooks/useRace"
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query"
@@ -15,10 +15,10 @@ interface AddParticipantsModalProps {
   onClose: () => void
   raceId: string
   onParticipantsAdded: () => void
-  refresh: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<any, Error>>
+  refresh: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<Race, Error>>
 }
 
-export default function AddParticipantsModal({
+export function AddParticipantsModal({
   isOpen,
   onClose,
   raceId,
@@ -34,10 +34,10 @@ export default function AddParticipantsModal({
     if (users) {
       users.forEach((user) => {
         const racer: Racer = {
-          id: user.id,
+          id: user.id.toString(),
           userName: user.userName
         }
-        if (racers.find(racer => racer.id === user.id)) return
+        if (racers.find(racer => racer.id === user.id.toString())) return
         setRacers(prev => [...prev, racer])
       })
     }

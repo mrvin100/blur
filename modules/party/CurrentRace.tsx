@@ -9,7 +9,7 @@ interface CurrentRaceProps {
   race: Race
 }
 
-export default function CurrentRace({ race }: CurrentRaceProps) {
+export function CurrentRace({ race }: CurrentRaceProps) {
   const { fetchRaceById } = useRace(race.id)
   const { fetchScoreByRaceId } = useScore(race.id)
   if (!race) {

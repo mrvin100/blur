@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Racer, Score } from "@/types/party.types"
+import { Racer } from "@/types/party.types"
 import { useScore } from "@/hooks/useScore"
 import { useRace } from "@/hooks/useRace"
 import { AddScoreRequestData } from "@/types/score.types"
@@ -17,7 +17,7 @@ interface ScoreFormProps {
   raceId: string
 }
 
-export default function ScoreForm({ raceId }: ScoreFormProps) {
+export function ScoreForm({ raceId }: ScoreFormProps) {
   const [racers, setRacers] = useState<Racer[]>([])
   const [selectedRacer, setSelectedRacer] = useState<string>("")
   const [score, setScore] = useState<string>("")

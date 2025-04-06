@@ -4,21 +4,15 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import AddParticipantsModal from "@/modules/party/AddParticipantsModal"
-import RaceDetailsModal from "@/modules/party/RaceDetailsModal"
-import CarAttributions from "@/modules/party/CarAttributions"
-import RacesList from "@/modules/party/RacesList"
-import { Race } from "@/types/party.types"
-import CurrentRace from "@/modules/party/CurrentRace"
-import ScoreForm from "@/modules/party/ScoreForm"
-import RaceMap from "@/modules/party/RaceMap"
+import { AddParticipantsModal , RaceDetailsModal, CarAttributions, RacesList, CurrentRace, ScoreForm, RaceMap } from "@/modules/party"
 import { useParams } from "next/navigation"
 import { useParty } from "@/hooks/useParty"
+import { Race } from "@/types/party.types"
 import { useRace } from "@/hooks/useRace"
 import { useRaceParty } from "@/hooks/useRaceParty"
 import { toast } from "sonner"
 
-const RaceManagement = () => {
+export function RaceManagement() {
   const [currentRace, setCurrentRace] = useState<Race | null>(null)
   const [selectedRace, setSelectedRace] = useState<string | null>(null)
   const [isAddParticipantsModalOpen, setIsAddParticipantsModalOpen] = useState(false)
@@ -181,7 +175,5 @@ const RaceManagement = () => {
     </div>
   )
 }
-
-export default RaceManagement
 
 

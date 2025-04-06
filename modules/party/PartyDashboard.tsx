@@ -10,7 +10,7 @@ import { useMaps } from "@/hooks/useMaps"
 import { Commet } from "react-loading-indicators"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export default function PartyDashboard() {
+export function PartyDashboard() {
   const { getRaceParameters } = useRaceParameters();
   const { getCars } = useCars();
   const { getMaps } = useMaps();

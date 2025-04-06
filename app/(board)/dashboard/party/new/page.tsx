@@ -1,4 +1,4 @@
-import {NewPartyPage} from '@/modules/party/NewParty'
+import { NewPartyPage } from '@/modules/party'
 
 const page = () => {
   return (

@@ -15,7 +15,7 @@ interface CarAttributionProps {
   race: Race
 }
 
-export default function CarAttributions({ race }: CarAttributionProps) {
+export function CarAttributions({ race }: CarAttributionProps) {
   const [globalCar, setGlobalCar] = useState<Car | null>(null)
   const [individualCars, setIndividualCars] = useState<CarAttribution[]>([])
   const [loadingGlobal, setLoadingGlobal] = useState(false)
