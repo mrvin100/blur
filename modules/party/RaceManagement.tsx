@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AddParticipantsModal , RaceDetailsModal, CarAttributions, RacesList, CurrentRace, ScoreForm, RaceMap } from "@/modules/party"
+import { AddParticipantsModal, RaceDetailsModal, CarAttributions, RacesList, CurrentRace, ScoreForm, RaceMap } from "@/modules/party"
 import { useParams } from "next/navigation"
 import { useParty } from "@/hooks/useParty"
 import { Race } from "@/types/party.types"
@@ -111,7 +111,7 @@ export function RaceManagement() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <CarAttributions race={currentRace} />
-                          <RaceMap />
+                          <RaceMap raceId={currentRace.id} />
                         </div>
 
                         <div className="mt-8 bg-muted/30 p-6 rounded-lg">
