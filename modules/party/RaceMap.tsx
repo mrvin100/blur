@@ -7,23 +7,22 @@ import { Dices, MapPin } from "lucide-react"
 import { Map } from "@/types/map.types"
 import { useMaps } from "@/hooks/useMaps"
 import { Button } from "@/components/ui/button"
-
-export function RaceMap() {
+import { useRace } from "@/hooks/useRace"
+import { getRandomMap } from "@/app/services/mapService"
+interface Props {
+  raceId: string
+}
+export function RaceMap({ raceId }: Props) {
   const [map, setMap] = useState<Map | null>(null)
-  const [loading, setLoading] = useState(true)
-  const { getRandomMapQuery } = useMaps()
-  
-  useEffect(() => {
-    fetchRandomMap()
-  }, [])
+  const [loading, setLoading] = useState(false)
+  const { fetchRaceById } = useRace(raceId)
+  const hasMap = !!fetchRaceById.data?.card
 
   const fetchRandomMap = async () => {
     try {
       setLoading(true)
-      await getRandomMapQuery.refetch()
-      if (getRandomMapQuery.data) {
-        setMap(getRandomMapQuery.data)
-      }
+      await getRandomMap(raceId)
+      await fetchRaceById.refetch()
     } catch (error) {
       console.error("Erreur lors de la récupération de la carte:", error)
     } finally {
@@ -53,14 +52,14 @@ export function RaceMap() {
               <p>Tirage en cours...</p>
             </div>
           </div>
-        ) : map ? (
+        ) : fetchRaceById.data && hasMap ? (
           <div className="space-y-4">
             <div className="relative h-48 w-full overflow-hidden rounded-md shadow-md">
-              <Image src={map.imageUrl || "/placeholder.svg"} alt={map.track} fill className="object-cover" />
+              <Image src={fetchRaceById.data.card.imageUrl || "/placeholder.svg"} alt={fetchRaceById.data.card.track} fill className="object-cover" />
             </div>
             <div className="text-center">
-              <h3 className="font-medium text-lg">{map.track}</h3>
-              <p className="text-muted-foreground">{map.location}</p>
+              <h3 className="font-medium text-lg">{fetchRaceById.data.card.track}</h3>
+              <p className="text-muted-foreground">{fetchRaceById.data.card.location}</p>
             </div>
           </div>
         ) : (

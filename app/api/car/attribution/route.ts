@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import axios from "axios";
 
 // Helper functions
-async function fetchGlobalAttribution() {
+async function fetchGlobalAttribution(raceId: string) {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cars/global-attribution`);
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cars/global-attribution/${raceId}`);
     return response.data.data;
   } catch (error) {
     console.error(error);
@@ -12,10 +12,10 @@ async function fetchGlobalAttribution() {
   }
 }
 
-async function fetchIndividualAttribution(carIds: string[]) {
+async function fetchIndividualAttribution(carIds: string[], raceId: string) {
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/cars/individual-attribution`,
+      `${process.env.NEXT_PUBLIC_API_URL}/cars/individual-attribution/${raceId}`,
       carIds
     );
     return response.data.data;
@@ -28,15 +28,15 @@ async function fetchIndividualAttribution(carIds: string[]) {
 // Route handler
 export async function POST(request: Request) {
   try {
-    const { type, carIds } = await request.json();
+    const { type, carIds, raceId } = await request.json();
 
-    if (type === 'global') {
-      const data = await fetchGlobalAttribution();
+    if (type === 'global' && raceId) {
+      const data = await fetchGlobalAttribution(raceId);
       return NextResponse.json({ data });
-    } 
-    
-    if (type === 'individual' && Array.isArray(carIds)) {
-      const data = await fetchIndividualAttribution(carIds);
+    }
+
+    if (type === 'individual' && Array.isArray(carIds) && raceId) {
+      const data = await fetchIndividualAttribution(carIds, raceId);
       return NextResponse.json({ data });
     }
 

@@ -6,10 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Dices } from "lucide-react"
-import { Race, Racer } from "@/types/party.types"
-import { useCars } from "@/hooks/useCars"
+import { Race } from "@/types/party.types"
 import { Car, CarAttribution } from "@/types/car.types"
 import { useRace } from "@/hooks/useRace"
+import { getGlobalCarAttribution, getIndividualCarAttribution } from "@/app/services/carService"
 
 interface CarAttributionProps {
   race: Race
@@ -22,36 +22,34 @@ export function CarAttributions({ race }: CarAttributionProps) {
   const [loadingIndividual, setLoadingIndividual] = useState(false)
   const [activeTab, setActiveTab] = useState<string>("global")
   const { fetchRaceById } = useRace(race.id)
-  const { getIndividualCar, getGlobalCar } = useCars(fetchRaceById?.data?.racers.map((racer: Racer) => racer.userName) || [])
+  const hasCar = !!fetchRaceById.data?.car;
+  const hasIndividualAttributions = (fetchRaceById.data?.attributions?.length || 0) > 0;
 
   const fetchGlobalCar = async () => {
     try {
-      setLoadingGlobal(true)
-      await getGlobalCar.refetch()
-      if (getGlobalCar.data) {
-        setGlobalCar(getGlobalCar.data)
-      }
+      setLoadingGlobal(true);
+      const car = await getGlobalCarAttribution(race.id);
+      fetchRaceById.refetch(); // Rafraîchit les données
     } catch (error) {
-      console.error("Erreur lors de la récupération de la voiture globale:", error)
+      console.error("Erreur lors de l'attribution :", error);
     } finally {
-      setLoadingGlobal(false)
+      setLoadingGlobal(false);
     }
-  }
+  };
 
   const fetchIndividualCars = async () => {
     try {
-      setLoadingIndividual(true)
-      await getIndividualCar.refetch()
-      console.log("Individual Attribution", getIndividualCar.data)
-      if (getIndividualCar.data) {
-        setIndividualCars(getIndividualCar.data)
-      }
+      setLoadingIndividual(true);
+      await getIndividualCarAttribution(
+        fetchRaceById.data?.racers.map(r => r.userName) || [], race.id
+      );
+      fetchRaceById.refetch();
     } catch (error) {
-      console.error("Erreur lors de la récupération des voitures individuelles:", error)
+      console.error("Erreur lors de l'attribution :", error);
     } finally {
-      setLoadingIndividual(false)
+      setLoadingIndividual(false);
     }
-  }
+  };
 
   return (
     <Card className="h-full border shadow-sm">
@@ -67,10 +65,10 @@ export function CarAttributions({ race }: CarAttributionProps) {
 
           <TabsContent value="global" className="pt-4">
             <div className="flex justify-end mb-4">
-              <Button variant="outline" size="sm" onClick={fetchGlobalCar} disabled={loadingGlobal}>
+              {!hasCar && <Button variant="outline" size="sm" onClick={fetchGlobalCar} disabled={loadingGlobal}>
                 <Dices className="h-4 w-4 mr-1" />
                 Attribuer une voiture
-              </Button>
+              </Button>}
             </div>
 
             {loadingGlobal ? (
@@ -80,13 +78,13 @@ export function CarAttributions({ race }: CarAttributionProps) {
                   <p>Chargement...</p>
                 </div>
               </div>
-            ) : globalCar ? (
+            ) : fetchRaceById.data && hasCar ? (
               <div className="space-y-4">
-                <h3 className="font-medium text-lg text-center">{globalCar.name}</h3>
+                <h3 className="font-medium text-lg text-center">{fetchRaceById.data.car.name}</h3>
                 <div className="relative h-48 w-full overflow-hidden rounded-md shadow-md">
                   <Image
-                    src={globalCar.imageUrl || "/placeholder.svg"}
-                    alt={globalCar.name}
+                    src={fetchRaceById.data.car.imageUrl || "/placeholder.svg"}
+                    alt={fetchRaceById.data.car.name}
                     fill
                     className="object-cover"
                   />
@@ -96,7 +94,7 @@ export function CarAttributions({ race }: CarAttributionProps) {
                 </p>
               </div>
             ) : (
-              <div className="py-16 text-center">
+              !hasCar && <div className="py-16 text-center">
                 <p className="text-muted-foreground mb-4">Aucune voiture attribuée</p>
                 <Button variant="outline" onClick={fetchGlobalCar}>
                   <Dices className="h-4 w-4 mr-2" />
@@ -108,7 +106,7 @@ export function CarAttributions({ race }: CarAttributionProps) {
 
           <TabsContent value="individual" className="pt-4">
             <div className="flex justify-end mb-4">
-              <Button
+              {!hasIndividualAttributions && <Button
                 variant="outline"
                 size="sm"
                 onClick={fetchIndividualCars}
@@ -116,7 +114,7 @@ export function CarAttributions({ race }: CarAttributionProps) {
               >
                 <Dices className="h-4 w-4 mr-1" />
                 Attribuer des voitures
-              </Button>
+              </Button>}
             </div>
 
             {loadingIndividual ? (
@@ -126,9 +124,9 @@ export function CarAttributions({ race }: CarAttributionProps) {
                   <p>Chargement...</p>
                 </div>
               </div>
-            ) : individualCars.length > 0 ? (
+            ) : fetchRaceById.data && hasIndividualAttributions ? (
               <div className="space-y-4">
-                {individualCars.map((car) => (
+                {fetchRaceById.data.attributions.map((car) => (
                   <div key={`${car.id} ${car.imageUrl}`} className="flex items-center space-x-4 border-b pb-4 last:border-0">
                     <div className="relative h-16 w-24 overflow-hidden rounded-md flex-shrink-0 shadow-sm">
                       <Image src={car.imageUrl || "/placeholder.svg"} alt={car.name} fill className="object-cover" />
@@ -143,11 +141,11 @@ export function CarAttributions({ race }: CarAttributionProps) {
             ) : (
               <div className="py-16 text-center">
                 <p className="text-muted-foreground mb-4">
-                  {race.racers.length === 0
+                  {fetchRaceById.data && fetchRaceById.data.racers.length === 0
                     ? "Ajoutez des participants à la course pour pouvoir attribuer des voitures"
                     : "Aucune voiture attribuée aux participants"}
                 </p>
-                {fetchRaceById.data && fetchRaceById.data.racers.length > 0 && (
+                {fetchRaceById.data && hasIndividualAttributions && (
                   <Button variant="outline" onClick={fetchIndividualCars}>
                     <Dices className="h-4 w-4 mr-2" />
                     Attribuer des voitures

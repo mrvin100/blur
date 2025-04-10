@@ -2,7 +2,7 @@ import { getAllMaps, getRandomMap } from "@/app/services/mapService"
 import { useQuery } from "@tanstack/react-query"
 import { MapsCacheKey } from "./const"
 
-export const useMaps = () => {
+export const useMaps = (raceId?:string) => {
   const getMaps = useQuery({
     queryKey: [MapsCacheKey.AllMaps],
     queryFn: () => getAllMaps()
@@ -10,7 +10,7 @@ export const useMaps = () => {
 
   const getRandomMapQuery = useQuery({
     queryKey: [MapsCacheKey.RandomMap],
-    queryFn: () => getRandomMap()
+    queryFn: () => getRandomMap(raceId as string)
   })
 
   return { getMaps, getRandomMapQuery }
