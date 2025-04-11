@@ -9,6 +9,8 @@ import { Race, Racer } from "@/types/party.types"
 import { useUsers } from "@/hooks/useUsers"
 import { useRace } from "@/hooks/useRace"
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query"
+import { useScore } from "@/hooks/useScore"
+import { AddScoreRequestData } from "@/types/score.types"
 
 interface AddParticipantsModalProps {
   isOpen: boolean
@@ -27,7 +29,9 @@ export function AddParticipantsModal({
   const [racers, setRacers] = useState<Racer[]>([])
   const [selectedRacers, setSelectedRacers] = useState<Racer[]>([])
   const { getUsers } = useUsers()
-  const { updateRace } = useRace(raceId)
+  const { updateRace,fetchRaceById } = useRace(raceId)
+  const { addScore,fetchScoreByRaceId } = useScore(raceId)
+
   const users = getUsers.data;
   useEffect(() => {
     setRacers([])
@@ -52,11 +56,21 @@ export function AddParticipantsModal({
 
   const handleAddParticipants = async () => {
     if (selectedRacers.length === 0) return
-    return updateRace.mutateAsync({ selectedRacers, raceId }).then(() => {
+    await updateRace.mutateAsync({ selectedRacers, raceId }).then(() => {
       onClose()
       setRacers([])
       refresh()
     }).catch(e => console.error(e))
+    for (let i = 0; i < selectedRacers.length; i++) {
+      const newScore: AddScoreRequestData = {
+        value: 0,
+        raceId: raceId,
+        userId: selectedRacers[i].id
+      }
+      await addScore.mutateAsync(newScore)
+      await fetchScoreByRaceId.refetch()
+      await fetchRaceById.refetch()
+    }
   }
 
 
