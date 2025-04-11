@@ -9,13 +9,14 @@ import {
 } from "@/components/ui/card";
 import { useParty } from "@/hooks/useParty";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Party } from "@/types/party.types";
 
 export function NewPartyPage() {
   const { createParty, fetchAllParties } = useParty();
+  const [disabled, setDisabled] = useState(false)
   const router = useRouter();
   const checkTodaysParty = () => {
     const allParties = fetchAllParties.data || [];
@@ -27,6 +28,7 @@ export function NewPartyPage() {
       return partyDateString === todayDateString;
     });
     if (todaysParty) {
+      setDisabled(true)
       router.push(`/dashboard/party/${todaysParty.id}`);
       toast.error("Une partie a déjà été créée aujourd'hui", {
         description: "Nous vous redigons vers celle ci",
@@ -82,6 +84,7 @@ export function NewPartyPage() {
                   type="submit"
                   className="cursor-pointer"
                   onClick={(e) => handleCreate(e)}
+                  disabled={disabled}
                 >
                   Create Party
                 </Button>
