@@ -25,7 +25,7 @@ export function RaceManagement() {
   const races = fetchRaceByPartyId.data
   useEffect(() => {
     setCurrentRace(getMostRecentRace(fetchRaceByPartyId.data || []))
-  }, [fetchRaceByPartyId.isLoading, fetchRaceById.data])
+  }, [fetchRaceByPartyId.isLoading, fetchRaceByPartyId.data])
 
   console.log("Party", party)
   console.log("Party Id", partyId)
@@ -44,11 +44,13 @@ export function RaceManagement() {
   const createNewRace = async () => {
     try {
       await createRace.mutateAsync().then(res => {
-        setCurrentRace(res)
         toast.success("Succès", {
           description: "La course a été créée avec succès"
         })
+
       }).catch(error => console.error(error))
+      await fetchPartyById.refetch()
+      await fetchRaceByPartyId.refetch()
     } catch (error) {
       return console.error(error)
     }
@@ -78,12 +80,12 @@ export function RaceManagement() {
           <h1 className="text-3xl font-bold mb-8 text-center sm:text-left">Gestion des Courses</h1>
         </div>
 
-        {party ? (
+        {fetchPartyById.data ? (
           <div className="grid gap-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-lg shadow-sm border">
               <div>
-                <h2 className="text-2xl font-semibold">Partie #{party.id}</h2>
-                <p className="text-muted-foreground">Date: {formatDate(party.datePlayed)}</p>
+                <h2 className="text-2xl font-semibold">Partie #{fetchPartyById.data.id}</h2>
+                <p className="text-muted-foreground">Date: {formatDate(fetchPartyById.data.datePlayed)}</p>
               </div>
               <Button onClick={() => createNewRace()} className="w-full sm:w-auto cursor-pointer">
                 Créer une nouvelle course
@@ -100,23 +102,23 @@ export function RaceManagement() {
                 <Card className="border shadow-md">
                   <CardHeader className="bg-muted/30">
                     <CardTitle className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                      <span>Course {currentRace?.id ? `#${currentRace.id}` : ""}</span>
+                      <span>Course {fetchPartyById.data?.id ? `#${fetchPartyById.data.id}` : ""}</span>
                       <Button onClick={() => setIsAddParticipantsModalOpen(true)} className="cursor-pointer">Ajouter des participants</Button>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
-                    {currentRace ? (
+                    {getMostRecentRace(fetchRaceByPartyId.data || []) ? (
                       <div className="space-y-8">
-                        <CurrentRace race={currentRace} />
+                        <CurrentRace raceId={getMostRecentRace(fetchRaceByPartyId.data || [])?.id} />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <CarAttributions race={currentRace} />
-                          <RaceMap raceId={currentRace.id} />
+                          <CarAttributions raceId={getMostRecentRace(fetchRaceByPartyId.data || [])?.id ?? ""} />
+                          <RaceMap raceId={getMostRecentRace(fetchRaceByPartyId.data || [])?.id ?? ""} />
                         </div>
 
                         <div className="mt-8 bg-muted/30 p-6 rounded-lg">
                           <h3 className="text-xl font-semibold mb-4">Ajouter des scores</h3>
-                          <ScoreForm raceId={currentRace.id} />
+                          <ScoreForm raceId={getMostRecentRace(fetchRaceByPartyId.data || [])?.id} />
                         </div>
                       </div>
                     ) : (

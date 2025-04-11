@@ -12,23 +12,23 @@ import { useRace } from "@/hooks/useRace"
 import { getGlobalCarAttribution, getIndividualCarAttribution } from "@/app/services/carService"
 
 interface CarAttributionProps {
-  race: Race
+  raceId: string
 }
 
-export function CarAttributions({ race }: CarAttributionProps) {
+export function CarAttributions({ raceId }: CarAttributionProps) {
   const [globalCar, setGlobalCar] = useState<Car | null>(null)
   const [individualCars, setIndividualCars] = useState<CarAttribution[]>([])
   const [loadingGlobal, setLoadingGlobal] = useState(false)
   const [loadingIndividual, setLoadingIndividual] = useState(false)
   const [activeTab, setActiveTab] = useState<string>("global")
-  const { fetchRaceById } = useRace(race.id)
+  const { fetchRaceById } = useRace(raceId)
   const hasCar = !!fetchRaceById.data?.car;
   const hasIndividualAttributions = (fetchRaceById.data?.attributions?.length || 0) > 0;
 
   const fetchGlobalCar = async () => {
     try {
       setLoadingGlobal(true);
-      const car = await getGlobalCarAttribution(race.id);
+      const car = await getGlobalCarAttribution(raceId);
       fetchRaceById.refetch(); // Rafraîchit les données
     } catch (error) {
       console.error("Erreur lors de l'attribution :", error);
@@ -41,7 +41,7 @@ export function CarAttributions({ race }: CarAttributionProps) {
     try {
       setLoadingIndividual(true);
       await getIndividualCarAttribution(
-        fetchRaceById.data?.racers.map(r => r.userName) || [], race.id
+        fetchRaceById.data?.racers.map(r => r.userName) || [], raceId
       );
       fetchRaceById.refetch();
     } catch (error) {
