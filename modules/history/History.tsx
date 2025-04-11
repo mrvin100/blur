@@ -5,7 +5,7 @@ import { useRaces } from "@/hooks/useRaces"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Trophy, Calendar, Users, Flag, User, Settings } from "lucide-react"
+import { Trophy, Calendar, Users, Flag, User, Settings, Medal } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Party, Race, Racer } from "@/types/party.types"
 
@@ -43,6 +43,9 @@ function PartyItem({ party }: Readonly<{ party: Party }>) {
   const { useRacesByPartyId } = useRaces()
   const { data: races, isLoading, isError } = useRacesByPartyId(party.id)
 
+  // Calculate cumulative scores and determine party winner
+  const { partyWinner, playerScores } = calculatePartyScores(races || [])
+
   return (
     <AccordionItem value={`party-${party.id}`}>
       <AccordionTrigger className="hover:bg-muted/50 px-4 rounded-md">
@@ -53,6 +56,12 @@ function PartyItem({ party }: Readonly<{ party: Party }>) {
           <Badge variant="outline" className="ml-auto">
             {races?.length ?? party.racesPlayed?.length ?? 0} races
           </Badge>
+          {partyWinner && (
+            <Badge variant="secondary" className="ml-2">
+              <Trophy className="h-3 w-3 mr-1 text-amber-500" />
+              {partyWinner.racer.userName}
+            </Badge>
+          )}
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-4">
@@ -66,11 +75,61 @@ function PartyItem({ party }: Readonly<{ party: Party }>) {
         ) : races?.length === 0 ? (
           <div className="text-muted-foreground py-2">No races found for this party</div>
         ) : (
-          <Accordion type="single" collapsible className="w-full">
-            {races?.map((race) => (
-              <RaceItem key={race.id.toString()} race={race} />
-            ))}
-          </Accordion>
+          <div className="space-y-6">
+            {/* Player Rankings - FIRST */}
+            {playerScores.length > 0 && (
+              <div className="bg-muted/50 p-4 rounded-md">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="h-5 w-5 text-blue-500" />
+                  <span className="font-medium text-lg">Player Rankings</span>
+                </div>
+                <div className="space-y-2">
+                  {playerScores.map((player, index) => (
+                    <div
+                      key={player.racer.id.toString()}
+                      className={`flex items-center justify-between p-3 rounded ${
+                        index === 0 ? "bg-amber-900 border border-amber-200" : "bg-background"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-muted-foreground">{index + 1}.</span>
+                        <span className={index === 0 ? "font-medium" : ""}>{player.racer.userName}</span>
+                        {index === 0 && <Medal className="h-4 w-4 text-amber-200 ml-1" />}
+                      </div>
+                      <Badge variant={index === 0 ? "default" : "secondary"}>{player.totalScore} pts</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Party Winner Section - SECOND */}
+            {partyWinner && (
+              <div className="border p-4 rounded-md border border-amber-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className="h-5 w-5 text-amber-500" />
+                  <span className="font-medium text-lg">Party Champion</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="font-medium text-xl">{partyWinner.racer.userName}</div>
+                  <div className="text-sm">
+                    Total Score: <span className="font-medium">{partyWinner.totalScore} points</span> in{" "}
+                    <span className="font-medium">{partyWinner.raceCount} races</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Races - THIRD */}
+            <div>
+              <h3 className="font-medium text-lg mb-3">Races</h3>
+              <Accordion type="single" collapsible className="w-full">
+                {races?.map((race) => (
+                  <RaceItem key={race.id.toString()} race={race} />
+                ))}
+              </Accordion>
+            </div>
+          </div>
         )}
       </AccordionContent>
     </AccordionItem>
@@ -103,7 +162,7 @@ function RaceItem({ race }: Readonly<{ race: Race }>) {
       <AccordionTrigger className="hover:bg-muted/50 px-4 rounded-md">
         <div className="flex items-center gap-2">
           <Flag className="h-4 w-4 text-muted-foreground" />
-          <span>{`Race ${race.id.toString()}`}</span>
+          <span>{parameters?.name || `Race ${race.id.toString()}`}</span>
           {race.party?.datePlayed && (
             <span className="text-xs text-muted-foreground">
               {new Date(race.party.datePlayed).toLocaleDateString()}
@@ -112,6 +171,12 @@ function RaceItem({ race }: Readonly<{ race: Race }>) {
           <Badge variant="outline" className="ml-auto">
             {race.racers?.length || 0} racers
           </Badge>
+          {winner && (
+            <Badge variant="secondary" className="ml-2">
+              <Trophy className="h-3 w-3 mr-1 text-amber-500" />
+              {winner.racer.userName}
+            </Badge>
+          )}
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-4">
@@ -192,6 +257,50 @@ function RaceItem({ race }: Readonly<{ race: Race }>) {
   )
 }
 
+// Helper function to calculate party scores and determine the winner
+function calculatePartyScores(races: Race[]) {
+  if (!races || races.length === 0) {
+    return { partyWinner: null, playerScores: [] }
+  }
+
+  // Create a map to track cumulative scores for each player
+  const playerScoresMap = new Map<string, { racer: Racer; totalScore: number; raceCount: number }>()
+
+  // Process all races and accumulate scores
+  races.forEach((race) => {
+    if (race.scores && race.scores.length > 0) {
+      race.scores.forEach((score) => {
+        const racerId = score.user.id.toString()
+        const currentPlayerData = playerScoresMap.get(racerId)
+
+        if (currentPlayerData) {
+          // Update existing player data
+          playerScoresMap.set(racerId, {
+            racer: score.user,
+            totalScore: currentPlayerData.totalScore + score.value,
+            raceCount: currentPlayerData.raceCount + 1,
+          })
+        } else {
+          // Add new player data
+          playerScoresMap.set(racerId, {
+            racer: score.user,
+            totalScore: score.value,
+            raceCount: 1,
+          })
+        }
+      })
+    }
+  })
+
+  // Convert map to array and sort by total score (descending)
+  const playerScores = Array.from(playerScoresMap.values()).sort((a, b) => b.totalScore - a.totalScore)
+
+  // The party winner is the player with the highest total score
+  const partyWinner = playerScores.length > 0 ? playerScores[0] : null
+
+  return { partyWinner, playerScores }
+}
+
 function HistorySkeleton() {
   return (
     <Card className="w-full max-w-3xl md:mx-auto md:my-5">
@@ -209,4 +318,3 @@ function HistorySkeleton() {
     </Card>
   )
 }
-
