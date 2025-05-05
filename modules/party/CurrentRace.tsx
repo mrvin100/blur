@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useRace } from "@/hooks/useRace"
 import { useScore } from "@/hooks/useScore"
-import { Race } from "@/types/party.types"
 import Image from "next/image"
 import { useEffect } from "react"
 
@@ -14,12 +13,13 @@ interface CurrentRaceProps {
 export function CurrentRace({ raceId }: CurrentRaceProps) {
   const { fetchRaceById } = useRace(raceId)
   const { fetchScoreByRaceId } = useScore(raceId)
-  if (!raceId) {
-    return <p>Aucune course sélectionnée</p>
-  }
+
+
   useEffect(() => {
     fetchData()
   }, [fetchScoreByRaceId.data])
+
+
   const fetchData = async () => {
     await fetchScoreByRaceId.refetch()
     await fetchRaceById.refetch()
@@ -35,11 +35,15 @@ export function CurrentRace({ raceId }: CurrentRaceProps) {
     }).format(date)
   }
 
+  if (!raceId) {
+    return <p>Aucune course sélectionnée</p>
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-xl font-semibold">Course #{fetchRaceById.data && fetchRaceById.data.id}</h2>
+          <h2 className="text-xl font-semibold">Course du {fetchRaceById.data && formatDate(fetchRaceById.data.createdAt)}</h2>
           {fetchRaceById.data && (
             <p className="text-sm text-muted-foreground">Créée le {formatDate(fetchRaceById.data.createdAt)}</p>
           )}
