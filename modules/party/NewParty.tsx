@@ -16,7 +16,7 @@ import { Party } from "@/types/party.types";
 
 export function NewPartyPage() {
   const { createParty, fetchAllParties } = useParty();
-  const [disabled, setDisabled] = useState(false)
+  const [disabled, setDisabled] = useState(true)
   const router = useRouter();
   const checkTodaysParty = () => {
     const allParties = fetchAllParties.data || [];
@@ -33,6 +33,8 @@ export function NewPartyPage() {
       toast.error("Une partie a déjà été créée aujourd'hui", {
         description: "Nous vous redigons vers celle ci",
       });
+    }else{
+      setDisabled(false)
     }
   };
 
