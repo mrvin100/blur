@@ -1,63 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blur (Racing Game) - Frontend
 
-## Getting Started
+This is the Next.js frontend for the Blur racing party game.
 
-First, run the development server:
+## Requirements
+- Node.js 18+
+- pnpm recommended
+
+## Environment variables
+Create `.env.local` (quickest: copy the template):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp env.template .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then run:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Or create `blur/.env.local` manually:
 
-## Learn More
+```bash
+# Backend base URL (Spring Boot)
+NEXT_PUBLIC_API_URL=http://localhost:8080
 
-To learn more about Next.js, take a look at the following resources:
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=replace-with-a-long-random-secret
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Install & Run
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm install
+pnpm dev
+```
 
-## Deploy on Vercel
+Open http://localhost:3000
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Authentication
+The frontend uses NextAuth Credentials provider.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Login UI: `/sign-in`
+- Backend endpoint: `POST {NEXT_PUBLIC_API_URL}/api/auth/login`
+- The returned JWT is stored in the NextAuth session (`session.user.accessToken`).
 
+All Next.js API routes under `blur/app/api/*` proxy to the backend and automatically attach:
 
+`Authorization: Bearer <accessToken>`
 
-## Authentication flow step and how to it works with the REST APIs
+## Game Flow (matches backend logic)
 
-Authentication Flow:
-a. Initial Load:
-When the application starts, the AuthProvider component is initialized
-It automatically runs checkAuth() on mount to verify if there's an existing session
-This checks /api/auth/session endpoint to validate the current session
-b. Login Process:
-User enters credentials on the login page
-The login() function is called with username and password
-It sends a POST request to /api/auth/login
-On successful login:
-User data is stored in the context
-isAuthenticated is set to true
-User is redirected based on their role (admin or user dashboard)
-c. Session Management:
-The DashboardLayout component uses useAuth() hook to protect routes
-If not authenticated, it redirects to the login page
-Different content is shown based on user role (admin vs user)
-d. Logout Process:
-User triggers logout
-Calls /api/auth/logout endpoint
-Clears user data from context
-Redirects to login page
+### 1) Party (one party per day)
+- When the first user clicks "Create Party" (or accesses the party screen), the frontend calls:
+  - `POST /api/party` (Next.js) → `GET /api/v1/parties/today` (backend)
+- If a party already exists today, it returns the existing one.
+
+### 2) Race
+- Create a race inside a party:
+  - `POST /api/race?partyId=...&attributionType=PER_USER|ALL_USERS`
+- Users join/leave race participants before start.
+
+### 3) Start Race
+- Party manager starts the race:
+  - `POST /api/v1/races/{raceId}/start`
+- Backend assigns:
+  - Random map (card)
+  - Random car attribution (per attribution type)
+  - Random score collector
+
+### 4) Scores
+- Only the assigned score collector can submit scores for participants:
+  - `POST /api/score`
+
+## Admin / Roles
+The backend is role-based:
+- `GREAT_ADMIN`: manage users (create users, assign roles)
+- `PARTY_MANAGER`: create/start races, manage party
+- `RACER`: join parties/races and play
+
+The UI determines admin capabilities based on:
+- `session.user.role === 'GREAT_ADMIN'`
+- or `session.user.permissions` containing `VIEW_ALL_USERS`

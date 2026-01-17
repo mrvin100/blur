@@ -5,7 +5,7 @@ import axios from "axios"
 // Helper function
 async function fetchAllRaceParameters(): Promise<RaceParameter[]> {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/raceParameters`);
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/raceParameters`);
     return response.data.data;
   } catch (error) {
     console.error(error);

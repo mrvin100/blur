@@ -1,30 +1,28 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
 import { Dices, MapPin } from "lucide-react"
-import { Map } from "@/types/map.types"
-import { useMaps } from "@/hooks/useMaps"
 import { Button } from "@/components/ui/button"
-import { useRace } from "@/hooks/useRace"
-import { getRandomMap } from "@/app/services/mapService"
+import { useRace } from "@/hooks"
+import { mapService } from "@/services"
+import { toast } from "sonner"
 interface Props {
   raceId: string
 }
 export function RaceMap({ raceId }: Props) {
-  const [map, setMap] = useState<Map | null>(null)
   const [loading, setLoading] = useState(false)
-  const { fetchRaceById } = useRace(raceId)
-  const hasMap = !!fetchRaceById.data?.card
+  const { data: race, refetch } = useRace(raceId)
+  const hasMap = !!race?.card
 
   const fetchRandomMap = async () => {
     try {
       setLoading(true)
-      await getRandomMap(raceId)
-      await fetchRaceById.refetch()
-    } catch (error) {
-      console.error("Erreur lors de la récupération de la carte:", error)
+      await mapService.getRandom(raceId)
+      await refetch()
+    } catch {
+      toast.error("Erreur lors de la récupération de la carte")
     } finally {
       setLoading(false)
     }
@@ -52,14 +50,14 @@ export function RaceMap({ raceId }: Props) {
               <p>Tirage en cours...</p>
             </div>
           </div>
-        ) : fetchRaceById.data && hasMap ? (
+        ) : race && hasMap ? (
           <div className="space-y-4">
             <div className="relative h-48 w-full overflow-hidden rounded-md shadow-md">
-              <Image src={fetchRaceById.data.card.imageUrl || "/placeholder.svg"} alt={fetchRaceById.data.card.track} fill className="object-cover" />
+              <Image src={race.card?.imageUrl || "/placeholder.svg"} alt={race.card?.track || "Track"} fill className="object-cover" />
             </div>
             <div className="text-center">
-              <h3 className="font-medium text-lg">{fetchRaceById.data.card.track}</h3>
-              <p className="text-muted-foreground">{fetchRaceById.data.card.location}</p>
+              <h3 className="font-medium text-lg">{race.card?.track}</h3>
+              <p className="text-muted-foreground">{race.card?.location}</p>
             </div>
           </div>
         ) : (

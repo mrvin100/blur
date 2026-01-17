@@ -3,22 +3,24 @@
 import Link from "next/link";
 import {
   Sidebar,
+  SidebarContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LucideIcon } from "lucide-react";
+import { ChevronUp, type LucideIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -33,7 +35,7 @@ interface SidebarProps {
   }[];
 }
 
-function SidebarWrapper({ navigationItems }: Readonly<SidebarProps>) {
+export function AppSidebar({ navigationItems }: Readonly<SidebarProps>) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const { isMobile } = useSidebar();
@@ -44,89 +46,96 @@ function SidebarWrapper({ navigationItems }: Readonly<SidebarProps>) {
   const userInitial = userName.charAt(0).toUpperCase();
 
   return (
-    <Sidebar className="w-64 border-r" variant="floating">
-      <SidebarHeader className="border-b px-4 py-3">
-        <div className="">
-          <h2 className="text-lg font-semibold">{userName}&apos;s Board</h2>
-        </div>
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <span className="text-lg font-bold">B</span>
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Blur Racing</span>
+                  <span className="truncate text-xs">{userName}&apos;s Board</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
-      <div className="flex-1 overflow-y-auto">
+      <SidebarContent>
         <SidebarGroup>
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors hover:bg-accent ${
-                  pathname === item.href ? "bg-accent" : ""
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.title}</span>
-              </Link>
-            );
-          })}
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                      <Link href={item.href}>
+                        <Icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
-      </div>
+      </SidebarContent>
 
-      <SidebarFooter className="border-t">
+      <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton size="lg" className="w-full">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8 shrink-0">
-                      <AvatarImage src={userImage} alt={userName} />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {userInitial}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex min-w-0 flex-col">
-                      <span className="truncate font-medium">{userName}</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {userEmail}
-                      </span>
-                    </div>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={userImage} alt={userName} />
+                    <AvatarFallback className="rounded-lg bg-sidebar-primary/10 text-sidebar-primary">
+                      {userInitial}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{userName}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {userEmail || "No email"}
+                    </span>
                   </div>
+                  <ChevronUp className="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56"
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
                 side={isMobile ? "bottom" : "right"}
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="p-0">
-                  <div className="flex items-center gap-2 px-1 py-1.5">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={userImage} alt={userName} />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {userInitial}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex min-w-0 flex-col">
-                      <span className="truncate font-medium">{userName}</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {userEmail}
-                      </span>
-                    </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings">Settings</Link>
+                    <Link href="/dashboard/profile" className="cursor-pointer">
+                      Profile
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard/profile">Profile</Link>
+                    <Link href="/dashboard/settings" className="cursor-pointer">
+                      Settings
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/api/auth/signout">Sign out</Link>
+                  <Link href="/api/auth/signout" className="cursor-pointer">
+                    Sign out
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -134,11 +143,5 @@ function SidebarWrapper({ navigationItems }: Readonly<SidebarProps>) {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  );
-}
-
-export function AppSidebar(props: SidebarProps) {
-  return (
-    <SidebarWrapper navigationItems={props.navigationItems} />
   );
 }

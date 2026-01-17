@@ -9,8 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { Racer } from "@/types/party.types"
-import { useScore } from "@/hooks/useScore"
-import { useRace } from "@/hooks/useRace"
+import { useRace, useScoresByRace, useCreateScore, useUpdateScore } from "@/hooks"
 import { AddScoreRequestData } from "@/types/score.types"
 
 interface ScoreFormProps {
@@ -21,8 +20,10 @@ export function ScoreForm({ raceId }: ScoreFormProps) {
   const [selectedRacer, setSelectedRacer] = useState<string>("")
   const [score, setScore] = useState<string>("")
   const [loading, setLoading] = useState(false)
-  const { fetchRaceById } = useRace(raceId)
-  const { fetchScoreByRaceId, updateScore, addScore } = useScore(raceId)
+  const { data: race, refetch: refetchRace } = useRace(raceId || "0")
+  const { data: scores, refetch: refetchScores } = useScoresByRace(raceId || "0")
+  const createScore = useCreateScore()
+  const updateScore = useUpdateScore()
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,31 +42,34 @@ export function ScoreForm({ raceId }: ScoreFormProps) {
     }
 
     try {
-      const existingScore = fetchRaceById.data?.scores.find((s) => s.user.id == selectedRacer)
-      console.log("Existing Score", existingScore)
-      await updateScore.mutateAsync({ data, scoreId: existingScore!.id })
-
-
-      toast.success("Succès", {
-        description: "Le rang a été enregistré avec succès"
-      })
+      const existingScore = race?.scores?.find((s) => s.user?.id == Number(selectedRacer))
+      
+      if (existingScore) {
+        await updateScore.mutateAsync({ 
+          id: existingScore.id, 
+          data: { value: Number(score) } 
+        })
+      } else {
+        await createScore.mutateAsync({
+          value: Number(score),
+          raceId: Number(raceId),
+          userId: Number(selectedRacer)
+        })
+      }
 
       setSelectedRacer("")
       setScore("")
 
-    } catch (e) {
-      console.error("Erreur:", e)
-      toast.error("Erreur", {
-        description: "Une erreur est survenue lors de l'enregistrement"
-      })
+    } catch {
+      toast.error("Erreur lors de l'ajout du score");
     } finally {
       setLoading(false)
-      await fetchRaceById.refetch()
-      await fetchScoreByRaceId.refetch()
+      await refetchRace()
+      await refetchScores()
     }
   }
 
-  if (fetchRaceById.data && fetchRaceById.data.racers.length === 0) {
+  if (race && race.racers && race.racers.length === 0) {
     return (
       <div className="text-center py-6 border rounded-md bg-muted/10">
         <p className="text-muted-foreground">Ajoutez des participants à la course pour pouvoir ajouter des rangs</p>
@@ -83,7 +87,7 @@ export function ScoreForm({ raceId }: ScoreFormProps) {
               <SelectValue placeholder="Sélectionner un participant" />
             </SelectTrigger>
             <SelectContent>
-              {fetchRaceById.data && fetchRaceById.data.racers.map((racer) => (
+              {race?.racers?.map((racer) => (
                 <SelectItem key={racer.id} value={racer.id.toString()}>
                   {racer.userName}
                 </SelectItem>

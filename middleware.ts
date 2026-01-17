@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
 
   // Handle dashboard routes
   if (pathname.startsWith('/dashboard')) {
-    const isAdmin = token?.user?.permissions?.some(p => p && typeof p === 'object' && p.name === 'canCreateUsers');
+    const isAdmin = token?.user?.role === 'GREAT_ADMIN' || token?.user?.permissions?.includes('VIEW_ALL_USERS');
     
     // Skip protection for the test page
     if (pathname.startsWith('/dashboard/users')) {

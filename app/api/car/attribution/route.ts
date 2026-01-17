@@ -4,7 +4,7 @@ import axios from "axios";
 // Helper functions
 async function fetchGlobalAttribution(raceId: string) {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cars/global-attribution/${raceId}`);
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cars/global-attribution/${raceId}`);
     return response.data.data;
   } catch (error) {
     console.error(error);
@@ -15,7 +15,7 @@ async function fetchGlobalAttribution(raceId: string) {
 async function fetchIndividualAttribution(carIds: string[], raceId: string) {
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/cars/individual-attribution/${raceId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/cars/individual-attribution/${raceId}`,
       carIds
     );
     return response.data.data;

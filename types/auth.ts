@@ -1,58 +1,36 @@
-export interface Permission {
-  id: number;
-  name: string;
-}
-
 export interface Score {
   id: number;
   value: number;
-  race?: any; // This is recursive, so we'll use any for now
 }
 
 export interface Race {
   id: number;
-  scores: Score[];
+  scores?: Score[];
 }
 
 export interface User {
   id: number;
   userName: string;
-  password: string;
-  permissions: Permission[];
-  races: Race[];
+  email?: string;
+  role?: string;
+  permissions?: string[];
+  races?: Race[];
 }
 
-export interface UserResponse {
-  message: string;
-  data: {
-    id: number;
-    userName: string;
-    permissions: Permission[];
-  };
-}
-
-export interface PermissionsResponse {
-  message: string;
-  data: Permission[];
+export interface AuthUser {
+  id: string;
+  userName: string;
+  email?: string;
+  role?: string;
+  permissions?: string[];
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 export interface CreateUserDto {
   userName: string;
+  email?: string;
   password: string;
-  permissionsIds: number[];
+  role: 'GREAT_ADMIN' | 'PARTY_MANAGER' | 'RACER';
 }
-
-export interface CreatePermissionDto {
-  name: string;
-}
-
-export type UserRole = 'admin' | 'user';
-
-export interface Session {
-  user: {
-    id: number;
-    userName: string;
-    permissions: Permission[];
-    role: UserRole;
-  };
-} 
+ 

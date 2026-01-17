@@ -1,43 +1,92 @@
-import { Car, CarAttribution } from "./car.types"
-import { Map } from "./map.types"
+/**
+ * Party Types
+ */
+
+import { Car, CarAttribution } from "./car.types";
+import { Map } from "./map.types";
 
 export interface Party {
-  id: string,
-  datePlayed: string,
-  racesPlayed: Race[],
+  id: number;
+  name?: string;
+  datePlayed: string;
+  createdAt?: string;
+  updatedAt?: string;
+  racesPlayed?: Race[];
+  participants?: Participant[];
 }
 
 export interface Race {
-  id: string,
-  party: PartyRace,
-  scores: Score[],
-  racers: Racer[],
-  raceParameters: RaceParameters[],
-  car: Car,
-  card: Map,
-  attributions: CarAttribution[],
-  createdAt: string,
+  id: number;
+  party?: PartyRace;
+  scores?: Score[];
+  racers?: Racer[];
+  raceParameters?: RaceParameter[];
+  car?: Car;
+  card?: Map;
+  attributions?: CarAttribution[];
+  createdAt?: string;
+  startedAt?: string;
+  completedAt?: string;
+  status?: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  attributionType?: 'GLOBAL' | 'INDIVIDUAL';
 }
 
 export interface Score {
-  id: string,
-  value: number,
-  user: Racer
+  id: number;
+  value: number;
+  user?: Racer;
+  race?: { id: number };
+  createdAt?: string;
 }
 
 export interface PartyRace {
-  id: string,
-  datePlayed: string
+  id: number;
+  datePlayed: string;
 }
 
 export interface Racer {
-  id: string,
-  userName: string
+  id: number;
+  userName: string;
+  email?: string;
 }
 
-export interface RaceParameters {
-  id: string,
-  name: string,
-  isActive: true,
-  downloadUrl: string
+export interface Participant {
+  id: number;
+  userName: string;
+  email?: string;
 }
+
+export interface RaceParameter {
+  id: number;
+  name: string;
+  isActive: boolean;
+  downloadUrl?: string;
+  description?: string;
+}
+
+// DTOs
+export interface CreatePartyDto {
+  name?: string;
+  datePlayed?: string;
+  participantIds?: number[];
+}
+
+export interface UpdatePartyDto {
+  name?: string;
+  datePlayed?: string;
+}
+
+export interface CreateRaceDto {
+  partyId: number;
+  cardId?: number;
+  attributionType?: 'GLOBAL' | 'INDIVIDUAL';
+  raceParameterIds?: number[];
+}
+
+export interface UpdateRaceDto {
+  status?: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  cardId?: number;
+}
+
+// Legacy aliases
+export type RaceParameters = RaceParameter;

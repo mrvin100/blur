@@ -1,7 +1,8 @@
 import {
   LayoutDashboard,
   Calendar,
-  Settings, Car
+  Settings,
+  Car,
 } from 'lucide-react';
 
 export const userNavigationItems = [
@@ -11,14 +12,14 @@ export const userNavigationItems = [
     icon: LayoutDashboard,
   },
   {
+    title: 'Party',
+    href: '/dashboard/party/new',
+    icon: Car,
+  },
+  {
     title: 'History',
     href: '/dashboard/history',
     icon: Calendar,
-  },
-  {
-    title: 'Party',
-    href: '/dashboard/party',
-    icon: Car
   },
   {
     title: 'Settings',

@@ -6,32 +6,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Dices } from "lucide-react"
-import { Race } from "@/types/party.types"
-import { Car, CarAttribution } from "@/types/car.types"
-import { useRace } from "@/hooks/useRace"
-import { getGlobalCarAttribution, getIndividualCarAttribution } from "@/app/services/carService"
+import { useRace } from "@/hooks"
+import { carService } from "@/services"
+import { toast } from "sonner"
 
 interface CarAttributionProps {
   raceId: string
 }
 
 export function CarAttributions({ raceId }: CarAttributionProps) {
-  const [globalCar, setGlobalCar] = useState<Car | null>(null)
-  const [individualCars, setIndividualCars] = useState<CarAttribution[]>([])
   const [loadingGlobal, setLoadingGlobal] = useState(false)
   const [loadingIndividual, setLoadingIndividual] = useState(false)
   const [activeTab, setActiveTab] = useState<string>("global")
-  const { fetchRaceById } = useRace(raceId)
-  const hasCar = !!fetchRaceById.data?.car;
-  const hasIndividualAttributions = (fetchRaceById.data?.attributions?.length || 0) > 0;
+  const { data: race, refetch: refetchRace } = useRace(raceId)
+  const hasCar = !!race?.car;
+  const hasIndividualAttributions = (race?.attributions?.length || 0) > 0;
 
   const fetchGlobalCar = async () => {
     try {
       setLoadingGlobal(true);
-      const car = await getGlobalCarAttribution(raceId);
-      fetchRaceById.refetch(); // Rafraîchit les données
-    } catch (error) {
-      console.error("Erreur lors de l'attribution :", error);
+      await carService.getGlobalAttribution(raceId);
+      await refetchRace();
+    } catch {
+      toast.error("Erreur lors de l'attribution");
     } finally {
       setLoadingGlobal(false);
     }
@@ -40,12 +37,11 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
   const fetchIndividualCars = async () => {
     try {
       setLoadingIndividual(true);
-      await getIndividualCarAttribution(
-        fetchRaceById.data?.racers.map(r => r.userName) || [], raceId
-      );
-      fetchRaceById.refetch();
-    } catch (error) {
-      console.error("Erreur lors de l'attribution :", error);
+      const carIds = race?.racers?.map(r => r.id.toString()) || [];
+      await carService.getIndividualAttribution(raceId, carIds);
+      await refetchRace();
+    } catch {
+      toast.error("Erreur lors de l'attribution");
     } finally {
       setLoadingIndividual(false);
     }
@@ -78,13 +74,13 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
                   <p>Chargement...</p>
                 </div>
               </div>
-            ) : fetchRaceById.data && hasCar ? (
+            ) : race && hasCar ? (
               <div className="space-y-4">
-                <h3 className="font-medium text-lg text-center">{fetchRaceById.data.car.name}</h3>
+                <h3 className="font-medium text-lg text-center">{race.car?.name}</h3>
                 <div className="relative h-48 w-full overflow-hidden rounded-md shadow-md">
                   <Image
-                    src={fetchRaceById.data.car.imageUrl || "/placeholder.svg"}
-                    alt={fetchRaceById.data.car.name}
+                    src={race.car?.imageUrl || "/placeholder.svg"}
+                    alt={race.car?.name || "Car"}
                     fill
                     className="object-cover"
                   />
@@ -110,7 +106,7 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
                 variant="outline"
                 size="sm"
                 onClick={fetchIndividualCars}
-                disabled={loadingIndividual || !fetchRaceById.data || fetchRaceById.data.racers.length === 0}
+                disabled={loadingIndividual || !race || !race.racers || race.racers.length === 0}
               >
                 <Dices className="h-4 w-4 mr-1" />
                 Attribuer des voitures
@@ -124,16 +120,16 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
                   <p>Chargement...</p>
                 </div>
               </div>
-            ) : fetchRaceById.data && hasIndividualAttributions ? (
+            ) : race && hasIndividualAttributions ? (
               <div className="space-y-4">
-                {fetchRaceById.data.attributions.map((car) => (
+                {race.attributions?.map((car) => (
                   <div key={`${car.id} ${car.imageUrl}`} className="flex items-center space-x-4 border-b pb-4 last:border-0">
                     <div className="relative h-16 w-24 overflow-hidden rounded-md flex-shrink-0 shadow-sm">
-                      <Image src={car.imageUrl || "/placeholder.svg"} alt={car.name} fill className="object-cover" />
+                      <Image src={car.car?.imageUrl || "/placeholder.svg"} alt={car.car?.name || "Car"} fill className="object-cover" />
                     </div>
                     <div>
-                      <h4 className="font-medium">{car.userName}</h4>
-                      <p className="text-sm text-muted-foreground">{car.name}</p>
+                      <h4 className="font-medium">{car.user?.userName}</h4>
+                      <p className="text-sm text-muted-foreground">{car.car?.name}</p>
                     </div>
                   </div>
                 ))}
@@ -141,11 +137,11 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
             ) : (
               <div className="py-16 text-center">
                 <p className="text-muted-foreground mb-4">
-                  {fetchRaceById.data && fetchRaceById.data.racers.length === 0
+                  {race && (!race.racers || race.racers.length === 0)
                     ? "Ajoutez des participants à la course pour pouvoir attribuer des voitures"
                     : "Aucune voiture attribuée aux participants"}
                 </p>
-                {fetchRaceById.data && hasIndividualAttributions && (
+                {race && race.racers && race.racers.length > 0 && !hasIndividualAttributions && (
                   <Button variant="outline" onClick={fetchIndividualCars}>
                     <Dices className="h-4 w-4 mr-2" />
                     Attribuer des voitures

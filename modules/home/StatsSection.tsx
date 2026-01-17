@@ -1,6 +1,3 @@
-'use client';
-
-import { motion } from "framer-motion";
 import { Car, Timer, Trophy, Users } from "lucide-react";
 import { Stat } from '@/types';
 
@@ -35,24 +32,17 @@ export function StatsSection() {
   return (
     <section className="w-full py-20 md:py-32 relative bg-gradient-to-b from-background to-background/80">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
-        <motion.div 
-          className="w-full max-w-7xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+        <div className="w-full max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {stats.map((stat) => {
               const Icon = stat.icon;
               return (
-                <motion.div
+                <div
                   key={stat.label}
                   className="relative group"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative h-full rounded-2xl border bg-card/50 backdrop-blur-sm p-6 lg:p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20">
+                  <div className="relative h-full rounded-2xl border bg-card/50 backdrop-blur-sm p-6 lg:p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/20 hover:scale-[1.02]">
                     <div className="p-3 rounded-xl bg-primary/10 inline-flex mb-4">
                       <Icon className="h-6 w-6 text-primary" />
                     </div>
@@ -64,11 +54,11 @@ export function StatsSection() {
                       </p>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

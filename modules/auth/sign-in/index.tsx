@@ -8,11 +8,13 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { SubmitButton } from '@/components/submit-button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -30,9 +32,6 @@ export function SignInForm() {
     }
 
     try {
-      console.log('[SignIn] Starting authentication process...');
-      
-      // Sign in with NextAuth directly
       const result = await nextAuthSignIn('credentials', {
         username,
         password,
@@ -40,22 +39,17 @@ export function SignInForm() {
       });
 
       if (result?.error) {
-        console.error('[SignIn] NextAuth error:', result.error);
         throw new Error(result.error);
       }
 
-      // Get the session to check user permissions
       const session = await getSession();
       if (!session?.user) {
         throw new Error('Failed to get user session');
       }
 
-      // Redirect to dashboard - the layout will handle showing the correct view
-      console.log('[SignIn] Authentication successful, redirecting to dashboard');
       router.push('/dashboard');
       toast.success('Successfully signed in!');
     } catch (error) {
-      console.error('[SignIn] Authentication error:', error);
       let errorMessage = 'An error occurred during sign in';
       
       if (error instanceof Error) {
@@ -73,53 +67,80 @@ export function SignInForm() {
   };
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center bg-gray-100 relative px-4">
+    <section className="min-h-screen flex flex-col items-center justify-center bg-background relative px-4 py-8">
       <Link 
         href="/" 
-        className="absolute top-8 left-8 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-4 left-4 sm:top-8 sm:left-8 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Home
+        <span className="hidden sm:inline">Back to Home</span>
+        <span className="sm:hidden">Back</span>
       </Link>
 
-      <Card className="w-full max-w-[350px]">
-        <CardHeader>
-          <h2 className="text-2xl font-bold text-center">Sign In</h2>
-          <p className="text-sm text-muted-foreground text-center">
+      <Card className="w-full max-w-[400px] mx-4">
+        <CardHeader className="text-center pb-2">
+          <h2 className="text-xl sm:text-2xl font-bold">Welcome Back</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Enter your credentials to access your account
           </p>
         </CardHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username" className="text-sm">Username</Label>
               <Input
                 id="username"
                 name="username"
                 type="text"
+                placeholder="Enter your username"
                 autoComplete="username"
                 required
                 disabled={isLoading}
+                className="h-10 sm:h-11"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                disabled={isLoading}
-              />
+              <Label htmlFor="password" className="text-sm">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  required
+                  disabled={isLoading}
+                  className="h-10 sm:h-11 pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide password" : "Show password"}
+                  </span>
+                </Button>
+              </div>
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col gap-4 pt-2">
             <SubmitButton
               isLoading={isLoading}
               buttonText="Sign In"
-              className="w-full"
+              className="w-full h-10 sm:h-11"
             />
+            <p className="text-xs text-muted-foreground text-center">
+              Demo: admin / admin123
+            </p>
           </CardFooter>
         </form>
       </Card>

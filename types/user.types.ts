@@ -1,13 +1,31 @@
-import { Race } from "./party.types"
+/**
+ * User Types
+ */
 
-export interface Users {
-  id: string,
-  userName: string,
-  permissions: Permission[],
-  races: Race[]
+export interface User {
+  id: number;
+  userName: string;
+  email?: string;
+  role?: string;
+  permissions?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface Permission {
-  id: string,
-  name: string
+// DTOs
+export interface CreateUserDto {
+  userName: string;
+  email?: string;
+  password: string;
+  role?: string;
 }
+
+export interface UpdateUserDto {
+  userName?: string;
+  email?: string;
+  password?: string;
+  role?: string;
+}
+
+// Legacy alias for backward compatibility
+export type Users = User;

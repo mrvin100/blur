@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useUsers } from "@/hooks/useUsers"
+import { useUser } from "@/hooks"
 import { 
   Dialog, 
   DialogContent, 
@@ -21,8 +21,7 @@ interface UserDetailsModalProps {
 }
 
 export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetailsModalProps) {
-  const { useUserById } = useUsers()
-  const { data: user, isLoading, isError, refetch } = useUserById(userId)
+  const { data: user, isLoading, isError, refetch } = useUser(userId)
 
   useEffect(() => {
     if (isOpen && userId) {
@@ -67,8 +66,8 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
                     {user.permissions && user.permissions.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {user.permissions.map((permission) => (
-                          <Badge key={permission.id} variant="secondary">
-                            {permission.name}
+                          <Badge key={permission} variant="secondary">
+                            {permission}
                           </Badge>
                         ))}
                       </div>
@@ -77,16 +76,10 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
                     )}
                   </div>
                   
-                  {user.races && (
-                    <div>
-                      <h3 className="text-sm font-medium mb-2">Races</h3>
-                      {user.races.length > 0 ? (
-                        <p className="text-sm">{user.races.length} races participated</p>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No race participation history</p>
-                      )}
-                    </div>
-                  )}
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Role</h3>
+                    <Badge variant="outline">{user.role || "USER"}</Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>

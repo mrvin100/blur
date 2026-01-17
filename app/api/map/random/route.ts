@@ -4,7 +4,7 @@ import axios from "axios";
 // Helper functions
 async function fetchRandomMap(raceId: string) {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cards/random/${raceId}`);
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cards/random/${raceId}`);
     return response.data.data;
   } catch (error) {
     console.error(error);

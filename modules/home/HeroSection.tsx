@@ -1,8 +1,5 @@
-'use client';
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -13,12 +10,7 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background" />
       </div>
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
-        <motion.div 
-          className="w-full max-w-[50rem] mx-auto text-center space-y-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="w-full max-w-[50rem] mx-auto text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <Badge 
             variant="outline" 
             className="inline-flex mx-auto bg-background/80 backdrop-blur-sm"
@@ -53,7 +45,7 @@ export function HeroSection() {
               <Link href="/about">Watch Trailer</Link>
             </Button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -34,7 +34,7 @@ export function DefaultRoutePreview({
   }
 }: DefaultRoutePreviewProps) {
   const { data: session } = useSession();
-  const isAdmin = session?.user?.permissions?.some((p) => p.name === "canCreateUsers");
+  const isAdmin = session?.user?.role === 'GREAT_ADMIN' || session?.user?.permissions?.includes('VIEW_ALL_USERS');
   
   const message = isAdmin ? adminMessage : userMessage;
 

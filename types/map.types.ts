@@ -1,6 +1,15 @@
+/**
+ * Map/Card Types
+ */
+
 export interface Map {
-  id: bigint,
-  location: string,
-  track: string,
-  imageUrl: string
+  id: number;
+  location: string;
+  track: string;
+  imageUrl: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
+
+// Alias for clarity
+export type Card = Map;

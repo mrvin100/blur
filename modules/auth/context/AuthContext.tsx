@@ -2,8 +2,6 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import type { Permission } from '@/types/auth';
-
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -11,7 +9,9 @@ interface AuthContextType {
   user: {
     id?: string;
     userName?: string;
-    permissions?: Permission[];
+    role?: string;
+    permissions?: string[];
+    accessToken?: string;
   } | null;
 }
 
@@ -31,9 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [status]);
 
   const isAuthenticated = !!session?.user;
-  const isAdmin = session?.user?.permissions?.some(
-    (p: Permission) => p.name === 'canCreateUsers'
-  ) ?? false;
+  const isAdmin = session?.user?.role === 'GREAT_ADMIN' || session?.user?.permissions?.includes('VIEW_ALL_USERS') || false;
 
   const value = {
     isAuthenticated,

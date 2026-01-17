@@ -1,31 +1,20 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Party } from "@/types/party.types";
-import axios from "axios";
+import { backendFetch } from '@/lib/backend';
 
-// Move helper functions outside of the module scope
 async function fetchAllParties(): Promise<Party[]> {
-  try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/parties`
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const res = await backendFetch('/api/v1/parties');
+  if (!res.ok) throw new Error('Failed to fetch parties');
+  const json = await res.json();
+  return json.data;
 }
 
 async function fetchPartyById(id: string): Promise<Party> {
-  try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/parties/get-party/${id}`
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const res = await backendFetch(`/api/v1/parties/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch party');
+  const json = await res.json();
+  return json.data;
 }
 
 // Export only the route handlers

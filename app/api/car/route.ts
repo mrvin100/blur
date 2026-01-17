@@ -4,7 +4,7 @@ import axios from "axios";
 // Helper functions
 async function fetchAllCars() {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cars`);
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cars`);
     return response.data.data;
   } catch (error) {
     console.error(error);

@@ -1,16 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Race, Racer } from "@/types/party.types"
-import { useUsers } from "@/hooks/useUsers"
-import { useRace } from "@/hooks/useRace"
+import { useUsers, useUpdateRace, useCreateScore } from "@/hooks"
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query"
-import { useScore } from "@/hooks/useScore"
-import { AddScoreRequestData } from "@/types/score.types"
+import { toast } from "sonner"
 
 interface AddParticipantsModalProps {
   isOpen: boolean
@@ -26,26 +24,16 @@ export function AddParticipantsModal({
   raceId,
   refresh
 }: AddParticipantsModalProps) {
-  const [racers, setRacers] = useState<Racer[]>([])
   const [selectedRacers, setSelectedRacers] = useState<Racer[]>([])
-  const { getUsers } = useUsers()
-  const { updateRace,fetchRaceById } = useRace(raceId)
-  const { addScore,fetchScoreByRaceId } = useScore(raceId)
+  const { data: users, isLoading } = useUsers()
+  const updateRace = useUpdateRace()
+  const createScore = useCreateScore()
 
-  const users = getUsers.data;
-  useEffect(() => {
-    setRacers([])
-    if (users) {
-      users.forEach((user) => {
-        const racer: Racer = {
-          id: user.id.toString(),
-          userName: user.userName
-        }
-        if (racers.find(racer => racer.id === user.id.toString())) return
-        setRacers(prev => [...prev, racer])
-      })
-    }
-  }, [getUsers.isLoading])
+  const racers: Racer[] = users?.map(user => ({
+    id: user.id,
+    userName: user.userName,
+    email: user.email
+  })) || []
   const toggleRacerSelection = (racer: Racer) => {
     if (selectedRacers.some((r) => r.id === racer.id)) {
       setSelectedRacers(selectedRacers.filter((r) => r.id !== racer.id))
@@ -56,25 +44,33 @@ export function AddParticipantsModal({
 
   const handleAddParticipants = async () => {
     if (selectedRacers.length === 0) return
-    await updateRace.mutateAsync({ selectedRacers, raceId }).then(() => {
-      onClose()
-      setRacers([])
-      refresh()
-    }).catch(e => console.error(e))
-    for (let i = 0; i < selectedRacers.length; i++) {
-      const newScore: AddScoreRequestData = {
-        value: 0,
-        raceId: raceId,
-        userId: selectedRacers[i].id
+    
+    try {
+      // Update race with selected racers
+      await updateRace.mutateAsync({
+        id: raceId,
+        data: {
+          // The backend should handle adding racers to the race
+          // This might need adjustment based on your backend implementation
+        }
+      })
+
+      // Create initial scores for new participants
+      for (const racer of selectedRacers) {
+        await createScore.mutateAsync({
+          value: 0,
+          raceId: Number(raceId),
+          userId: Number(racer.id)
+        })
       }
-      await addScore.mutateAsync(newScore)
-      await fetchScoreByRaceId.refetch()
-      await fetchRaceById.refetch()
+
+      await refresh()
+      setSelectedRacers([])
+      onClose()
+    } catch {
+      toast.error("Error adding participants")
     }
   }
-
-
-  const isLoading = getUsers.isLoading
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

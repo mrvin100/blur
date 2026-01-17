@@ -1,47 +1,27 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Race } from "@/types/party.types";
-import axios from "axios";
+import { backendFetch } from '@/lib/backend';
 
 async function fetchAllRaces(): Promise<Race[]> {
-  try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/races`
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const res = await backendFetch('/api/v1/races');
+  if (!res.ok) throw new Error('Failed to fetch races');
+  const json = await res.json();
+  return json.data;
 }
 
 async function fetchRaceById(id: string): Promise<Race> {
-  try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/races/get-by-id?raceId=${id}`
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const res = await backendFetch(`/api/v1/races/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch race');
+  const json = await res.json();
+  return json.data;
 }
 
 async function fetchRacesByPartyId(id: string): Promise<Race[]> {
-  try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/races/get-by-party-id`,
-      {
-        params: {
-          partyId: id.toString()
-        }
-      }
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const res = await backendFetch(`/api/v1/races/party/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch races by party');
+  const json = await res.json();
+  return json.data;
 }
 
 export async function GET(request: NextRequest) {
