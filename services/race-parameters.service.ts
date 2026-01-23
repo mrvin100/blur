@@ -12,9 +12,9 @@ import type {
 import type { ApiResponse } from '@/types/api.types';
 
 const RACE_PARAMS_ENDPOINTS = {
-  BASE: 'api/v1/raceParameters',
-  BY_ID: (id: number | string) => `api/v1/raceParameters/${id}`,
-  ACTIVE: 'api/v1/raceParameters/active',
+  BASE: 'raceParameters',
+  BY_ID: (id: number | string) => `raceParameters/${id}`,
+  ACTIVE: 'raceParameters/active',
 };
 
 export const raceParametersService = {

@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "@/lib/auth-client";
+import { authApiClient } from "@/lib/api-client";
+import { useAuthStore } from "@/lib/stores/auth.store";
 import { signInSchema, type SignInFormData } from "@/lib/schemas/auth.schema";
+import { backendAuthResponseSchema } from "@/lib/schemas/auth.schema";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -22,6 +24,7 @@ export function SignInForm({
 }: React.ComponentProps<"div">) {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const {
     register,
@@ -30,18 +33,45 @@ export function SignInForm({
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
 
   const onSubmit = async (data: SignInFormData) => {
     try {
-      // Call our custom login endpoint
-      await signIn.email({
-        email: data.email,
-        password: data.password,
-      });
+      // Call Spring Boot backend directly using centralized auth API client
+      const response = await authApiClient
+        .post("api/auth/login", {
+          json: {
+            userName: data.username,
+            password: data.password,
+          },
+        })
+        .json<unknown>();
+
+      // Validate response with Zod
+      const parseResult = backendAuthResponseSchema.safeParse(response);
+      if (!parseResult.success) {
+        console.error("Invalid backend response:", parseResult.error);
+        throw new Error("Invalid credentials");
+      }
+
+      const authResponse = parseResult.data;
+
+      // Map backend AuthResponse.user into frontend AuthUser shape
+      const authUser = {
+        id: authResponse.user.id.toString(),
+        name: authResponse.user.username,
+        email: authResponse.user.email ?? `${authResponse.user.username}@blurapp.com`,
+        image: null,
+        role: authResponse.user.role,
+        permissions: authResponse.user.permissions ?? [],
+        accessToken: authResponse.token,
+        refreshToken: authResponse.refreshToken,
+      };
+
+      setUser(authUser);
 
       toast.success("Successfully signed in!");
       router.push("/dashboard");
@@ -74,17 +104,17 @@ export function SignInForm({
                 </p>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  {...register("email")}
+                  id="username"
+                  type="text"
+                  placeholder="johndoe"
+                  {...register("username")}
                   disabled={isSubmitting}
                 />
-                {errors.email && (
+                {errors.username && (
                   <p className="text-sm text-destructive">
-                    {errors.email.message}
+                    {errors.username.message}
                   </p>
                 )}
               </div>

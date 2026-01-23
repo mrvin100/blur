@@ -8,12 +8,12 @@ import type { Race, CreateRaceDto, UpdateRaceDto } from '@/types/party.types';
 import type { ApiResponse } from '@/types/api.types';
 
 const RACE_ENDPOINTS = {
-  BASE: 'api/v1/races',
-  BY_ID: (id: number | string) => `api/v1/races/${id}`,
-  BY_PARTY: (partyId: number | string) => `api/v1/races/party/${partyId}`,
-  START: (id: number | string) => `api/v1/races/${id}/start`,
-  COMPLETE: (id: number | string) => `api/v1/races/${id}/complete`,
-  CURRENT: (partyId: number | string) => `api/v1/races/party/${partyId}/current`,
+  BASE: 'races',
+  BY_ID: (id: number | string) => `races/${id}`,
+  BY_PARTY: (partyId: number | string) => `races/party/${partyId}`,
+  START: (id: number | string) => `races/${id}/start`,
+  COMPLETE: (id: number | string) => `races/${id}/complete`,
+  CURRENT: (partyId: number | string) => `races/party/${partyId}/current`,
 };
 
 export const raceService = {

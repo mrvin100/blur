@@ -8,11 +8,11 @@ import type { Party, CreatePartyDto, UpdatePartyDto } from '@/types/party.types'
 import type { ApiResponse } from '@/types/api.types';
 
 const PARTY_ENDPOINTS = {
-  BASE: 'api/v1/parties',
-  BY_ID: (id: number | string) => `api/v1/parties/${id}`,
-  ADD_PARTICIPANTS: (id: number | string) => `api/v1/parties/${id}/participants`,
+  BASE: 'parties',
+  BY_ID: (id: number | string) => `parties/${id}`,
+  ADD_PARTICIPANTS: (id: number | string) => `parties/${id}/participants`,
   REMOVE_PARTICIPANT: (partyId: number | string, userId: number | string) => 
-    `api/v1/parties/${partyId}/participants/${userId}`,
+    `parties/${partyId}/participants/${userId}`,
 };
 
 export const partyService = {

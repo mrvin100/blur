@@ -8,10 +8,10 @@ import type { Car, CarAttribution } from '@/types/car.types';
 import type { ApiResponse } from '@/types/api.types';
 
 const CAR_ENDPOINTS = {
-  BASE: 'api/v1/cars',
-  BY_ID: (id: number | string) => `api/v1/cars/${id}`,
-  GLOBAL_ATTRIBUTION: (raceId: number | string) => `api/v1/cars/global-attribution/${raceId}`,
-  INDIVIDUAL_ATTRIBUTION: (raceId: number | string) => `api/v1/cars/individual-attribution/${raceId}`,
+  BASE: 'cars',
+  BY_ID: (id: number | string) => `cars/${id}`,
+  GLOBAL_ATTRIBUTION: (raceId: number | string) => `cars/global-attribution/${raceId}`,
+  INDIVIDUAL_ATTRIBUTION: (raceId: number | string) => `cars/individual-attribution/${raceId}`,
 };
 
 export const carService = {

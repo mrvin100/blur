@@ -8,8 +8,8 @@ import type { User, CreateUserDto, UpdateUserDto } from '@/types/user.types';
 import type { ApiResponse } from '@/types/api.types';
 
 const USER_ENDPOINTS = {
-  BASE: 'api/v1/users',
-  BY_ID: (id: number | string) => `api/v1/users/${id}`,
+  BASE: 'users',
+  BY_ID: (id: number | string) => `users/${id}`,
 };
 
 export const userService = {

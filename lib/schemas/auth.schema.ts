@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-// Sign In Schema (email + password for Better Auth)
+// Sign In Schema (username + password, aligned with backend UserSignInDto)
 export const signInSchema = z.object({
-  email: z
+  username: z
     .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
+    .min(1, "Username is required")
+    .min(3, "Username must be at least 3 characters"),
   password: z
     .string()
     .min(1, "Password is required")

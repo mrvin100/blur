@@ -8,10 +8,10 @@ import type { Score, CreateScoreDto, UpdateScoreDto } from '@/types/score.types'
 import type { ApiResponse } from '@/types/api.types';
 
 const SCORE_ENDPOINTS = {
-  BASE: 'api/v1/scores',
-  BY_ID: (id: number | string) => `api/v1/scores/${id}`,
-  BY_RACE: (raceId: number | string) => `api/v1/scores/race/${raceId}`,
-  BY_USER: (userId: number | string) => `api/v1/scores/user/${userId}`,
+  BASE: 'scores',
+  BY_ID: (id: number | string) => `scores/${id}`,
+  BY_RACE: (raceId: number | string) => `scores/race/${raceId}`,
+  BY_USER: (userId: number | string) => `scores/user/${userId}`,
 };
 
 export const scoreService = {

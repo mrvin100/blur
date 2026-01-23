@@ -8,9 +8,9 @@ import type { Map } from '@/types/map.types';
 import type { ApiResponse } from '@/types/api.types';
 
 const MAP_ENDPOINTS = {
-  BASE: 'api/v1/cards',
-  BY_ID: (id: number | string) => `api/v1/cards/${id}`,
-  RANDOM: (raceId: number | string) => `api/v1/cards/random/${raceId}`,
+  BASE: 'cards',
+  BY_ID: (id: number | string) => `cards/${id}`,
+  RANDOM: (raceId: number | string) => `cards/random/${raceId}`,
 };
 
 export const mapService = {
