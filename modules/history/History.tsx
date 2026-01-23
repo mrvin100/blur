@@ -6,17 +6,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Trophy, Calendar, Users, Flag, User, Settings, Medal } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ApiErrorState } from "@/components/ui/error-states"
 import type { Party, Race, Racer } from "@/types/party.types"
 
 export function History() {
-  const { data: parties, isLoading, isError, error } = useParties()
+  const { data: parties, isLoading, isError, error, refetch } = useParties()
 
   if (isLoading) {
     return <HistorySkeleton />
   }
 
   if (isError) {
-    return <div className="text-red-500">Error loading parties: {error?.toString()}</div>
+    return (
+      <div className="flex items-center justify-center py-8">
+        <ApiErrorState 
+          error={error} 
+          onRetry={() => refetch()} 
+          showHomeButton={true}
+        />
+      </div>
+    )
   }
 
   return (

@@ -3,10 +3,8 @@
 import dynamic from "next/dynamic";
 import {
   PageLoader,
-  DashboardSkeleton,
   PartyDashboardSkeleton,
   TableSkeleton,
-  ProfileSkeleton,
 } from "@/components/ui/page-loader";
 
 /**
