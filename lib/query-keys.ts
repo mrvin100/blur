@@ -11,11 +11,19 @@ export const authKeys = {
   user: () => [...authKeys.all, 'user'] as const,
 };
 
+/**
+ * Query Keys Factory
+ * Provides type-safe query keys for React Query
+ */
+
+// Filter type for query keys
+type QueryFilter = Record<string, unknown>;
+
 // User Keys
 export const userKeys = {
   all: ['users'] as const,
   lists: () => [...userKeys.all, 'list'] as const,
-  list: (filters?: Record<string, any>) => [...userKeys.lists(), { filters }] as const,
+  list: (filters?: QueryFilter) => [...userKeys.lists(), filters ? { filters } : {}] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: number | string) => [...userKeys.details(), id] as const,
 };
@@ -24,7 +32,7 @@ export const userKeys = {
 export const partyKeys = {
   all: ['parties'] as const,
   lists: () => [...partyKeys.all, 'list'] as const,
-  list: (filters?: Record<string, any>) => [...partyKeys.lists(), { filters }] as const,
+  list: (filters?: QueryFilter) => [...partyKeys.lists(), filters ? { filters } : {}] as const,
   details: () => [...partyKeys.all, 'detail'] as const,
   detail: (id: number | string) => [...partyKeys.details(), id] as const,
   participants: (partyId: number | string) => [...partyKeys.detail(partyId), 'participants'] as const,
@@ -34,7 +42,7 @@ export const partyKeys = {
 export const raceKeys = {
   all: ['races'] as const,
   lists: () => [...raceKeys.all, 'list'] as const,
-  list: (filters?: Record<string, any>) => [...raceKeys.lists(), { filters }] as const,
+  list: (filters?: QueryFilter) => [...raceKeys.lists(), filters ? { filters } : {}] as const,
   details: () => [...raceKeys.all, 'detail'] as const,
   detail: (id: number | string) => [...raceKeys.details(), id] as const,
   byParty: (partyId: number | string) => [...raceKeys.all, 'party', partyId] as const,
@@ -45,7 +53,7 @@ export const raceKeys = {
 export const scoreKeys = {
   all: ['scores'] as const,
   lists: () => [...scoreKeys.all, 'list'] as const,
-  list: (filters?: Record<string, any>) => [...scoreKeys.lists(), { filters }] as const,
+  list: (filters?: QueryFilter) => [...scoreKeys.lists(), filters ? { filters } : {}] as const,
   details: () => [...scoreKeys.all, 'detail'] as const,
   detail: (id: number | string) => [...scoreKeys.details(), id] as const,
   byRace: (raceId: number | string) => [...scoreKeys.all, 'race', raceId] as const,
@@ -56,14 +64,14 @@ export const scoreKeys = {
 export const carKeys = {
   all: ['cars'] as const,
   lists: () => [...carKeys.all, 'list'] as const,
-  list: (filters?: Record<string, any>) => [...carKeys.lists(), { filters }] as const,
+  list: (filters?: QueryFilter) => [...carKeys.lists(), filters ? { filters } : {}] as const,
   details: () => [...carKeys.all, 'detail'] as const,
   detail: (id: number | string) => [...carKeys.details(), id] as const,
   attribution: {
     all: () => [...carKeys.all, 'attribution'] as const,
     global: (raceId: number | string) => [...carKeys.attribution.all(), 'global', raceId] as const,
     individual: (raceId: number | string, carIds?: string[]) => 
-      [...carKeys.attribution.all(), 'individual', raceId, { carIds }] as const,
+      [...carKeys.attribution.all(), 'individual', raceId, carIds ? { carIds } : {}] as const,
   },
 };
 
@@ -71,7 +79,7 @@ export const carKeys = {
 export const mapKeys = {
   all: ['maps'] as const,
   lists: () => [...mapKeys.all, 'list'] as const,
-  list: (filters?: Record<string, any>) => [...mapKeys.lists(), { filters }] as const,
+  list: (filters?: QueryFilter) => [...mapKeys.lists(), filters ? { filters } : {}] as const,
   details: () => [...mapKeys.all, 'detail'] as const,
   detail: (id: number | string) => [...mapKeys.details(), id] as const,
   random: (raceId: number | string) => [...mapKeys.all, 'random', raceId] as const,
@@ -81,7 +89,7 @@ export const mapKeys = {
 export const raceParametersKeys = {
   all: ['raceParameters'] as const,
   lists: () => [...raceParametersKeys.all, 'list'] as const,
-  list: (filters?: Record<string, any>) => [...raceParametersKeys.lists(), { filters }] as const,
+  list: (filters?: QueryFilter) => [...raceParametersKeys.lists(), filters ? { filters } : {}] as const,
   active: () => [...raceParametersKeys.all, 'active'] as const,
 };
 

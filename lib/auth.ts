@@ -1,35 +1,43 @@
-import axios from 'axios';
-interface AuthResponse {
-  success: boolean;
-  message?: string;
-  token: string;
-  refreshToken?: string;
-  tokenType?: string;
-  expiresIn?: number;
+import { betterAuth } from "better-auth";
+
+// Re-export AuthUser from schemas for convenience
+export type { AuthUser } from "@/lib/schemas/auth.schema";
+
+export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  secret: process.env.BETTER_AUTH_SECRET,
+  
+  // Use JWT sessions without database
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
+
+  // Disable database
+  database: false,
+
+  // Custom user fields
   user: {
-    id: number;
-    username: string;
-    email?: string;
-    role?: string;
-    permissions?: string[];
-  };
-  timestamp?: string;
-}
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+      },
+      permissions: {
+        type: "string[]",
+        required: false,
+      },
+      accessToken: {
+        type: "string",
+        required: false,
+      },
+      refreshToken: {
+        type: "string",
+        required: false,
+      },
+    },
+  },
+});
 
-/**
- * Sign in a user with username and password
- */
-export async function signIn(username: string, password: string): Promise<AuthResponse> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
-    const response = await axios.post(
-      `${baseUrl}/api/auth/login`,
-      { userName: username, password }
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error('Sign in error:', error);
-    throw error;
-  }
-} 
+export type Session = typeof auth.$Infer.Session;

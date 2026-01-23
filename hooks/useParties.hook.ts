@@ -6,14 +6,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { partyService } from '@/services';
 import { queryKeys } from '@/lib/query-keys';
-import { Party, CreatePartyDto, UpdatePartyDto } from '@/types';
+import type { Party, CreatePartyDto, UpdatePartyDto } from '@/types/party.types';
 import { toast } from 'sonner';
 
 /**
  * Get all parties
  */
 export const useParties = () => {
-  return useQuery({
+  return useQuery<Party[], Error>({
     queryKey: queryKeys.parties.lists(),
     queryFn: partyService.getAll,
   });
@@ -23,7 +23,7 @@ export const useParties = () => {
  * Get party by ID
  */
 export const useParty = (id: number | string) => {
-  return useQuery({
+  return useQuery<Party, Error>({
     queryKey: queryKeys.parties.detail(id),
     queryFn: () => partyService.getById(id),
     enabled: !!id,

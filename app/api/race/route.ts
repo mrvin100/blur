@@ -58,16 +58,30 @@ export async function PUT(request: Request) {
 
     if (!raceId) return NextResponse.json({ error: 'Race ID is required' }, { status: 400 });
 
-    const payload = await request.json();
+    interface Racer {
+      id: string | number;
+      userName?: string;
+    }
+    
+    interface RaceData {
+      racers?: Array<{ id: string | number }>;
+      participants?: Array<{ id: string | number }>;
+    }
+    
+    interface RaceResponse {
+      data?: RaceData;
+    }
+
+    const payload = await request.json() as Racer[];
     // payload is Racer[] with {id, userName}? We'll only use ids.
-    const selectedIds: string[] = Array.isArray(payload) ? payload.map((r: any) => String(r.id)) : [];
+    const selectedIds: string[] = Array.isArray(payload) ? payload.map((r) => String(r.id)) : [];
 
     // Get current race to diff participants
     const currentRes = await backendFetch(`/api/v1/races/${raceId}`);
-    const currentJson = await currentRes.json();
+    const currentJson = await currentRes.json() as RaceResponse;
     const current = currentJson.data;
 
-    const currentIds: string[] = (current?.racers ?? current?.participants ?? []).map((u: any) => String(u.id));
+    const currentIds: string[] = (current?.racers ?? current?.participants ?? []).map((u) => String(u.id));
 
     const toAdd = selectedIds.filter(id => !currentIds.includes(id));
     const toRemove = currentIds.filter(id => !selectedIds.includes(id));

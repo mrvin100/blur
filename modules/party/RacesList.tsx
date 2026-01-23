@@ -27,7 +27,7 @@ export function RacesList({ races, onRaceSelect }: RacesListProps) {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h3 className="font-medium text-lg">Course #{race.id.toString()}</h3>
-                {race.party.datePlayed && (
+                {race.party?.datePlayed && (
                   <p className="text-sm text-muted-foreground">{formatDate(race.party.datePlayed)}</p>
                 )}
                 <div className="mt-2 space-y-1">
@@ -43,7 +43,7 @@ export function RacesList({ races, onRaceSelect }: RacesListProps) {
                   )}
                 </div>
               </div>
-              <Button variant="outline" onClick={() => onRaceSelect(race.id)}>
+              <Button variant="outline" onClick={() => onRaceSelect(race.id.toString())}>
                 Voir détails
               </Button>
             </div>

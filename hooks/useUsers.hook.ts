@@ -6,7 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService } from '@/services';
 import { queryKeys } from '@/lib/query-keys';
-import { CreateUserDto, UpdateUserDto } from '@/types';
+import type { User, CreateUserDto, UpdateUserDto } from '@/types/user.types';
 import { toast } from 'sonner';
 
 /**
@@ -14,7 +14,7 @@ import { toast } from 'sonner';
  * @param enabled - Optional flag to enable/disable the query (default: true)
  */
 export const useUsers = (enabled: boolean = true) => {
-  return useQuery({
+  return useQuery<User[], Error>({
     queryKey: queryKeys.users.lists(),
     queryFn: userService.getAll,
     enabled,
@@ -25,7 +25,7 @@ export const useUsers = (enabled: boolean = true) => {
  * Get user by ID
  */
 export const useUser = (id: number | string) => {
-  return useQuery({
+  return useQuery<User, Error>({
     queryKey: queryKeys.users.detail(id),
     queryFn: () => userService.getById(id),
     enabled: !!id,
@@ -44,8 +44,8 @@ export const useCreateUser = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
       toast.success('User created successfully');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to create user');
+    onError: (error: Error) => {
+      toast.error((error as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to create user');
     },
   });
 };
@@ -64,8 +64,8 @@ export const useUpdateUser = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) });
       toast.success('User updated successfully');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update user');
+    onError: (error: Error) => {
+      toast.error((error as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to update user');
     },
   });
 };
@@ -82,8 +82,8 @@ export const useDeleteUser = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
       toast.success('User deleted successfully');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete user');
+    onError: (error: Error) => {
+      toast.error((error as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to delete user');
     },
   });
 };

@@ -1,8 +1,7 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
+import type { AuthUser } from "@/lib/auth";
 import { Shield, AlertCircle, Users, Lock, ShieldAlert, Loader2 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -10,18 +9,11 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 export default function PermissionsPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  
-  const isAdmin = session?.user?.permissions?.some((p) => p === "VIEW_ALL_USERS");
+  const { data: session, isPending } = useSession();
+  const user = session?.user as AuthUser | null;
+  const isAdmin = user?.permissions?.some((p) => p === "VIEW_ALL_USERS");
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/sign-in");
-    }
-  }, [status, router]);
-
-  if (status === "loading") {
+  if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -32,7 +24,7 @@ export default function PermissionsPage() {
 
   if (!isAdmin) {
     return (
-      <div className="w-full">
+      <div className="p-4 md:p-6">
         <Card className="text-center">
           <CardHeader>
             <div className="mx-auto mb-4 p-3 rounded-full bg-destructive/10 w-fit">
@@ -54,7 +46,7 @@ export default function PermissionsPage() {
   }
 
   return (
-    <div className="w-full">
+    <div className="p-4 md:p-6">
       <div className="space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -155,5 +147,5 @@ export default function PermissionsPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

@@ -1,17 +1,17 @@
 import { Metadata } from "next";
-import { SignInForm } from "@/modules/auth/sign-in";
+import { SignUpForm } from "@/modules/auth/sign-up";
 
 export const metadata: Metadata = {
-  title: "Sign In | Blur App",
-  description: "Sign in to your Blur App account",
+  title: "Sign Up | Blur App",
+  description: "Create your Blur App account",
 };
 
-export default function SignInPage() {
+export default function SignUpPage() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-3xl">
-        <SignInForm />
+        <SignUpForm />
       </div>
     </div>
   );
-} 
+}

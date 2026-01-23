@@ -3,12 +3,13 @@
  * Handles all user-related API calls
  */
 
-import apiClient from '@/lib/api-client';
-import { User, CreateUserDto, UpdateUserDto, ApiResponse } from '@/types';
+import { apiClient } from '@/lib/api-client';
+import type { User, CreateUserDto, UpdateUserDto } from '@/types/user.types';
+import type { ApiResponse } from '@/types/api.types';
 
 const USER_ENDPOINTS = {
-  BASE: '/api/v1/users',
-  BY_ID: (id: number | string) => `/api/v1/users/${id}`,
+  BASE: 'api/v1/users',
+  BY_ID: (id: number | string) => `api/v1/users/${id}`,
 };
 
 export const userService = {
@@ -16,32 +17,32 @@ export const userService = {
    * Get all users
    */
   getAll: async (): Promise<User[]> => {
-    const response = await apiClient.get<ApiResponse<User[]>>(USER_ENDPOINTS.BASE);
-    return response.data.data;
+    const response = await apiClient.get(USER_ENDPOINTS.BASE).json<ApiResponse<User[]>>();
+    return response.data;
   },
 
   /**
    * Get user by ID
    */
   getById: async (id: number | string): Promise<User> => {
-    const response = await apiClient.get<ApiResponse<User>>(USER_ENDPOINTS.BY_ID(id));
-    return response.data.data;
+    const response = await apiClient.get(USER_ENDPOINTS.BY_ID(id)).json<ApiResponse<User>>();
+    return response.data;
   },
 
   /**
    * Create new user
    */
   create: async (data: CreateUserDto): Promise<User> => {
-    const response = await apiClient.post<ApiResponse<User>>(USER_ENDPOINTS.BASE, data);
-    return response.data.data;
+    const response = await apiClient.post(USER_ENDPOINTS.BASE, { json: data }).json<ApiResponse<User>>();
+    return response.data;
   },
 
   /**
    * Update user
    */
   update: async (id: number | string, data: UpdateUserDto): Promise<User> => {
-    const response = await apiClient.put<ApiResponse<User>>(USER_ENDPOINTS.BY_ID(id), data);
-    return response.data.data;
+    const response = await apiClient.put(USER_ENDPOINTS.BY_ID(id), { json: data }).json<ApiResponse<User>>();
+    return response.data;
   },
 
   /**

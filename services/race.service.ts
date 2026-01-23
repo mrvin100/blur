@@ -4,15 +4,16 @@
  */
 
 import apiClient from '@/lib/api-client';
-import { Race, CreateRaceDto, UpdateRaceDto, ApiResponse } from '@/types';
+import type { Race, CreateRaceDto, UpdateRaceDto } from '@/types/party.types';
+import type { ApiResponse } from '@/types/api.types';
 
 const RACE_ENDPOINTS = {
-  BASE: '/api/v1/races',
-  BY_ID: (id: number | string) => `/api/v1/races/${id}`,
-  BY_PARTY: (partyId: number | string) => `/api/v1/races/party/${partyId}`,
-  START: (id: number | string) => `/api/v1/races/${id}/start`,
-  COMPLETE: (id: number | string) => `/api/v1/races/${id}/complete`,
-  CURRENT: (partyId: number | string) => `/api/v1/races/party/${partyId}/current`,
+  BASE: 'api/v1/races',
+  BY_ID: (id: number | string) => `api/v1/races/${id}`,
+  BY_PARTY: (partyId: number | string) => `api/v1/races/party/${partyId}`,
+  START: (id: number | string) => `api/v1/races/${id}/start`,
+  COMPLETE: (id: number | string) => `api/v1/races/${id}/complete`,
+  CURRENT: (partyId: number | string) => `api/v1/races/party/${partyId}/current`,
 };
 
 export const raceService = {
@@ -20,24 +21,30 @@ export const raceService = {
    * Get all races
    */
   getAll: async (): Promise<Race[]> => {
-    const response = await apiClient.get<ApiResponse<Race[]>>(RACE_ENDPOINTS.BASE);
-    return response.data.data;
+    const response = await apiClient
+      .get(RACE_ENDPOINTS.BASE)
+      .json<ApiResponse<Race[]>>();
+    return response.data;
   },
 
   /**
    * Get race by ID
    */
   getById: async (id: number | string): Promise<Race> => {
-    const response = await apiClient.get<ApiResponse<Race>>(RACE_ENDPOINTS.BY_ID(id));
-    return response.data.data;
+    const response = await apiClient
+      .get(RACE_ENDPOINTS.BY_ID(id))
+      .json<ApiResponse<Race>>();
+    return response.data;
   },
 
   /**
    * Get races by party ID
    */
   getByPartyId: async (partyId: number | string): Promise<Race[]> => {
-    const response = await apiClient.get<ApiResponse<Race[]>>(RACE_ENDPOINTS.BY_PARTY(partyId));
-    return response.data.data;
+    const response = await apiClient
+      .get(RACE_ENDPOINTS.BY_PARTY(partyId))
+      .json<ApiResponse<Race[]>>();
+    return response.data;
   },
 
   /**
@@ -45,8 +52,10 @@ export const raceService = {
    */
   getCurrentRace: async (partyId: number | string): Promise<Race | null> => {
     try {
-      const response = await apiClient.get<ApiResponse<Race>>(RACE_ENDPOINTS.CURRENT(partyId));
-      return response.data.data;
+      const response = await apiClient
+        .get(RACE_ENDPOINTS.CURRENT(partyId))
+        .json<ApiResponse<Race>>();
+      return response.data;
     } catch (error: any) {
       // Return null if no current race exists (404)
       if (error.response?.status === 404) {
@@ -60,32 +69,40 @@ export const raceService = {
    * Create new race
    */
   create: async (data: CreateRaceDto): Promise<Race> => {
-    const response = await apiClient.post<ApiResponse<Race>>(RACE_ENDPOINTS.BASE, data);
-    return response.data.data;
+    const response = await apiClient
+      .post(RACE_ENDPOINTS.BASE, { json: data })
+      .json<ApiResponse<Race>>();
+    return response.data;
   },
 
   /**
    * Update race
    */
   update: async (id: number | string, data: UpdateRaceDto): Promise<Race> => {
-    const response = await apiClient.put<ApiResponse<Race>>(RACE_ENDPOINTS.BY_ID(id), data);
-    return response.data.data;
+    const response = await apiClient
+      .put(RACE_ENDPOINTS.BY_ID(id), { json: data })
+      .json<ApiResponse<Race>>();
+    return response.data;
   },
 
   /**
    * Start a race
    */
   start: async (id: number | string): Promise<Race> => {
-    const response = await apiClient.post<ApiResponse<Race>>(RACE_ENDPOINTS.START(id));
-    return response.data.data;
+    const response = await apiClient
+      .post(RACE_ENDPOINTS.START(id))
+      .json<ApiResponse<Race>>();
+    return response.data;
   },
 
   /**
    * Complete a race
    */
   complete: async (id: number | string): Promise<Race> => {
-    const response = await apiClient.post<ApiResponse<Race>>(RACE_ENDPOINTS.COMPLETE(id));
-    return response.data.data;
+    const response = await apiClient
+      .post(RACE_ENDPOINTS.COMPLETE(id))
+      .json<ApiResponse<Race>>();
+    return response.data;
   },
 
   /**

@@ -6,7 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { scoreService } from '@/services';
 import { queryKeys } from '@/lib/query-keys';
-import { Score, CreateScoreDto, UpdateScoreDto } from '@/types';
+import type { Score, CreateScoreDto, UpdateScoreDto } from '@/types/score.types';
 import { toast } from 'sonner';
 
 /**

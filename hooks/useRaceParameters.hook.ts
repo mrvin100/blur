@@ -6,7 +6,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { raceParametersService } from '@/services';
 import { queryKeys } from '@/lib/query-keys';
-import { RaceParameter, CreateRaceParameterDto, UpdateRaceParameterDto } from '@/types';
+import type {
+  RaceParameter,
+  CreateRaceParameterDto,
+  UpdateRaceParameterDto,
+} from '@/types/raceParameters.types';
 import { toast } from 'sonner';
 
 /**

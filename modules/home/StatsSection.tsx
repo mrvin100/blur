@@ -1,5 +1,5 @@
 import { Car, Timer, Trophy, Users } from "lucide-react";
-import { Stat } from '@/types';
+import type { Stat } from '@/types/home.types';
 
 const stats: Stat[] = [
   {

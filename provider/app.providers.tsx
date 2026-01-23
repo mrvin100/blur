@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/modules/auth/context/AuthContext";
@@ -31,26 +30,24 @@ export function AppProviders({ children }: AppProvidersProps) {
   );
 
   return (
-    <SessionProvider refetchInterval={5 * 60}>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-            storageKey="theme-preference"
-          >
-            <Toaster
-              position="top-right"
-              theme="system"
-              closeButton
-              richColors
-            />
-            {children}
-          </ThemeProvider>
-        </QueryClientProvider>
-      </AuthProvider>
-    </SessionProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          storageKey="theme-preference"
+        >
+          <Toaster
+            position="top-right"
+            theme="system"
+            closeButton
+            richColors
+          />
+          {children}
+        </ThemeProvider>
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Race, Racer } from "@/types/party.types"
+import type { User } from "@/types/user.types"
 import { useUsers, useUpdateRace, useCreateScore } from "@/hooks"
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -15,7 +16,7 @@ interface AddParticipantsModalProps {
   onClose: () => void
   raceId: string
   onParticipantsAdded: () => void
-  refresh: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<Race, Error>>
+  refresh: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<unknown, Error>>
 }
 
 export function AddParticipantsModal({
@@ -29,7 +30,7 @@ export function AddParticipantsModal({
   const updateRace = useUpdateRace()
   const createScore = useCreateScore()
 
-  const racers: Racer[] = users?.map(user => ({
+  const racers: Racer[] = (users as User[] | undefined)?.map((user) => ({
     id: user.id,
     userName: user.userName,
     email: user.email

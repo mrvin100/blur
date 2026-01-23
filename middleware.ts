@@ -1,41 +1,23 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 
 const publicPaths = ['/', '/sign-in', '/sign-up'];
 
 export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
 
+  // Get session from Better Auth cookie
+  const sessionCookie = request.cookies.get('better-auth.session_token')?.value;
+  const hasSession = !!sessionCookie;
+
   // If the path is public and user is authenticated, redirect to dashboard
-  if (publicPaths.includes(pathname) && token) {
+  if (publicPaths.includes(pathname) && hasSession) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   // If the path is protected and user is not authenticated, redirect to sign-in
-  if (!publicPaths.includes(pathname) && !token) {
+  if (!publicPaths.includes(pathname) && !hasSession) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
-  }
-
-  // Handle dashboard routes
-  if (pathname.startsWith('/dashboard')) {
-    const isAdmin = token?.user?.role === 'GREAT_ADMIN' || token?.user?.permissions?.includes('VIEW_ALL_USERS');
-    
-    // Skip protection for the test page
-    if (pathname.startsWith('/dashboard/users')) {
-      return NextResponse.next();
-    }
-    
-    // If user tries to access admin-specific routes without admin permissions
-    if ((pathname.startsWith('/dashboard/admin')) && !isAdmin) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-    
-    // If admin tries to access user-specific routes
-    if (pathname.startsWith('/dashboard/user') && isAdmin) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
   }
 
   return NextResponse.next();

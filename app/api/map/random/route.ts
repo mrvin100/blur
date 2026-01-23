@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import axios from "axios";
+import ky from "ky";
 
 // Helper functions
 async function fetchRandomMap(raceId: string) {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cards/random/${raceId}`);
-    return response.data.data;
+    const response = await ky.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cards/random/${raceId}`).json<{ data: unknown }>();
+    return response.data;
   } catch (error) {
     console.error(error);
     throw error;

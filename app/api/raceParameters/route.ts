@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { RaceParameter } from "@/types/raceParameters.types";
-import axios from "axios"
+import ky from "ky"
 
 // Helper function
 async function fetchAllRaceParameters(): Promise<RaceParameter[]> {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/raceParameters`);
-    return response.data.data;
+    const response = await ky.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/raceParameters`).json<{ data: RaceParameter[] }>();
+    return response.data;
   } catch (error) {
     console.error(error);
     throw error;

@@ -122,14 +122,14 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
               </div>
             ) : race && hasIndividualAttributions ? (
               <div className="space-y-4">
-                {race.attributions?.map((car) => (
-                  <div key={`${car.id} ${car.imageUrl}`} className="flex items-center space-x-4 border-b pb-4 last:border-0">
+                {race.attributions?.map((attribution) => (
+                  <div key={`${attribution.id}-${attribution.car?.id || 'no-car'}`} className="flex items-center space-x-4 border-b pb-4 last:border-0">
                     <div className="relative h-16 w-24 overflow-hidden rounded-md flex-shrink-0 shadow-sm">
-                      <Image src={car.car?.imageUrl || "/placeholder.svg"} alt={car.car?.name || "Car"} fill className="object-cover" />
+                      <Image src={attribution.car?.imageUrl || "/placeholder.svg"} alt={attribution.car?.name || "Car"} fill className="object-cover" />
                     </div>
                     <div>
-                      <h4 className="font-medium">{car.user?.userName}</h4>
-                      <p className="text-sm text-muted-foreground">{car.car?.name}</p>
+                      <h4 className="font-medium">{attribution.user?.userName}</h4>
+                      <p className="text-sm text-muted-foreground">{attribution.car?.name}</p>
                     </div>
                   </div>
                 ))}

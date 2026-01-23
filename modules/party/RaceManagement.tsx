@@ -28,9 +28,11 @@ export function RaceManagement() {
 
   function getMostRecentRace(races: Race[]): Race | null {
     if (races.length === 0) return null;
-    const sorted = [...races].sort((a, b) =>
-      b.createdAt.localeCompare(a.createdAt)
-    );
+    const sorted = [...races].sort((a, b) => {
+      const aTime = a.createdAt || '';
+      const bTime = b.createdAt || '';
+      return bTime.localeCompare(aTime);
+    });
     return sorted[0];
   }
 

@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import axios from "axios";
+import ky from "ky";
 
 // Helper functions
 async function fetchGlobalAttribution(raceId: string) {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cars/global-attribution/${raceId}`);
-    return response.data.data;
+    const response = await ky.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cars/global-attribution/${raceId}`).json<{ data: unknown }>();
+    return response.data;
   } catch (error) {
     console.error(error);
     throw error;
@@ -14,11 +14,11 @@ async function fetchGlobalAttribution(raceId: string) {
 
 async function fetchIndividualAttribution(carIds: string[], raceId: string) {
   try {
-    const response = await axios.post(
+    const response = await ky.post(
       `${process.env.NEXT_PUBLIC_API_URL}/api/v1/cars/individual-attribution/${raceId}`,
-      carIds
-    );
-    return response.data.data;
+      { json: carIds }
+    ).json<{ data: unknown }>();
+    return response.data;
   } catch (error) {
     console.error(error);
     throw error;

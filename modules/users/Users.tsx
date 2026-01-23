@@ -50,7 +50,7 @@ import { toast } from "sonner"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { User } from "@/types/auth"
+import type { User } from "@/types/user.types"
 import UserDetailsModal from "./UserDetailsModal"
 
 const createUserSchema = z.object({

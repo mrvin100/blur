@@ -158,7 +158,7 @@ function RaceItem({ race }: Readonly<{ race: Race }>) {
     race.scores.forEach((score) => {
       if (score.value > highestScore) {
         highestScore = score.value
-        winningRacer = score.user
+        winningRacer = score.user ?? null
       }
     })
 
@@ -250,7 +250,7 @@ function RaceItem({ race }: Readonly<{ race: Race }>) {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                 {race.racers.map((racer) => {
-                  const racerScore = race.scores?.find((score) => score.user.id === racer.id)?.value
+                  const racerScore = race.scores?.find((score) => score.user?.id === racer.id)?.value
                   return (
                     <div
                       key={racer.id.toString()}
@@ -283,6 +283,8 @@ function calculatePartyScores(races: Race[]) {
   races.forEach((race) => {
     if (race.scores && race.scores.length > 0) {
       race.scores.forEach((score) => {
+        if (!score.user) return;
+        
         const racerId = score.user.id.toString()
         const currentPlayerData = playerScoresMap.get(racerId)
 

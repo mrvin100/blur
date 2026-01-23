@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { useUser } from "@/hooks"
+import type { User } from "@/types/user.types"
 import { 
   Dialog, 
   DialogContent, 
@@ -21,7 +22,8 @@ interface UserDetailsModalProps {
 }
 
 export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetailsModalProps) {
-  const { data: user, isLoading, isError, refetch } = useUser(userId)
+  const { data: userData, isLoading, isError, refetch } = useUser(userId)
+  const user = userData as User | undefined
 
   useEffect(() => {
     if (isOpen && userId) {

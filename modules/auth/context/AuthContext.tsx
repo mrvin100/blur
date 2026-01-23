@@ -1,18 +1,15 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { createContext, useContext, useEffect } from 'react';
+import { useSession } from '@/lib/auth-client';
+import { useAuthStore } from '@/lib/stores/auth.store';
+import type { AuthUser } from '@/lib/schemas/auth.schema';
+
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
-  user: {
-    id?: string;
-    userName?: string;
-    role?: string;
-    permissions?: string[];
-    accessToken?: string;
-  } | null;
+  user: AuthUser | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,21 +20,38 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: session, isPending } = useSession();
+  const { setUser, setLoading, user, isAuthenticated, isAdmin, isLoading } = useAuthStore();
 
   useEffect(() => {
-    setIsLoading(status === 'loading');
-  }, [status]);
+    setLoading(isPending);
+  }, [isPending, setLoading]);
 
-  const isAuthenticated = !!session?.user;
-  const isAdmin = session?.user?.role === 'GREAT_ADMIN' || session?.user?.permissions?.includes('VIEW_ALL_USERS') || false;
+  useEffect(() => {
+    if (!isPending) {
+      const sessionUser = session?.user as AuthUser | null;
+      if (sessionUser) {
+        setUser({
+          id: sessionUser.id,
+          name: sessionUser.name,
+          email: sessionUser.email,
+          image: sessionUser.image,
+          role: sessionUser.role,
+          permissions: sessionUser.permissions,
+          accessToken: sessionUser.accessToken,
+          refreshToken: sessionUser.refreshToken,
+        });
+      } else {
+        setUser(null);
+      }
+    }
+  }, [session, isPending, setUser]);
 
   const value = {
     isAuthenticated,
     isLoading,
     isAdmin,
-    user: session?.user ?? null,
+    user,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

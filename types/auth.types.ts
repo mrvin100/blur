@@ -45,6 +45,3 @@ export interface AuthContextType {
   isAdmin: () => boolean;
   isAuthenticated: boolean;
 }
-
-// Legacy alias
-export type User = AuthUser; 

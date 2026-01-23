@@ -1,4 +1,4 @@
-import { APIConfig } from '@/types';
+import type { APIConfig } from '@/types/api.types';
 
 export const API_CONFIG: APIConfig = {
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080',

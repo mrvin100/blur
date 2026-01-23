@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator"
 
 export default function SettingsPage() {
   return (
-    <div className="w-full">
+    <div className="p-4 md:p-6">
       <div className="space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -169,4 +169,4 @@ export default function SettingsPage() {
       </div>
     </div>
   );
-} 
+}

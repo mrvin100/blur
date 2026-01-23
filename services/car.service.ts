@@ -4,13 +4,14 @@
  */
 
 import apiClient from '@/lib/api-client';
-import { Car, CarAttribution, ApiResponse } from '@/types';
+import type { Car, CarAttribution } from '@/types/car.types';
+import type { ApiResponse } from '@/types/api.types';
 
 const CAR_ENDPOINTS = {
-  BASE: '/api/v1/cars',
-  BY_ID: (id: number | string) => `/api/v1/cars/${id}`,
-  GLOBAL_ATTRIBUTION: (raceId: number | string) => `/api/v1/cars/global-attribution/${raceId}`,
-  INDIVIDUAL_ATTRIBUTION: (raceId: number | string) => `/api/v1/cars/individual-attribution/${raceId}`,
+  BASE: 'api/v1/cars',
+  BY_ID: (id: number | string) => `api/v1/cars/${id}`,
+  GLOBAL_ATTRIBUTION: (raceId: number | string) => `api/v1/cars/global-attribution/${raceId}`,
+  INDIVIDUAL_ATTRIBUTION: (raceId: number | string) => `api/v1/cars/individual-attribution/${raceId}`,
 };
 
 export const carService = {
@@ -18,26 +19,30 @@ export const carService = {
    * Get all cars
    */
   getAll: async (): Promise<Car[]> => {
-    const response = await apiClient.get<ApiResponse<Car[]>>(CAR_ENDPOINTS.BASE);
-    return response.data.data;
+    const response = await apiClient
+      .get(CAR_ENDPOINTS.BASE)
+      .json<ApiResponse<Car[]>>();
+    return response.data;
   },
 
   /**
    * Get car by ID
    */
   getById: async (id: number | string): Promise<Car> => {
-    const response = await apiClient.get<ApiResponse<Car>>(CAR_ENDPOINTS.BY_ID(id));
-    return response.data.data;
+    const response = await apiClient
+      .get(CAR_ENDPOINTS.BY_ID(id))
+      .json<ApiResponse<Car>>();
+    return response.data;
   },
 
   /**
    * Get global car attribution for a race
    */
   getGlobalAttribution: async (raceId: number | string): Promise<Car> => {
-    const response = await apiClient.get<ApiResponse<Car>>(
-      CAR_ENDPOINTS.GLOBAL_ATTRIBUTION(raceId)
-    );
-    return response.data.data;
+    const response = await apiClient
+      .get(CAR_ENDPOINTS.GLOBAL_ATTRIBUTION(raceId))
+      .json<ApiResponse<Car>>();
+    return response.data;
   },
 
   /**
@@ -47,11 +52,12 @@ export const carService = {
     raceId: number | string,
     carIds: string[]
   ): Promise<CarAttribution[]> => {
-    const response = await apiClient.post<ApiResponse<CarAttribution[]>>(
-      CAR_ENDPOINTS.INDIVIDUAL_ATTRIBUTION(raceId),
-      carIds
-    );
-    return response.data.data;
+    const response = await apiClient
+      .post(CAR_ENDPOINTS.INDIVIDUAL_ATTRIBUTION(raceId), {
+        json: carIds,
+      })
+      .json<ApiResponse<CarAttribution[]>>();
+    return response.data;
   },
 };
 

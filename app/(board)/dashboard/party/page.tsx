@@ -1,10 +1,9 @@
 import { PartyDashboard } from '@/modules/party'
-import React from 'react'
 
-const page = () => {
+export default function PartyPage() {
   return (
+    <div className="p-4 md:p-6">
       <PartyDashboard />
-  )
+    </div>
+  );
 }
-
-export default page

@@ -1,6 +1,7 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from '@/lib/auth-client';
+import type { AuthUser } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -13,11 +14,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function UserActions() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const user = session?.user as AuthUser | null;
 
-  if (!session?.user) {
+  if (!user) {
     return (
       <Button variant="ghost" asChild>
         <Link href="/sign-in">Sign In</Link>
@@ -25,10 +29,15 @@ export function UserActions() {
     );
   }
 
-  const userName = session.user.name || session.user.userName || 'User';
-  const userEmail = session.user.email || '';
-  const userImage = session.user.image || '';
+  const userName = user.name || 'User';
+  const userEmail = user.email || '';
+  const userImage = user.image || '';
   const userInitial = userName.charAt(0).toUpperCase();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/sign-in');
+  };
 
   return (
     <DropdownMenu>
@@ -61,8 +70,8 @@ export function UserActions() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/api/auth/signout">Log out</Link>
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -37,8 +37,8 @@ export function ScoreForm({ raceId }: ScoreFormProps) {
     setLoading(true)
     const data: AddScoreRequestData = {
       value: Number(score),
-      raceId: raceId,
-      userId: selectedRacer
+      raceId: Number(raceId),
+      userId: Number(selectedRacer)
     }
 
     try {

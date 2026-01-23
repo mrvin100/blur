@@ -4,14 +4,15 @@
  */
 
 import apiClient from '@/lib/api-client';
-import { Party, CreatePartyDto, UpdatePartyDto, ApiResponse } from '@/types';
+import type { Party, CreatePartyDto, UpdatePartyDto } from '@/types/party.types';
+import type { ApiResponse } from '@/types/api.types';
 
 const PARTY_ENDPOINTS = {
-  BASE: '/api/v1/parties',
-  BY_ID: (id: number | string) => `/api/v1/parties/${id}`,
-  ADD_PARTICIPANTS: (id: number | string) => `/api/v1/parties/${id}/participants`,
+  BASE: 'api/v1/parties',
+  BY_ID: (id: number | string) => `api/v1/parties/${id}`,
+  ADD_PARTICIPANTS: (id: number | string) => `api/v1/parties/${id}/participants`,
   REMOVE_PARTICIPANT: (partyId: number | string, userId: number | string) => 
-    `/api/v1/parties/${partyId}/participants/${userId}`,
+    `api/v1/parties/${partyId}/participants/${userId}`,
 };
 
 export const partyService = {
@@ -19,32 +20,40 @@ export const partyService = {
    * Get all parties
    */
   getAll: async (): Promise<Party[]> => {
-    const response = await apiClient.get<ApiResponse<Party[]>>(PARTY_ENDPOINTS.BASE);
-    return response.data.data;
+    const response = await apiClient
+      .get(PARTY_ENDPOINTS.BASE)
+      .json<ApiResponse<Party[]>>();
+    return response.data;
   },
 
   /**
    * Get party by ID
    */
   getById: async (id: number | string): Promise<Party> => {
-    const response = await apiClient.get<ApiResponse<Party>>(PARTY_ENDPOINTS.BY_ID(id));
-    return response.data.data;
+    const response = await apiClient
+      .get(PARTY_ENDPOINTS.BY_ID(id))
+      .json<ApiResponse<Party>>();
+    return response.data;
   },
 
   /**
    * Create new party
    */
   create: async (data: CreatePartyDto): Promise<Party> => {
-    const response = await apiClient.post<ApiResponse<Party>>(PARTY_ENDPOINTS.BASE, data);
-    return response.data.data;
+    const response = await apiClient
+      .post(PARTY_ENDPOINTS.BASE, { json: data })
+      .json<ApiResponse<Party>>();
+    return response.data;
   },
 
   /**
    * Update party
    */
   update: async (id: number | string, data: UpdatePartyDto): Promise<Party> => {
-    const response = await apiClient.put<ApiResponse<Party>>(PARTY_ENDPOINTS.BY_ID(id), data);
-    return response.data.data;
+    const response = await apiClient
+      .put(PARTY_ENDPOINTS.BY_ID(id), { json: data })
+      .json<ApiResponse<Party>>();
+    return response.data;
   },
 
   /**
@@ -58,11 +67,12 @@ export const partyService = {
    * Add participants to party
    */
   addParticipants: async (partyId: number | string, userIds: number[]): Promise<Party> => {
-    const response = await apiClient.post<ApiResponse<Party>>(
-      PARTY_ENDPOINTS.ADD_PARTICIPANTS(partyId),
-      { userIds }
-    );
-    return response.data.data;
+    const response = await apiClient
+      .post(PARTY_ENDPOINTS.ADD_PARTICIPANTS(partyId), {
+        json: { userIds },
+      })
+      .json<ApiResponse<Party>>();
+    return response.data;
   },
 
   /**

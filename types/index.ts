@@ -12,8 +12,18 @@ export * from './auth.types';
 // User Types
 export * from './user.types';
 
-// Party Types
-export * from './party.types';
+// Party Types (exclude Score and RaceParameter to avoid name conflicts)
+export type {
+  Party,
+  Race,
+  PartyRace,
+  Racer,
+  Participant,
+  CreatePartyDto,
+  UpdatePartyDto,
+  CreateRaceDto,
+  UpdateRaceDto,
+} from './party.types';
 
 // Car Types
 export * from './car.types';
@@ -30,5 +40,5 @@ export * from './raceParameters.types';
 // Home Types
 export * from './home.types';
 
-// next-auth types are provided via module augmentation in `types/next-auth.d.ts`
+// Auth types are defined in lib/auth.ts (AuthUser type)
  

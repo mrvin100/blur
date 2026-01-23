@@ -1,9 +1,9 @@
 import { NewPartyPage } from '@/modules/party'
 
-const page = () => {
+export default function NewPartyRoutePage() {
   return (
-    <NewPartyPage />
-  )
+    <div className="p-4 md:p-6">
+      <NewPartyPage />
+    </div>
+  );
 }
-
-export default page

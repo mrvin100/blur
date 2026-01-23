@@ -1,15 +1,17 @@
 'use client';
 
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
+import type { AuthUser } from "@/lib/auth";
 import { User, Mail, Shield, Calendar, Trophy, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
+  const user = session?.user as AuthUser | null;
 
-  if (status === "loading") {
+  if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -18,15 +20,15 @@ export default function ProfilePage() {
     );
   }
 
-  const userName = session?.user?.name ?? session?.user?.userName ?? "User";
-  const userEmail = session?.user?.email ?? "No email provided";
-  const userImage = session?.user?.image ?? "";
+  const userName = user?.name ?? "User";
+  const userEmail = user?.email ?? "No email provided";
+  const userImage = user?.image ?? "";
   const userInitial = userName.charAt(0).toUpperCase();
-  const isAdmin = session?.user?.permissions?.some((p) => p === "VIEW_ALL_USERS");
-  const permissions = session?.user?.permissions ?? [];
+  const isAdmin = user?.permissions?.some((p) => p === "VIEW_ALL_USERS");
+  const permissions = user?.permissions ?? [];
 
   return (
-    <div className="w-full">
+    <div className="p-4 md:p-6">
       <div className="space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
           <div>
