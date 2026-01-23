@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUp } from "@/lib/auth-client";
-import { signUpSchema, type SignUpFormData } from "@/lib/schemas/auth.schema";
+import { authApiClient } from "@/lib/api-client";
+import { signUpSchema, type SignUpFormData, backendAuthResponseSchema } from "@/lib/schemas/auth.schema";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -49,16 +49,52 @@ export function SignUpForm({
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
-      await signUp.email({
-        email: data.email,
-        password: data.password,
-        name: data.username,
+      const response = await authApiClient
+        .post('api/auth/register', {
+          json: {
+            userName: data.username,
+            email: data.email,
+            password: data.password,
+          },
+        })
+        .json<unknown>();
+
+      const parse = backendAuthResponseSchema.safeParse(response);
+      if (!parse.success) {
+        console.error('Invalid backend response:', parse.error);
+        throw new Error('Registration failed');
+      }
+
+      const authResponse = parse.data;
+      const authUser = {
+        id: authResponse.user.id.toString(),
+        name: authResponse.user.username,
+        email: authResponse.user.email ?? `${authResponse.user.username}@blurapp.com`,
+        image: null,
+        role: authResponse.user.role,
+        permissions: authResponse.user.permissions ?? [],
+        accessToken: authResponse.token,
+        refreshToken: authResponse.refreshToken,
+      };
+
+      await fetch('/api/session/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: authResponse.token,
+          refreshToken: authResponse.refreshToken,
+          expiresIn: authResponse.expiresIn,
+        }),
       });
 
-      toast.success("Account created successfully!");
-      router.push("/dashboard");
+      // Hydrate client store for immediate UX
+      const { useAuthStore } = await import('@/lib/stores/auth.store');
+      useAuthStore.getState().setUser(authUser);
+
+      toast.success('Account created successfully!');
+      router.push('/dashboard');
     } catch (error) {
-      let errorMessage = "An error occurred during registration";
+      let errorMessage = 'An error occurred during registration';
 
       if (error instanceof Error) {
         errorMessage = error.message || errorMessage;

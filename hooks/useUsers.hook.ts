@@ -8,6 +8,7 @@ import { userService } from '@/services';
 import { queryKeys } from '@/lib/query-keys';
 import type { User, CreateUserDto, UpdateUserDto } from '@/types/user.types';
 import { toast } from 'sonner';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * Get all users
@@ -42,11 +43,9 @@ export const useCreateUser = () => {
     mutationFn: (data: CreateUserDto) => userService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
-      toast.success('User created successfully');
+      toast.success('Utilisateur créé avec succès');
     },
-    onError: (error: Error) => {
-      toast.error((error as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to create user');
-    },
+    onError: (error: Error) => handleApiError(error),
   });
 };
 
@@ -62,11 +61,9 @@ export const useUpdateUser = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) });
-      toast.success('User updated successfully');
+      toast.success('Utilisateur mis à jour avec succès');
     },
-    onError: (error: Error) => {
-      toast.error((error as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to update user');
-    },
+    onError: (error: Error) => handleApiError(error),
   });
 };
 
@@ -80,10 +77,54 @@ export const useDeleteUser = () => {
     mutationFn: (id: number | string) => userService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
-      toast.success('User deleted successfully');
+      toast.success('Utilisateur supprimé avec succès');
     },
-    onError: (error: Error) => {
-      toast.error((error as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to delete user');
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Get current authenticated user
+ */
+export const useCurrentUser = () => {
+  return useQuery<User, Error>({
+    queryKey: [...queryKeys.users.all, 'me'],
+    queryFn: userService.getCurrentUser,
+  });
+};
+
+/**
+ * Update user's own profile mutation
+ */
+export const useUpdateUserProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number | string; data: UpdateUserDto }) =>
+      userService.updateProfile(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.users.all, 'me'] });
+      toast.success('Profil mis à jour avec succès');
     },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Assign role to user mutation
+ */
+export const useAssignUserRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, role }: { id: number | string; role: string }) =>
+      userService.assignRole(id, role),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) });
+      toast.success('Rôle assigné avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
   });
 };

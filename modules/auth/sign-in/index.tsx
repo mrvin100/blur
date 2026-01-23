@@ -71,6 +71,17 @@ export function SignInForm({
         refreshToken: authResponse.refreshToken,
       };
 
+      // Persist httpOnly cookies for server/middleware access
+      await fetch('/api/session/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: authResponse.token,
+          refreshToken: authResponse.refreshToken,
+          expiresIn: authResponse.expiresIn,
+        }),
+      });
+
       setUser(authUser);
 
       toast.success("Successfully signed in!");

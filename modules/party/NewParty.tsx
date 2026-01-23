@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useParties, useCreateParty } from "@/hooks";
+import { useParties, useTodayParty } from "@/hooks";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,7 @@ import { Car, Flag, Users, Zap, Trophy, Loader2 } from "lucide-react";
 
 export function NewPartyPage() {
   const { data: allParties, isSuccess } = useParties();
-  const createParty = useCreateParty();
+  const { data: todayParty, refetch: fetchTodayParty } = useTodayParty();
   const [disabled, setDisabled] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
@@ -54,10 +54,11 @@ export function NewPartyPage() {
     setIsCreating(true);
 
     try {
-      const newParty = await createParty.mutateAsync({
-        datePlayed: new Date().toISOString(),
-      });
-      router.push(`/dashboard/party/${newParty.id}`);
+      // Backend's getTodayParty creates a party if it doesn't exist
+      const { data } = await fetchTodayParty();
+      if (data) {
+        router.push(`/dashboard/party/${data.id}`);
+      }
     } catch {
       toast.error("Failed to create party");
       setIsCreating(false);

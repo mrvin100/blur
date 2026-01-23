@@ -42,7 +42,7 @@ export function RaceManagement() {
     try {
       await createRace.mutateAsync({
         partyId: Number(partyId),
-        attributionType: 'INDIVIDUAL', // Default, can be changed by user
+        attributionType: 'PER_USER', // Default, can be changed by user
       })
       await refetchParty()
       await refetchRaces()

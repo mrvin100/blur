@@ -1,6 +1,4 @@
-import { auth } from '@/lib/auth';
-import type { AuthUser } from '@/lib/schemas/auth.schema';
-import { headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { apiServerClient } from './api-client';
 
 export const getBackendBaseUrl = () => {
@@ -9,11 +7,8 @@ export const getBackendBaseUrl = () => {
 
 export async function getAccessToken(): Promise<string | null> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-    const user = session?.user as AuthUser | undefined;
-    return user?.accessToken ?? null;
+    const token = (await cookies()).get('auth_token')?.value ?? null;
+    return token;
   } catch {
     return null;
   }

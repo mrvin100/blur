@@ -1,18 +1,22 @@
 /**
  * Party Service
  * Handles all party-related API calls
+ * Aligned with backend PartyController endpoints
  */
 
 import apiClient from '@/lib/api-client';
-import type { Party, CreatePartyDto, UpdatePartyDto } from '@/types/party.types';
+import type { Party } from '@/types/party.types';
 import type { ApiResponse } from '@/types/api.types';
 
 const PARTY_ENDPOINTS = {
   BASE: 'parties',
+  TODAY: 'parties/today',
   BY_ID: (id: number | string) => `parties/${id}`,
-  ADD_PARTICIPANTS: (id: number | string) => `parties/${id}/participants`,
-  REMOVE_PARTICIPANT: (partyId: number | string, userId: number | string) => 
-    `parties/${partyId}/participants/${userId}`,
+  BY_DATE: (date: string) => `parties/date/${date}`,
+  JOIN: (partyId: number | string) => `parties/${partyId}/join`,
+  LEAVE: (partyId: number | string) => `parties/${partyId}/leave`,
+  ASSIGN_MANAGER: (partyId: number | string, userId: number | string) => 
+    `parties/${partyId}/managers/${userId}`,
 };
 
 export const partyService = {
@@ -37,49 +41,70 @@ export const partyService = {
   },
 
   /**
-   * Create new party
+   * Get today's party or create one if it doesn't exist
    */
-  create: async (data: CreatePartyDto): Promise<Party> => {
+  getTodayParty: async (): Promise<Party> => {
     const response = await apiClient
-      .post(PARTY_ENDPOINTS.BASE, { json: data })
+      .get(PARTY_ENDPOINTS.TODAY)
       .json<ApiResponse<Party>>();
     return response.data;
   },
 
   /**
-   * Update party
+   * Get party by date (format: YYYY-MM-DD)
    */
-  update: async (id: number | string, data: UpdatePartyDto): Promise<Party> => {
+  getByDate: async (date: string): Promise<Party> => {
     const response = await apiClient
-      .put(PARTY_ENDPOINTS.BY_ID(id), { json: data })
+      .get(PARTY_ENDPOINTS.BY_DATE(date))
       .json<ApiResponse<Party>>();
     return response.data;
   },
 
   /**
-   * Delete party
+   * Join a party (current user joins)
    */
-  delete: async (id: number | string): Promise<void> => {
+  join: async (partyId: number | string): Promise<Party> => {
+    const response = await apiClient
+      .post(PARTY_ENDPOINTS.JOIN(partyId))
+      .json<ApiResponse<Party>>();
+    return response.data;
+  },
+
+  /**
+   * Leave a party (current user leaves)
+   */
+  leave: async (partyId: number | string): Promise<Party> => {
+    const response = await apiClient
+      .post(PARTY_ENDPOINTS.LEAVE(partyId))
+      .json<ApiResponse<Party>>();
+    return response.data;
+  },
+
+  /**
+   * Assign a manager to a party
+   */
+  assignManager: async (partyId: number | string, userId: number | string): Promise<Party> => {
+    const response = await apiClient
+      .post(PARTY_ENDPOINTS.ASSIGN_MANAGER(partyId, userId))
+      .json<ApiResponse<Party>>();
+    return response.data;
+  },
+
+  /**
+   * Remove a manager from a party
+   */
+  removeManager: async (partyId: number | string, userId: number | string): Promise<Party> => {
+    const response = await apiClient
+      .delete(PARTY_ENDPOINTS.ASSIGN_MANAGER(partyId, userId))
+      .json<ApiResponse<Party>>();
+    return response.data;
+  },
+
+  /**
+   * Deactivate a party (soft delete)
+   */
+  deactivate: async (id: number | string): Promise<void> => {
     await apiClient.delete(PARTY_ENDPOINTS.BY_ID(id));
-  },
-
-  /**
-   * Add participants to party
-   */
-  addParticipants: async (partyId: number | string, userIds: number[]): Promise<Party> => {
-    const response = await apiClient
-      .post(PARTY_ENDPOINTS.ADD_PARTICIPANTS(partyId), {
-        json: { userIds },
-      })
-      .json<ApiResponse<Party>>();
-    return response.data;
-  },
-
-  /**
-   * Remove participant from party
-   */
-  removeParticipant: async (partyId: number | string, userId: number | string): Promise<void> => {
-    await apiClient.delete(PARTY_ENDPOINTS.REMOVE_PARTICIPANT(partyId, userId));
   },
 };
 

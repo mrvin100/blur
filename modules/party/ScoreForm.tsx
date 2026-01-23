@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { Racer } from "@/types/party.types"
-import { useRace, useScoresByRace, useCreateScore, useUpdateScore } from "@/hooks"
+import { useRace, useScoresByRace, useSubmitScore, useUpdateScore } from "@/hooks"
 import { AddScoreRequestData } from "@/types/score.types"
 
 interface ScoreFormProps {
@@ -22,7 +22,7 @@ export function ScoreForm({ raceId }: ScoreFormProps) {
   const [loading, setLoading] = useState(false)
   const { data: race, refetch: refetchRace } = useRace(raceId || "0")
   const { data: scores, refetch: refetchScores } = useScoresByRace(raceId || "0")
-  const createScore = useCreateScore()
+  const submitScore = useSubmitScore()
   const updateScore = useUpdateScore()
 
 
@@ -47,10 +47,14 @@ export function ScoreForm({ raceId }: ScoreFormProps) {
       if (existingScore) {
         await updateScore.mutateAsync({ 
           id: existingScore.id, 
-          data: { value: Number(score) } 
+          data: { 
+            value: Number(score),
+            raceId: Number(raceId),
+            userId: Number(selectedRacer)
+          } 
         })
       } else {
-        await createScore.mutateAsync({
+        await submitScore.mutateAsync({
           value: Number(score),
           raceId: Number(raceId),
           userId: Number(selectedRacer)

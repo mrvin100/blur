@@ -10,8 +10,7 @@ import { Separator } from "@/components/ui/separator"
 
 export default function SettingsPage() {
   return (
-    <div className="p-4 md:p-6">
-      <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
@@ -166,7 +165,6 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
     </div>
   );
 }

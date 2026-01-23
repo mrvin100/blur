@@ -7,6 +7,7 @@ import type { AuthUser } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Separator } from "@/components/ui/separator";
 
 export default function DashboardLayout({
   children,
@@ -15,7 +16,7 @@ export default function DashboardLayout({
 }>) {
   const { data: session, isPending } = useSession();
   const router = useRouter();
-  const user = session?.user as AuthUser | null;
+  const user = (session?.user as AuthUser | null) ?? null;
 
   useEffect(() => {
     if (!isPending && !user) {
@@ -28,25 +29,26 @@ export default function DashboardLayout({
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        <p className="text-sm text-muted-foreground">Chargement du dashboard...</p>
       </div>
     );
   }
 
   return (
-    <SidebarProvider className="flex min-h-screen">
+    <SidebarProvider>
       <AppSidebar />
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center gap-2 border-b px-4 py-2">
-          <SidebarTrigger />
+      <main className="flex flex-1 flex-col">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-sm font-semibold text-muted-foreground">
             Blur Dashboard
           </h1>
         </header>
-        <main className="flex-1 overflow-auto px-4 py-4">
+        <div className="flex-1 overflow-auto p-4 md:p-6">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </SidebarProvider>
   );
 }

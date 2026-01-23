@@ -1,13 +1,15 @@
 /**
  * Race Hooks
  * Custom hooks for race-related queries and mutations
+ * Aligned with backend RaceController endpoints
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { raceService } from '@/services';
+import { raceService, type CreateRaceParams } from '@/services';
 import { queryKeys } from '@/lib/query-keys';
-import type { Race, CreateRaceDto, UpdateRaceDto } from '@/types/party.types';
+import type { Race } from '@/types/party.types';
 import { toast } from 'sonner';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * Get all races
@@ -42,13 +44,13 @@ export const useRacesByParty = (partyId: number | string) => {
 };
 
 /**
- * Get current race for a party
+ * Get races by status
  */
-export const useCurrentRace = (partyId: number | string) => {
+export const useRacesByStatus = (status: string) => {
   return useQuery({
-    queryKey: queryKeys.races.current(partyId),
-    queryFn: () => raceService.getCurrentRace(partyId),
-    enabled: !!partyId,
+    queryKey: [...queryKeys.races.lists(), 'status', status],
+    queryFn: () => raceService.getByStatus(status),
+    enabled: !!status,
   });
 };
 
@@ -59,38 +61,53 @@ export const useCreateRace = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateRaceDto) => raceService.create(data),
+    mutationFn: (params: CreateRaceParams) => raceService.create(params),
     onSuccess: (race) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.races.lists() });
       queryClient.invalidateQueries({ queryKey: queryKeys.races.byParty(race.party?.id || '') });
-      toast.success('Race created successfully');
+      toast.success('Course créée avec succès');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to create race');
-    },
+    onError: (error: Error) => handleApiError(error),
   });
 };
 
 /**
- * Update race mutation
+ * Add participant to race mutation
  */
-export const useUpdateRace = () => {
+export const useAddParticipant = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number | string; data: UpdateRaceDto }) =>
-      raceService.update(id, data),
+    mutationFn: ({ raceId, userId }: { raceId: number | string; userId: number | string }) =>
+      raceService.addParticipant(raceId, userId),
     onSuccess: (race, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.races.lists() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.races.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.races.detail(variables.raceId) });
       if (race.party?.id) {
         queryClient.invalidateQueries({ queryKey: queryKeys.races.byParty(race.party.id) });
       }
-      toast.success('Race updated successfully');
+      toast.success('Participant ajouté avec succès');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update race');
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Remove participant from race mutation
+ */
+export const useRemoveParticipant = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ raceId, userId }: { raceId: number | string; userId: number | string }) =>
+      raceService.removeParticipant(raceId, userId),
+    onSuccess: (race, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.races.detail(variables.raceId) });
+      if (race.party?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.races.byParty(race.party.id) });
+      }
+      toast.success('Participant retiré avec succès');
     },
+    onError: (error: Error) => handleApiError(error),
   });
 };
 
@@ -105,13 +122,11 @@ export const useStartRace = () => {
     onSuccess: (race, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.races.detail(id) });
       if (race.party?.id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.races.current(race.party.id) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.races.byParty(race.party.id) });
       }
-      toast.success('Race started successfully');
+      toast.success('Course démarrée avec succès');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to start race');
-    },
+    onError: (error: Error) => handleApiError(error),
   });
 };
 
@@ -126,31 +141,30 @@ export const useCompleteRace = () => {
     onSuccess: (race, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.races.detail(id) });
       if (race.party?.id) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.races.current(race.party.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.races.byParty(race.party.id) });
       }
-      toast.success('Race completed successfully');
+      toast.success('Course terminée avec succès');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to complete race');
-    },
+    onError: (error: Error) => handleApiError(error),
   });
 };
 
 /**
- * Delete race mutation
+ * Cancel race mutation
  */
-export const useDeleteRace = () => {
+export const useCancelRace = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number | string) => raceService.delete(id),
-    onSuccess: () => {
+    mutationFn: (id: number | string) => raceService.cancel(id),
+    onSuccess: (race, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.races.lists() });
-      toast.success('Race deleted successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.races.detail(id) });
+      if (race.party?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.races.byParty(race.party.id) });
+      }
+      toast.success('Course annulée avec succès');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete race');
-    },
+    onError: (error: Error) => handleApiError(error),
   });
 };

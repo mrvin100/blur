@@ -1,9 +1,7 @@
-import { NewPartyPage } from '@/modules/party'
+"use client";
+
+import { LazyNewParty } from "@/lib/lazy-modules";
 
 export default function NewPartyRoutePage() {
-  return (
-    <div className="p-4 md:p-6">
-      <NewPartyPage />
-    </div>
-  );
+  return <LazyNewParty />;
 }

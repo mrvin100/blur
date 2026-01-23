@@ -10,6 +10,9 @@ import type { ApiResponse } from '@/types/api.types';
 const USER_ENDPOINTS = {
   BASE: 'users',
   BY_ID: (id: number | string) => `users/${id}`,
+  ME: 'users/me',
+  PROFILE: (id: number | string) => `users/${id}/profile`,
+  ROLE: (id: number | string) => `users/${id}/role`,
 };
 
 export const userService = {
@@ -50,6 +53,35 @@ export const userService = {
    */
   delete: async (id: number | string): Promise<void> => {
     await apiClient.delete(USER_ENDPOINTS.BY_ID(id));
+  },
+
+  /**
+   * Get current authenticated user
+   * Backend: GET /users/me
+   */
+  getCurrentUser: async (): Promise<User> => {
+    const response = await apiClient.get(USER_ENDPOINTS.ME).json<ApiResponse<User>>();
+    return response.data;
+  },
+
+  /**
+   * Update user's own profile
+   * Backend: PUT /users/{id}/profile
+   */
+  updateProfile: async (id: number | string, data: UpdateUserDto): Promise<User> => {
+    const response = await apiClient.put(USER_ENDPOINTS.PROFILE(id), { json: data }).json<ApiResponse<User>>();
+    return response.data;
+  },
+
+  /**
+   * Assign role to a user
+   * Backend: PUT /users/{id}/role?role={role}
+   */
+  assignRole: async (id: number | string, role: string): Promise<User> => {
+    const response = await apiClient
+      .put(`${USER_ENDPOINTS.ROLE(id)}?role=${role}`)
+      .json<ApiResponse<User>>();
+    return response.data;
   },
 };
 

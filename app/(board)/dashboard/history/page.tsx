@@ -1,9 +1,7 @@
-import { History } from "@/modules/history";
+"use client";
+
+import { LazyHistory } from "@/lib/lazy-modules";
 
 export default function HistoryPage() {
-  return (
-    <div className="p-4 md:p-6">
-      <History />
-    </div>
-  );
+  return <LazyHistory />;
 }

@@ -1,10 +1,11 @@
 /**
  * Score Service
  * Handles all score-related API calls
+ * Aligned with backend ScoreController endpoints
  */
 
 import apiClient from '@/lib/api-client';
-import type { Score, CreateScoreDto, UpdateScoreDto } from '@/types/score.types';
+import type { Score, CreateScoreDto } from '@/types/score.types';
 import type { ApiResponse } from '@/types/api.types';
 
 const SCORE_ENDPOINTS = {
@@ -12,19 +13,11 @@ const SCORE_ENDPOINTS = {
   BY_ID: (id: number | string) => `scores/${id}`,
   BY_RACE: (raceId: number | string) => `scores/race/${raceId}`,
   BY_USER: (userId: number | string) => `scores/user/${userId}`,
+  BY_RACE_AND_USER: (raceId: number | string, userId: number | string) => 
+    `scores/race/${raceId}/user/${userId}`,
 };
 
 export const scoreService = {
-  /**
-   * Get all scores
-   */
-  getAll: async (): Promise<Score[]> => {
-    const response = await apiClient
-      .get(SCORE_ENDPOINTS.BASE)
-      .json<ApiResponse<Score[]>>();
-    return response.data;
-  },
-
   /**
    * Get score by ID
    */
@@ -56,9 +49,19 @@ export const scoreService = {
   },
 
   /**
-   * Create new score
+   * Get score by race ID and user ID
    */
-  create: async (data: CreateScoreDto): Promise<Score> => {
+  getByRaceAndUser: async (raceId: number | string, userId: number | string): Promise<Score> => {
+    const response = await apiClient
+      .get(SCORE_ENDPOINTS.BY_RACE_AND_USER(raceId, userId))
+      .json<ApiResponse<Score>>();
+    return response.data;
+  },
+
+  /**
+   * Submit a new score
+   */
+  submit: async (data: CreateScoreDto): Promise<Score> => {
     const response = await apiClient
       .post(SCORE_ENDPOINTS.BASE, { json: data })
       .json<ApiResponse<Score>>();
@@ -66,9 +69,9 @@ export const scoreService = {
   },
 
   /**
-   * Update score
+   * Update score (uses same DTO as create)
    */
-  update: async (id: number | string, data: UpdateScoreDto): Promise<Score> => {
+  update: async (id: number | string, data: CreateScoreDto): Promise<Score> => {
     const response = await apiClient
       .put(SCORE_ENDPOINTS.BY_ID(id), { json: data })
       .json<ApiResponse<Score>>();

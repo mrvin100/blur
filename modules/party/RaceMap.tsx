@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
 import { Dices, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useRace } from "@/hooks"
-import { mapService } from "@/services"
+import { useRace, useMaps } from "@/hooks"
 import { toast } from "sonner"
 interface Props {
   raceId: string
@@ -14,12 +13,16 @@ interface Props {
 export function RaceMap({ raceId }: Props) {
   const [loading, setLoading] = useState(false)
   const { data: race, refetch } = useRace(raceId)
+  const { data: maps } = useMaps()
   const hasMap = !!race?.card
 
+  // Note: Random map endpoint not available in backend yet
+  // This is a placeholder
   const fetchRandomMap = async () => {
     try {
       setLoading(true)
-      await mapService.getRandom(raceId)
+      // Backend random map endpoint not implemented yet
+      toast.info("Attribution de circuit non disponible pour le moment")
       await refetch()
     } catch {
       toast.error("Erreur lors de la récupération de la carte")

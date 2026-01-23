@@ -4,7 +4,7 @@
  */
 
 import ky from 'ky';
-import { authClient } from '@/lib/auth-client';
+import { getSession } from '@/lib/auth-client';
 import type { AuthUser } from '@/lib/schemas/auth.schema';
 
 // Base API configuration
@@ -25,7 +25,7 @@ export const apiClient = ky.create({
     beforeRequest: [
       async (request) => {
         try {
-          const session = await authClient.getSession();
+          const session = await getSession();
           const user = session?.data?.user as AuthUser | undefined;
           const token = user?.accessToken;
 

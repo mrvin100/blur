@@ -35,8 +35,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ChevronUp } from "lucide-react"
+import type { ComponentProps } from "react"
 
-export function AppSidebar() {
+type AppSidebarProps = ComponentProps<typeof Sidebar>
+
+export function AppSidebar({ ...props }: AppSidebarProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
   const user = session?.user as AuthUser | null
@@ -89,7 +92,7 @@ export function AppSidebar() {
   ]
 
   return (
-    <Sidebar>
+    <Sidebar {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

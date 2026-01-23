@@ -1,13 +1,15 @@
 /**
  * Party Hooks
  * Custom hooks for party-related queries and mutations
+ * Aligned with backend PartyController endpoints
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { partyService } from '@/services';
 import { queryKeys } from '@/lib/query-keys';
-import type { Party, CreatePartyDto, UpdatePartyDto } from '@/types/party.types';
+import type { Party } from '@/types/party.types';
 import { toast } from 'sonner';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * Get all parties
@@ -31,97 +33,106 @@ export const useParty = (id: number | string) => {
 };
 
 /**
- * Create party mutation
+ * Get today's party (creates one if it doesn't exist)
  */
-export const useCreateParty = () => {
+export const useTodayParty = () => {
+  return useQuery<Party, Error>({
+    queryKey: [...queryKeys.parties.lists(), 'today'],
+    queryFn: partyService.getTodayParty,
+  });
+};
+
+/**
+ * Get party by date
+ */
+export const usePartyByDate = (date: string) => {
+  return useQuery<Party, Error>({
+    queryKey: [...queryKeys.parties.lists(), 'date', date],
+    queryFn: () => partyService.getByDate(date),
+    enabled: !!date,
+  });
+};
+
+/**
+ * Join party mutation
+ */
+export const useJoinParty = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreatePartyDto) => partyService.create(data),
-    onSuccess: () => {
+    mutationFn: (partyId: number | string) => partyService.join(partyId),
+    onSuccess: (_, partyId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.parties.lists() });
-      toast.success('Party created successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(partyId) });
+      toast.success('Vous avez rejoint la partie');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to create party');
-    },
+    onError: (error: Error) => handleApiError(error),
   });
 };
 
 /**
- * Update party mutation
+ * Leave party mutation
  */
-export const useUpdateParty = () => {
+export const useLeaveParty = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number | string; data: UpdatePartyDto }) =>
-      partyService.update(id, data),
-    onSuccess: (_, variables) => {
+    mutationFn: (partyId: number | string) => partyService.leave(partyId),
+    onSuccess: (_, partyId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.parties.lists() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.id) });
-      toast.success('Party updated successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(partyId) });
+      toast.success('Vous avez quitté la partie');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update party');
-    },
+    onError: (error: Error) => handleApiError(error),
   });
 };
 
 /**
- * Delete party mutation
+ * Assign manager to party mutation
  */
-export const useDeleteParty = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: number | string) => partyService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.parties.lists() });
-      toast.success('Party deleted successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete party');
-    },
-  });
-};
-
-/**
- * Add participants to party mutation
- */
-export const useAddParticipants = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ partyId, userIds }: { partyId: number | string; userIds: number[] }) =>
-      partyService.addParticipants(partyId, userIds),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.partyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.parties.participants(variables.partyId) });
-      toast.success('Participants added successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to add participants');
-    },
-  });
-};
-
-/**
- * Remove participant from party mutation
- */
-export const useRemoveParticipant = () => {
+export const useAssignManager = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ partyId, userId }: { partyId: number | string; userId: number | string }) =>
-      partyService.removeParticipant(partyId, userId),
+      partyService.assignManager(partyId, userId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.partyId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.parties.participants(variables.partyId) });
-      toast.success('Participant removed successfully');
+      toast.success('Manager assigné avec succès');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to remove participant');
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Remove manager from party mutation
+ */
+export const useRemoveManager = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ partyId, userId }: { partyId: number | string; userId: number | string }) =>
+      partyService.removeManager(partyId, userId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.partyId) });
+      toast.success('Manager retiré avec succès');
     },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Deactivate party mutation
+ */
+export const useDeactivateParty = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number | string) => partyService.deactivate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.lists() });
+      toast.success('Partie désactivée avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
   });
 };

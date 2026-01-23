@@ -6,8 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Dices } from "lucide-react"
-import { useRace } from "@/hooks"
-import { carService } from "@/services"
+import { useRace, useCars } from "@/hooks"
 import { toast } from "sonner"
 
 interface CarAttributionProps {
@@ -19,13 +18,17 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
   const [loadingIndividual, setLoadingIndividual] = useState(false)
   const [activeTab, setActiveTab] = useState<string>("global")
   const { data: race, refetch: refetchRace } = useRace(raceId)
+  const { data: cars } = useCars()
   const hasCar = !!race?.car;
   const hasIndividualAttributions = (race?.attributions?.length || 0) > 0;
 
+  // Note: Car attribution endpoints not available in backend yet
+  // This is a placeholder that shows available cars
   const fetchGlobalCar = async () => {
     try {
       setLoadingGlobal(true);
-      await carService.getGlobalAttribution(raceId);
+      // Backend attribution endpoint not implemented yet
+      toast.info("Attribution de voiture non disponible pour le moment");
       await refetchRace();
     } catch {
       toast.error("Erreur lors de l'attribution");
@@ -37,8 +40,8 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
   const fetchIndividualCars = async () => {
     try {
       setLoadingIndividual(true);
-      const carIds = race?.racers?.map(r => r.id.toString()) || [];
-      await carService.getIndividualAttribution(raceId, carIds);
+      // Backend attribution endpoint not implemented yet
+      toast.info("Attribution individuelle non disponible pour le moment");
       await refetchRace();
     } catch {
       toast.error("Erreur lors de l'attribution");

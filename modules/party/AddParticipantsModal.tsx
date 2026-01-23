@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Race, Racer } from "@/types/party.types"
 import type { User } from "@/types/user.types"
-import { useUsers, useUpdateRace, useCreateScore } from "@/hooks"
+import { useUsers, useAddParticipant, useSubmitScore } from "@/hooks"
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -27,8 +27,8 @@ export function AddParticipantsModal({
 }: AddParticipantsModalProps) {
   const [selectedRacers, setSelectedRacers] = useState<Racer[]>([])
   const { data: users, isLoading } = useUsers()
-  const updateRace = useUpdateRace()
-  const createScore = useCreateScore()
+  const addParticipant = useAddParticipant()
+  const submitScore = useSubmitScore()
 
   const racers: Racer[] = (users as User[] | undefined)?.map((user) => ({
     id: user.id,
@@ -47,18 +47,15 @@ export function AddParticipantsModal({
     if (selectedRacers.length === 0) return
     
     try {
-      // Update race with selected racers
-      await updateRace.mutateAsync({
-        id: raceId,
-        data: {
-          // The backend should handle adding racers to the race
-          // This might need adjustment based on your backend implementation
-        }
-      })
-
-      // Create initial scores for new participants
+      // Add each selected racer as a participant to the race
       for (const racer of selectedRacers) {
-        await createScore.mutateAsync({
+        await addParticipant.mutateAsync({
+          raceId: raceId,
+          userId: racer.id
+        })
+        
+        // Create initial score for new participant
+        await submitScore.mutateAsync({
           value: 0,
           raceId: Number(raceId),
           userId: Number(racer.id)

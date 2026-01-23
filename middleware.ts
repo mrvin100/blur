@@ -6,9 +6,9 @@ const publicPaths = ['/', '/sign-in', '/sign-up'];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Get session from Better Auth cookie
-  const sessionCookie = request.cookies.get('better-auth.session_token')?.value;
-  const hasSession = !!sessionCookie;
+  // Get session from our auth cookie
+  const token = request.cookies.get('auth_token')?.value;
+  const hasSession = !!token;
 
   // If the path is public and user is authenticated, redirect to dashboard
   if (publicPaths.includes(pathname) && hasSession) {

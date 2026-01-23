@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const totalUsers = users?.length ?? 0;
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="space-y-6">
       {/* Welcome Section */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Welcome back, {userName}!</h1>

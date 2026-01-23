@@ -1,20 +1,29 @@
 /**
  * Race Service
  * Handles all race-related API calls
+ * Aligned with backend RaceController endpoints
  */
 
 import apiClient from '@/lib/api-client';
-import type { Race, CreateRaceDto, UpdateRaceDto } from '@/types/party.types';
+import type { Race } from '@/types/party.types';
 import type { ApiResponse } from '@/types/api.types';
 
 const RACE_ENDPOINTS = {
   BASE: 'races',
   BY_ID: (id: number | string) => `races/${id}`,
   BY_PARTY: (partyId: number | string) => `races/party/${partyId}`,
+  BY_STATUS: (status: string) => `races/status/${status}`,
   START: (id: number | string) => `races/${id}/start`,
   COMPLETE: (id: number | string) => `races/${id}/complete`,
-  CURRENT: (partyId: number | string) => `races/party/${partyId}/current`,
+  CANCEL: (id: number | string) => `races/${id}/cancel`,
+  ADD_PARTICIPANT: (raceId: number | string, userId: number | string) => 
+    `races/${raceId}/participants/${userId}`,
 };
+
+export interface CreateRaceParams {
+  partyId: number | string;
+  attributionType?: 'PER_USER' | 'ALL_USERS';
+}
 
 export const raceService = {
   /**
@@ -48,39 +57,47 @@ export const raceService = {
   },
 
   /**
-   * Get current race for a party
+   * Get races by status
    */
-  getCurrentRace: async (partyId: number | string): Promise<Race | null> => {
-    try {
-      const response = await apiClient
-        .get(RACE_ENDPOINTS.CURRENT(partyId))
-        .json<ApiResponse<Race>>();
-      return response.data;
-    } catch (error: any) {
-      // Return null if no current race exists (404)
-      if (error.response?.status === 404) {
-        return null;
-      }
-      throw error;
-    }
+  getByStatus: async (status: string): Promise<Race[]> => {
+    const response = await apiClient
+      .get(RACE_ENDPOINTS.BY_STATUS(status))
+      .json<ApiResponse<Race[]>>();
+    return response.data;
   },
 
   /**
-   * Create new race
+   * Create new race (backend expects query parameters)
    */
-  create: async (data: CreateRaceDto): Promise<Race> => {
+  create: async (params: CreateRaceParams): Promise<Race> => {
+    const searchParams = new URLSearchParams();
+    searchParams.set('partyId', String(params.partyId));
+    if (params.attributionType) {
+      searchParams.set('attributionType', params.attributionType);
+    }
+    
     const response = await apiClient
-      .post(RACE_ENDPOINTS.BASE, { json: data })
+      .post(`${RACE_ENDPOINTS.BASE}?${searchParams.toString()}`)
       .json<ApiResponse<Race>>();
     return response.data;
   },
 
   /**
-   * Update race
+   * Add participant to race
    */
-  update: async (id: number | string, data: UpdateRaceDto): Promise<Race> => {
+  addParticipant: async (raceId: number | string, userId: number | string): Promise<Race> => {
     const response = await apiClient
-      .put(RACE_ENDPOINTS.BY_ID(id), { json: data })
+      .post(RACE_ENDPOINTS.ADD_PARTICIPANT(raceId, userId))
+      .json<ApiResponse<Race>>();
+    return response.data;
+  },
+
+  /**
+   * Remove participant from race
+   */
+  removeParticipant: async (raceId: number | string, userId: number | string): Promise<Race> => {
+    const response = await apiClient
+      .delete(RACE_ENDPOINTS.ADD_PARTICIPANT(raceId, userId))
       .json<ApiResponse<Race>>();
     return response.data;
   },
@@ -106,10 +123,13 @@ export const raceService = {
   },
 
   /**
-   * Delete race
+   * Cancel a race
    */
-  delete: async (id: number | string): Promise<void> => {
-    await apiClient.delete(RACE_ENDPOINTS.BY_ID(id));
+  cancel: async (id: number | string): Promise<Race> => {
+    const response = await apiClient
+      .post(RACE_ENDPOINTS.CANCEL(id))
+      .json<ApiResponse<Race>>();
+    return response.data;
   },
 };
 
