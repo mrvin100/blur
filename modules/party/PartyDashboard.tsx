@@ -6,13 +6,15 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRaceParameters, useCars, useMaps } from "@/hooks"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ApiErrorState } from "@/components/ui/error-states"
 
 export function PartyDashboard() {
-  const { data: raceParameters, isLoading: isLoadingParams } = useRaceParameters();
-  const { data: cars, isLoading: isLoadingCars } = useCars();
-  const { data: maps, isLoading: isLoadingMaps } = useMaps();
+  const { data: raceParameters, isLoading: isLoadingParams, isError: isParamsError, error: paramsError } = useRaceParameters();
+  const { data: cars, isLoading: isLoadingCars, isError: isCarsError, error: carsError } = useCars();
+  const { data: maps, isLoading: isLoadingMaps, isError: isMapsError, error: mapsError } = useMaps();
 
   const isLoading = isLoadingParams || isLoadingCars || isLoadingMaps;
+  const isError = isParamsError || isCarsError || isMapsError;
   if (isLoading) {
     return (
       <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
@@ -21,6 +23,15 @@ export function PartyDashboard() {
       </div>
     );
   }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-[70vh]">
+        <ApiErrorState error={paramsError ?? carsError ?? mapsError ?? new Error('Failed to load dashboard data')} />
+      </div>
+    )
+  }
+
   return (
     <div className="w-full">
       <div className="flex flex-col gap-4 mb-6 sm:mb-8">

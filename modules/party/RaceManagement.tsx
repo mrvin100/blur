@@ -9,6 +9,7 @@ import { useParams } from "next/navigation"
 import { useParty, useRacesByParty, useCreateRace } from "@/hooks"
 import { Race } from "@/types/party.types"
 import { toast } from "sonner"
+import { ApiErrorState } from "@/components/ui/error-states"
 
 export function RaceManagement() {
   const [currentRace, setCurrentRace] = useState<Race | null>(null)
@@ -16,8 +17,8 @@ export function RaceManagement() {
   const [isAddParticipantsModalOpen, setIsAddParticipantsModalOpen] = useState(false)
   const [isRaceDetailsModalOpen, setIsRaceDetailsModalOpen] = useState(false)
   const { partyId } = useParams()
-  const { data: party, refetch: refetchParty } = useParty(Number(partyId))
-  const { data: races, refetch: refetchRaces } = useRacesByParty(Number(partyId))
+  const { data: party, refetch: refetchParty, isError: isPartyError, error: partyError } = useParty(Number(partyId))
+  const { data: races, refetch: refetchRaces, isError: isRacesError, error: racesError } = useRacesByParty(Number(partyId))
   const createRace = useCreateRace()
   
   useEffect(() => {
@@ -65,6 +66,14 @@ export function RaceManagement() {
       hour: "2-digit",
       minute: "2-digit",
     }).format(date)
+  }
+
+  if (isPartyError || isRacesError) {
+    return (
+      <div className="flex items-center justify-center py-10">
+        <ApiErrorState error={partyError ?? racesError ?? new Error('Failed to load party/races')} />
+      </div>
+    )
   }
 
   return (

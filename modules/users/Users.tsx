@@ -44,7 +44,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { AlertCircle, Eye, EyeOff, UserPlus, Users as UsersIcon } from "lucide-react"
+import { Eye, EyeOff, UserPlus, Users as UsersIcon } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -52,6 +52,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import type { User } from "@/types/user.types"
 import UserDetailsModal from "./UserDetailsModal"
+import { ApiErrorState } from "@/components/ui/error-states"
 
 const createUserSchema = z.object({
   userName: z.string().min(3, "Username must be at least 3 characters"),
@@ -106,17 +107,9 @@ export function Users() {
 
   if (isError) {
     return (
-      <Card className="w-full">
-        <CardContent className="pt-6">
-          <div className="bg-destructive/10 text-destructive p-4 rounded-md flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 mt-0.5" />
-            <div>
-              <h3 className="font-medium">Error loading users</h3>
-              <p className="text-sm">An unexpected error occurred</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-8">
+        <ApiErrorState error={createUser.error ?? new Error('Failed to load users')} />
+      </div>
     )
   }
 

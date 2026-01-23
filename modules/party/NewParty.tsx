@@ -14,10 +14,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Party } from "@/types/party.types";
 import { Car, Flag, Users, Zap, Trophy, Loader2 } from "lucide-react";
+import { ApiErrorState } from "@/components/ui/error-states";
 
 export function NewPartyPage() {
-  const { data: allParties, isSuccess } = useParties();
-  const { data: todayParty, refetch: fetchTodayParty } = useTodayParty();
+  const { data: allParties, isSuccess, isError: isAllPartiesError, error: allPartiesError } = useParties();
+  const { data: todayParty, refetch: fetchTodayParty, isError: isTodayError, error: todayError } = useTodayParty();
   const [disabled, setDisabled] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
@@ -71,6 +72,14 @@ export function NewPartyPage() {
     { icon: Flag, label: "Track Roulette", description: "Discover new circuits" },
     { icon: Trophy, label: "Score Tracking", description: "Real-time leaderboard" },
   ];
+
+  if (isAllPartiesError || isTodayError) {
+    return (
+      <div className="flex items-center justify-center py-10">
+        <ApiErrorState error={todayError ?? allPartiesError ?? new Error('Failed to load parties')} />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
