@@ -13,6 +13,8 @@ const USER_ENDPOINTS = {
   ME: 'users/me',
   PROFILE: (id: number | string) => `users/${id}/profile`,
   ROLE: (id: number | string) => `users/${id}/role`,
+  ROLES: (id: number | string) => `users/${id}/roles`,
+  ALL_ROLES: 'users/roles',
 };
 
 export const userService = {
@@ -74,13 +76,44 @@ export const userService = {
   },
 
   /**
-   * Assign role to a user
+   * Assign single role to a user (legacy)
    * Backend: PUT /users/{id}/role?role={role}
    */
   assignRole: async (id: number | string, role: string): Promise<User> => {
     const response = await apiClient
       .put(`${USER_ENDPOINTS.ROLE(id)}?role=${role}`)
       .json<ApiResponse<User>>();
+    return response.data;
+  },
+
+  /**
+   * Assign multiple roles to a user
+   * Backend: PUT /users/{id}/roles
+   */
+  assignRoles: async (id: number | string, roles: string[]): Promise<User> => {
+    const response = await apiClient
+      .put(USER_ENDPOINTS.ROLES(id), { json: roles })
+      .json<ApiResponse<User>>();
+    return response.data;
+  },
+
+  /**
+   * Remove a role from a user
+   * Backend: DELETE /users/{id}/roles/{role}
+   */
+  removeRole: async (id: number | string, role: string): Promise<User> => {
+    const response = await apiClient
+      .delete(`${USER_ENDPOINTS.ROLES(id)}/${role}`)
+      .json<ApiResponse<User>>();
+    return response.data;
+  },
+
+  /**
+   * Get all available roles
+   * Backend: GET /users/roles
+   */
+  getAllRoles: async (): Promise<string[]> => {
+    const response = await apiClient.get(USER_ENDPOINTS.ALL_ROLES).json<ApiResponse<string[]>>();
     return response.data;
   },
 };

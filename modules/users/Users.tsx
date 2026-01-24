@@ -44,7 +44,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Eye, EyeOff, UserPlus, Users as UsersIcon } from "lucide-react"
+import { Eye, EyeOff, UserPlus, Users as UsersIcon, Pencil } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -58,7 +59,7 @@ const createUserSchema = z.object({
   userName: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.enum(["GREAT_ADMIN", "PARTY_MANAGER", "RACER"]),
+  roles: z.array(z.enum(["GREAT_ADMIN", "PARTY_MANAGER", "RACER"])).min(1, "At least one role is required"),
 })
 
 type FormValues = z.infer<typeof createUserSchema>
@@ -76,7 +77,7 @@ export function Users() {
     defaultValues: {
       userName: "",
       password: "",
-      role: "RACER", 
+      roles: ["RACER"], 
       email: "",
     },
   })
@@ -86,7 +87,7 @@ export function Users() {
       await createUser.mutateAsync({
         userName: values.userName,
         password: values.password,
-        role: values.role,
+        roles: values.roles,
         email: values.email || undefined,
       })
       setIsCreateDialogOpen(false)
@@ -204,22 +205,39 @@ export function Users() {
 
                   <FormField
                     control={form.control}
-                    name="role"
-                    render={({ field }) => (
+                    name="roles"
+                    render={() => (
                       <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="RACER">RACER</SelectItem>
-                            <SelectItem value="PARTY_MANAGER">PARTY_MANAGER</SelectItem>
-                            <SelectItem value="GREAT_ADMIN">GREAT_ADMIN</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormLabel>Roles (select one or more)</FormLabel>
+                        <div className="space-y-2">
+                          {(["RACER", "PARTY_MANAGER", "GREAT_ADMIN"] as const).map((role) => (
+                            <FormField
+                              key={role}
+                              control={form.control}
+                              name="roles"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(role)}
+                                      onCheckedChange={(checked) => {
+                                        const current = field.value || [];
+                                        if (checked) {
+                                          field.onChange([...current, role]);
+                                        } else {
+                                          field.onChange(current.filter((r) => r !== role));
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal cursor-pointer">
+                                    {role}
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                          ))}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -265,18 +283,26 @@ export function Users() {
                       <TableCell className="font-medium text-xs sm:text-sm py-2 sm:py-4">{user.id}</TableCell>
                       <TableCell className="font-medium text-xs sm:text-sm py-2 sm:py-4 truncate max-w-[100px] sm:max-w-none">{user.userName}</TableCell>
                       <TableCell className="py-2 sm:py-4">
-                        <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 bg-muted rounded">{(user as any).role ?? 'USER'}</span>
+                        <div className="flex flex-wrap gap-1">
+                          {(user.roles && user.roles.length > 0 ? user.roles : [user.role || 'USER']).map((role, idx) => (
+                            <span key={idx} className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 bg-muted rounded">
+                              {role}
+                            </span>
+                          ))}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right py-2 sm:py-4">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleViewUser(user)}
-                          className="cursor-pointer h-8 w-8"
-                        >
-                          <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          <span className="sr-only">View Details</span>
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewUser(user)}
+                            className="cursor-pointer h-8 w-8"
+                          >
+                            <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span className="sr-only">View Details</span>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

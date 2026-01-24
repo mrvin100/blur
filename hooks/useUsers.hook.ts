@@ -112,7 +112,7 @@ export const useUpdateUserProfile = () => {
 };
 
 /**
- * Assign role to user mutation
+ * Assign single role to user mutation (legacy)
  */
 export const useAssignUserRole = () => {
   const queryClient = useQueryClient();
@@ -126,5 +126,51 @@ export const useAssignUserRole = () => {
       toast.success('Rôle assigné avec succès');
     },
     onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Assign multiple roles to user mutation
+ */
+export const useAssignUserRoles = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, roles }: { id: number | string; roles: string[] }) =>
+      userService.assignRoles(id, roles),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) });
+      toast.success('Rôles assignés avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Remove role from user mutation
+ */
+export const useRemoveUserRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, role }: { id: number | string; role: string }) =>
+      userService.removeRole(id, role),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) });
+      toast.success('Rôle retiré avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Get all available roles
+ */
+export const useAvailableRoles = () => {
+  return useQuery<string[], Error>({
+    queryKey: [...queryKeys.users.all, 'roles'],
+    queryFn: userService.getAllRoles,
   });
 };
