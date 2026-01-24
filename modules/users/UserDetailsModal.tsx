@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AlertCircle, User as UserIcon } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 
 const ALL_ROLES = ["RACER", "PARTY_MANAGER", "GREAT_ADMIN"] as const
 
@@ -31,13 +32,21 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
   const { data: currentUser } = useCurrentUser()
   const canManageRoles = useMemo(() => {
     const perms = (currentUser?.permissions || []) as string[]
-    return perms.includes('ASSIGN_ROLES') || perms.includes('UPDATE_USER')
+    return perms.includes('ALL_PERMISSIONS') || perms.includes('ASSIGN_ROLES') || perms.includes('UPDATE_USER') || (currentUser?.role === 'GREAT_ADMIN')
   }, [currentUser])
 
   const user = userData as User | undefined
   const [selectedRoles, setSelectedRoles] = useState<RoleType[]>([])
   const [enabled, setEnabled] = useState<boolean | undefined>(undefined)
   const [locked, setLocked] = useState<boolean | undefined>(undefined)
+  const [userName, setUserName] = useState<string>("")
+  const [email, setEmail] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
+  const [confirmPassword, setConfirmPassword] = useState<string>("")
+  const canEditDetails = useMemo(() => {
+    const perms = (currentUser?.permissions || []) as string[]
+    return perms.includes('ALL_PERMISSIONS') || perms.includes('UPDATE_USER') || (currentUser?.role === 'GREAT_ADMIN')
+  }, [currentUser])
 
   const assignUserRoles = useAssignUserRoles()
   const removeUserRole = useRemoveUserRole()
@@ -55,6 +64,10 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
       setSelectedRoles(roles)
       setEnabled(user.enabled)
       setLocked(user.accountNonLocked)
+      setUserName(user.userName)
+      setEmail(user.email ?? "")
+      setPassword("")
+      setConfirmPassword("")
     }
   }, [user])
 
@@ -65,6 +78,20 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
       await refetch()
     } catch (e) {
       // noop, handled by hook
+    }
+  }
+
+  const handleSaveDetails = async () => {
+    if (!user) return
+    if (password && password !== confirmPassword) {
+      // basic check
+      return
+    }
+    try {
+      await updateUser.mutateAsync({ id: user.id, data: { userName, email, password: password || undefined, enabled, accountNonLocked: locked } })
+      await refetch()
+    } catch (e) {
+      // noop
     }
   }
 
@@ -110,6 +137,37 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
               </CardHeader>
               <CardContent>
                 <div className="space-y-5">
+                  {/* Details form */}
+                  {canEditDetails && (
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">User Details</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground">Username</label>
+                          <Input value={userName} onChange={(e) => setUserName(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground">Email</label>
+                          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground">Password (optional)</label>
+                          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground">Confirm Password</label>
+                          <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="flex gap-2 pt-3">
+                        <Button size="sm" className="cursor-pointer" onClick={handleSaveDetails} disabled={updateUser.isPending}>
+                          {updateUser.isPending ? 'Saving...' : 'Save Details'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Permissions overview */}
                   <div>
                     <h3 className="text-sm font-medium mb-2">Permissions</h3>
                     {user.permissions && user.permissions.length > 0 ? (

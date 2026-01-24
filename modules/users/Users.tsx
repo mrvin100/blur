@@ -53,6 +53,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import type { User } from "@/types/user.types"
 import UserDetailsModal from "./UserDetailsModal"
+import PermissionGate from "@/components/ui/permission-gate"
 import { ApiErrorState } from "@/components/ui/error-states"
 
 const createUserSchema = z.object({
@@ -293,11 +294,24 @@ export function Users() {
                       </TableCell>
                       <TableCell className="text-right py-2 sm:py-4">
                         <div className="flex justify-end gap-1">
+                          <PermissionGate any={["UPDATE_USER", "ASSIGN_ROLES", "VIEW_ALL_USERS", "ALL_PERMISSIONS"]}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleViewUser(user)}
+                              className="cursor-pointer h-8 w-8"
+                              title="Edit user"
+                            >
+                              <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              <span className="sr-only">Edit User</span>
+                            </Button>
+                          </PermissionGate>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleViewUser(user)}
                             className="cursor-pointer h-8 w-8"
+                            title="View details"
                           >
                             <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             <span className="sr-only">View Details</span>

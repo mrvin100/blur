@@ -10,3 +10,4 @@ export { default as partyService } from './party.service';
 export { default as raceService, type CreateRaceParams } from './race.service';
 export { default as scoreService } from './score.service';
 export { default as raceParametersService } from './race-parameters.service';
+export { default as roleService } from './role.service';

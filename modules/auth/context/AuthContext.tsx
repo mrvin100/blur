@@ -27,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const currentUser = session?.user ?? user;
   const currentIsAuthenticated = !!currentUser || isAuthenticated;
   const currentIsAdmin = currentUser?.role === "GREAT_ADMIN" || 
+                         currentUser?.permissions?.includes("ALL_PERMISSIONS") ||
                          currentUser?.permissions?.includes("VIEW_ALL_USERS") || 
                          isAdmin;
 

@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useSession, signOut } from "@/lib/auth-client"
 import type { AuthUser } from "@/lib/auth"
+import PermissionGate from "@/components/ui/permission-gate"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,7 +44,7 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
   const user = session?.user as AuthUser | null
-  const isAdmin = user?.permissions?.some((p) => p === "VIEW_ALL_USERS")
+  const isAdmin = !!user && (user.role === 'GREAT_ADMIN' || user.permissions?.includes('ALL_PERMISSIONS') || user.permissions?.includes('VIEW_ALL_USERS'))
 
   // Navigation items based on role
   const mainItems = [
@@ -57,20 +58,8 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
       url: "/dashboard/party/new",
       icon: Trophy,
     },
-    ...(isAdmin
-      ? [
-          {
-            title: "Users",
-            url: "/dashboard/users",
-            icon: Users,
-          },
-          {
-            title: "Permissions",
-            url: "/dashboard/permissions",
-            icon: Shield,
-          },
-        ]
-      : []),
+    // Admin / privileged entries are injected below via PermissionGate
+    
     {
       title: "History",
       url: "/dashboard/history",
@@ -126,6 +115,37 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {/* Privileged: Users */}
+              <PermissionGate any={["VIEW_ALL_USERS", "ALL_PERMISSIONS"]}>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname === "/dashboard/users"}>
+                    <Link href="/dashboard/users">
+                      <Users />
+                      <span>Users</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </PermissionGate>
+              {/* Privileged: Permissions */}
+              <PermissionGate any={["ASSIGN_ROLES", "VIEW_ALL_USERS", "ALL_PERMISSIONS"]}>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname === "/dashboard/permissions"}>
+                    <Link href="/dashboard/permissions">
+                      <Shield />
+                      <span>Permissions</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                {/* Roles subpage */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname === "/dashboard/permissions/roles"}>
+                    <Link href="/dashboard/permissions/roles">
+                      <Shield />
+                      <span>Roles</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </PermissionGate>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -26,3 +26,6 @@ export * from './useRaceParameters.hook';
 
 // Utility hooks
 export * from './use-mobile';
+
+// Roles hooks
+export * from './useRoles.hook';

@@ -12,7 +12,7 @@ import Link from "next/link";
 export default function UsersPage() {
   const { data: session, isPending } = useSession();
   const user = session?.user as AuthUser | null;
-  const isAdmin = user?.permissions?.some((p) => p === "VIEW_ALL_USERS");
+  const isAdmin = !!user && (user.role === 'GREAT_ADMIN' || user.permissions?.includes('ALL_PERMISSIONS') || user.permissions?.includes('VIEW_ALL_USERS'));
 
   if (isPending) {
     return <TableSkeleton rows={8} />;
