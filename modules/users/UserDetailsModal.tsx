@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { useUser, useAssignUserRoles, useRemoveUserRole, useUpdateUser, useCurrentUser } from "@/hooks"
+import { useUser, useAssignUserRoles, useRemoveUserRole, useUpdateUser, useCurrentUser, useAvailableRoles } from "@/hooks"
 import type { User } from "@/types/user.types"
 import { 
   Dialog, 
@@ -17,9 +17,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 
-const ALL_ROLES = ["RACER", "PARTY_MANAGER", "GREAT_ADMIN"] as const
-
-type RoleType = typeof ALL_ROLES[number]
 
 interface UserDetailsModalProps {
   isOpen: boolean
@@ -36,7 +33,8 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
   }, [currentUser])
 
   const user = userData as User | undefined
-  const [selectedRoles, setSelectedRoles] = useState<RoleType[]>([])
+  const { data: availableRoles } = useAvailableRoles()
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [enabled, setEnabled] = useState<boolean | undefined>(undefined)
   const [locked, setLocked] = useState<boolean | undefined>(undefined)
   const [userName, setUserName] = useState<string>("")
@@ -60,7 +58,7 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
 
   useEffect(() => {
     if (user) {
-      const roles = (user.roles && user.roles.length > 0 ? user.roles : (user.role ? [user.role] : [])) as RoleType[]
+      const roles = (user.roles && user.roles.length > 0 ? user.roles : (user.role ? [user.role] : [])) as string[]
       setSelectedRoles(roles)
       setEnabled(user.enabled)
       setLocked(user.accountNonLocked)
@@ -193,20 +191,25 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
 
                     {canManageRoles && (
                       <div className="space-y-2">
-                        {ALL_ROLES.map((role) => (
-                          <label key={role} className="flex items-center gap-3">
-                            <Checkbox
-                              checked={selectedRoles.includes(role)}
-                              onCheckedChange={(checked) => {
-                                setSelectedRoles((prev) => {
-                                  if (checked) return Array.from(new Set([...prev, role]))
-                                  return prev.filter((r) => r !== role)
-                                })
-                              }}
-                            />
-                            <span className="text-sm">{role}</span>
-                          </label>
-                        ))}
+                        {(availableRoles ?? []).map((role) => {
+                          const isGreatAdmin = role === 'GREAT_ADMIN'
+                          return (
+                            <label key={role} className="flex items-center gap-3">
+                              <Checkbox
+                                checked={selectedRoles.includes(role)}
+                                disabled={isGreatAdmin}
+                                onCheckedChange={(checked) => {
+                                  if (isGreatAdmin) return
+                                  setSelectedRoles((prev) => {
+                                    if (checked) return Array.from(new Set([...prev, role]))
+                                    return prev.filter((r) => r !== role)
+                                  })
+                                }}
+                              />
+                              <span className="text-sm">{role}</span>
+                            </label>
+                          )
+                        })}
                         <div className="flex gap-2 pt-2">
                           <Button size="sm" className="cursor-pointer" onClick={handleSaveRoles} disabled={assignUserRoles.isPending}>
                             {assignUserRoles.isPending ? 'Saving...' : 'Save Roles'}

@@ -53,7 +53,11 @@ export default function RolesPage() {
             <div>
               <h3 className="font-medium mb-2">Create Role</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Input placeholder="Role name (enum) e.g., PARTY_MANAGER" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value.toUpperCase())} />
+                <Input
+  placeholder="Role name e.g., PARTY_MANAGER, SCORE_COLLECTOR"
+  value={newRoleName}
+  onChange={(e) => setNewRoleName(e.target.value.toUpperCase())}
+/>
                 <Input placeholder="Description" value={newRoleDesc} onChange={(e) => setNewRoleDesc(e.target.value)} />
                 <Button className="cursor-pointer" onClick={handleCreate} disabled={createRole.isPending}>Create</Button>
               </div>
@@ -74,7 +78,9 @@ export default function RolesPage() {
               {isLoading && <p>Loading...</p>}
               {isError && <p className="text-destructive">Failed to load roles</p>}
               <div className="space-y-3">
-                {roles?.map((r) => (
+                {roles?.map((r) => {
+  const isGreatAdmin = r.name === 'GREAT_ADMIN'
+  return (
                   <Card key={r.id}>
                     <CardContent className="p-3 space-y-2">
                       <div className="flex items-center justify-between">
@@ -83,34 +89,60 @@ export default function RolesPage() {
                           <div className="text-xs text-muted-foreground">{r.description || '—'}</div>
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" className="cursor-pointer" onClick={async () => {
-                            try {
-                              await updateRole.mutateAsync({ id: r.id, data: { description: r.description, permissions: r.permissions } });
-                            } catch {}
-                          }}>Save</Button>
-                          <Button size="sm" variant="destructive" className="cursor-pointer" onClick={async () => {
-                            try { await deleteRole.mutateAsync(r.id); } catch {}
-                          }}>Delete</Button>
+                          <Button
+  size="sm"
+  variant="outline"
+  className="cursor-pointer"
+  disabled={isGreatAdmin}
+  title={isGreatAdmin ? 'GREAT_ADMIN is a protected system role' : undefined}
+  onClick={async () => {
+    try {
+      await updateRole.mutateAsync({ id: r.id, data: { description: r.description, permissions: r.permissions } });
+    } catch {}
+  }}
+>
+  Save
+</Button>
+<Button
+  size="sm"
+  variant="destructive"
+  className="cursor-pointer"
+  disabled={isGreatAdmin}
+  title={isGreatAdmin ? 'GREAT_ADMIN is a protected system role' : undefined}
+  onClick={async () => {
+    try {
+      await deleteRole.mutateAsync(r.id);
+    } catch {}
+  }}
+>
+  Delete
+</Button>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {ALL_PERMISSIONS.map((perm) => (
                           <label key={perm} className="flex items-center gap-2 text-sm">
-                            <Checkbox checked={r.permissions.includes(perm)} onCheckedChange={(c) => {
-                              const exists = r.permissions.includes(perm);
-                              if (c && !exists) {
-                                r.permissions.push(perm);
-                              } else if (!c && exists) {
-                                r.permissions = r.permissions.filter((p) => p !== perm);
-                              }
-                            }} />
+                            <Checkbox
+  checked={r.permissions.includes(perm)}
+  disabled={isGreatAdmin}
+  onCheckedChange={(c) => {
+    if (isGreatAdmin) return
+    const exists = r.permissions.includes(perm)
+    if (c && !exists) {
+      r.permissions.push(perm)
+    } else if (!c && exists) {
+      r.permissions = r.permissions.filter((p) => p !== perm)
+    }
+  }}
+/>
                             {perm}
                           </label>
                         ))}
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )
+              })}
               </div>
             </div>
           </CardContent>
