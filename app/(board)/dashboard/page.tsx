@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Trophy, Flag, Users, Star, Plus, History } from "lucide-react";
 import Link from "next/link";
-import { useParties, useUsers } from "@/hooks";
+import { useParties, useUsers, useRaceCount } from "@/hooks";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -15,10 +15,11 @@ export default function DashboardPage() {
   const user = session?.user as AuthUser | null;
   const isAdmin = user?.permissions?.some((p) => p === "VIEW_ALL_USERS");
   const { data: users } = useUsers(isAdmin) as { data: User[] | undefined };
+  const { data: raceCount } = useRaceCount();
 
   const userName = user?.name ?? "User";
   const activeParties = parties?.length ?? 0;
-  const totalRaces = parties?.reduce((sum, p) => sum + (p.racesPlayed?.length ?? 0), 0) ?? 0;
+  const totalRaces = raceCount?.total ?? 0;
   const totalUsers = users?.length ?? 0;
 
   return (

@@ -95,15 +95,9 @@ export async function handleApiError(
   if (!options?.silent) {
     const message = options?.customMessage || apiError.message;
     
-    if (apiError.status >= 500) {
-      toast.error('Erreur serveur', { description: message });
-    } else if (apiError.status === 403) {
-      toast.error('Accès refusé', { description: message });
-    } else if (apiError.status === 404) {
-      toast.error('Non trouvé', { description: message });
-    } else {
-      toast.error('Erreur', { description: message });
-    }
+    // Show only the backend (or custom) message to avoid duplicated/misleading toasts
+    toast.error(message);
+
   }
 
   return apiError;

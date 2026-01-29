@@ -6,10 +6,12 @@
 
 import apiClient from '@/lib/api-client';
 import type { Race } from '@/types/party.types';
+import type { RaceCount } from '@/types/race-count.types';
 import type { ApiResponse } from '@/types/api.types';
 
 const RACE_ENDPOINTS = {
   BASE: 'races',
+  COUNT: 'races/count',
   BY_ID: (id: number | string) => `races/${id}`,
   BY_PARTY: (partyId: number | string) => `races/party/${partyId}`,
   BY_STATUS: (status: string) => `races/status/${status}`,
@@ -26,6 +28,14 @@ export interface CreateRaceParams {
 }
 
 export const raceService = {
+  /**
+   * Get total races count
+   */
+  getCount: async (): Promise<RaceCount> => {
+    const response = await apiClient.get(RACE_ENDPOINTS.COUNT).json<ApiResponse<RaceCount>>();
+    return response.data;
+  },
+
   /**
    * Get all races
    */

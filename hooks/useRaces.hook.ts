@@ -12,6 +12,17 @@ import { toast } from 'sonner';
 import { handleApiError } from '@/lib/api-error-handler';
 
 /**
+ * Get total races count
+ */
+export const useRaceCount = () => {
+  return useQuery({
+    queryKey: [...queryKeys.races.lists(), 'count'],
+    queryFn: raceService.getCount,
+    staleTime: 60_000,
+  });
+};
+
+/**
  * Get all races
  */
 export const useRaces = () => {
@@ -65,7 +76,8 @@ export const useCreateRace = () => {
     onSuccess: (race) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.races.lists() });
       queryClient.invalidateQueries({ queryKey: queryKeys.races.byParty(race.party?.id || '') });
-      toast.success('Course créée avec succès');
+      // Optional success toast, keep it minimal
+      toast.success('Course créée');
     },
     onError: (error: Error) => handleApiError(error),
   });

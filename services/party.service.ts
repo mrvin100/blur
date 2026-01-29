@@ -6,6 +6,8 @@
 
 import apiClient from '@/lib/api-client';
 import type { Party } from '@/types/party.types';
+import type { PartyActiveStatus } from '@/types/party-active.types';
+import type { PartyMember } from '@/types/party-member.types';
 import type { ApiResponse } from '@/types/api.types';
 
 const PARTY_ENDPOINTS = {
@@ -13,6 +15,8 @@ const PARTY_ENDPOINTS = {
   TODAY: 'parties/today',
   BY_ID: (id: number | string) => `parties/${id}`,
   BY_DATE: (date: string) => `parties/date/${date}`,
+  ACTIVE_STATUS: (id: number | string) => `parties/${id}/active`,
+  MEMBERS: (id: number | string) => `parties/${id}/members`,
   JOIN: (partyId: number | string) => `parties/${partyId}/join`,
   LEAVE: (partyId: number | string) => `parties/${partyId}/leave`,
   ASSIGN_MANAGER: (partyId: number | string, userId: number | string) => 
@@ -37,6 +41,28 @@ export const partyService = {
     const response = await apiClient
       .get(PARTY_ENDPOINTS.BY_ID(id))
       .json<ApiResponse<Party>>();
+    return response.data;
+  },
+
+  /**
+   * Get party active/actionable status
+   * Backend: GET /parties/{id}/active
+   */
+  getActiveStatus: async (id: number | string): Promise<PartyActiveStatus> => {
+    const response = await apiClient
+      .get(PARTY_ENDPOINTS.ACTIVE_STATUS(id))
+      .json<ApiResponse<PartyActiveStatus>>();
+    return response.data;
+  },
+
+  /**
+   * Get party members
+   * Backend: GET /parties/{id}/members
+   */
+  getMembers: async (id: number | string): Promise<PartyMember[]> => {
+    const response = await apiClient
+      .get(PARTY_ENDPOINTS.MEMBERS(id))
+      .json<ApiResponse<PartyMember[]>>();
     return response.data;
   },
 

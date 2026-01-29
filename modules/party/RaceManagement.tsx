@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AddParticipantsModal, RaceDetailsModal, CarAttributions, RacesList, CurrentRace, ScoreForm, RaceMap } from "@/modules/party"
+import { RaceDetailsModal, CarAttributions, RacesList, CurrentRace, ScoreForm, RaceMap } from "@/modules/party"
 import { useParams } from "next/navigation"
-import { useParty, useRacesByParty, useCreateRace } from "@/hooks"
+import { useParty, useRacesByParty, useCreateRace, usePartyActionability } from "@/hooks"
 import { Race } from "@/types/party.types"
 import { toast } from "sonner"
 import { ApiErrorState } from "@/components/ui/error-states"
@@ -14,12 +14,17 @@ import { ApiErrorState } from "@/components/ui/error-states"
 export function RaceManagement() {
   const [currentRace, setCurrentRace] = useState<Race | null>(null)
   const [selectedRace, setSelectedRace] = useState<string | null>(null)
-  const [isAddParticipantsModalOpen, setIsAddParticipantsModalOpen] = useState(false)
   const [isRaceDetailsModalOpen, setIsRaceDetailsModalOpen] = useState(false)
   const { partyId } = useParams()
-  const { data: party, refetch: refetchParty, isError: isPartyError, error: partyError } = useParty(Number(partyId))
-  const { data: races, refetch: refetchRaces, isError: isRacesError, error: racesError } = useRacesByParty(Number(partyId))
+  const numericPartyId = Number(partyId)
+
+  const { data: party, refetch: refetchParty, isError: isPartyError, error: partyError } = useParty(numericPartyId)
+  const { data: races, refetch: refetchRaces, isError: isRacesError, error: racesError } = useRacesByParty(numericPartyId)
+  const partyActionability = usePartyActionability(numericPartyId)
   const createRace = useCreateRace()
+
+  const actionsDisabled = partyActionability.isLoading || !partyActionability.isActionable
+  const actionsDisabledReason = partyActionability.reason
   
   useEffect(() => {
     if (races && races.length > 0) {
@@ -40,15 +45,20 @@ export function RaceManagement() {
 
 
   const createNewRace = async () => {
+    if (actionsDisabled) {
+      toast.error("Cette partie n'est pas active aujourd'hui. Action impossible.")
+      return
+    }
+
     try {
       await createRace.mutateAsync({
-        partyId: Number(partyId),
+        partyId: numericPartyId,
         attributionType: 'PER_USER', // Default, can be changed by user
       })
       await refetchParty()
       await refetchRaces()
     } catch {
-      toast.error("Failed to create race")
+      // error toast is handled by handleApiError in the React Query mutation
     }
   }
 
@@ -84,13 +94,25 @@ export function RaceManagement() {
 
         {party ? (
           <div className="grid gap-4 sm:gap-6 md:gap-8">
+            {actionsDisabled && (
+              <div className="rounded-lg border bg-muted/30 p-3 sm:p-4 text-sm text-muted-foreground">
+                Cette partie n'est plus active pour aujourd'hui. Les actions sont désactivées.
+                {actionsDisabledReason ? ` (Raison: ${actionsDisabledReason})` : ''}
+              </div>
+            )}
             <div className="flex flex-col gap-3 sm:gap-4 bg-card p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
                 <div>
                   <h2 className="text-lg sm:text-xl md:text-2xl font-semibold">Partie #{party.id}</h2>
                   <p className="text-xs sm:text-sm text-muted-foreground">Date: {formatDate(party.datePlayed)}</p>
                 </div>
-                <Button onClick={() => createNewRace()} className="w-full sm:w-auto cursor-pointer" size="sm">
+                <Button
+                  onClick={() => createNewRace()}
+                  className="w-full sm:w-auto cursor-pointer"
+                  size="sm"
+                  disabled={actionsDisabled}
+                  title={actionsDisabled ? "Cette partie n'est pas active aujourd'hui" : undefined}
+                >
                   Créer une nouvelle course
                 </Button>
               </div>
@@ -113,15 +135,12 @@ export function RaceManagement() {
                   <CardHeader className="bg-muted/30 p-3 sm:p-4 md:p-6">
                     <CardTitle className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 sm:gap-4">
                       <span className="text-base sm:text-lg md:text-xl">Course {party?.id ? `#${party.id}` : ""}</span>
-                      <Button onClick={() => setIsAddParticipantsModalOpen(true)} className="cursor-pointer w-full sm:w-auto" size="sm">
-                        Ajouter des participants
-                      </Button>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 sm:p-4 md:p-6">
                     {currentRace ? (
                       <div className="space-y-4 sm:space-y-6 md:space-y-8">
-                        <CurrentRace raceId={currentRace.id.toString()} />
+                        <CurrentRace raceId={currentRace.id.toString()} partyId={numericPartyId} />
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                           <CarAttributions raceId={currentRace.id.toString()} />
@@ -130,13 +149,20 @@ export function RaceManagement() {
 
                         <div className="mt-4 sm:mt-6 md:mt-8 bg-muted/30 p-3 sm:p-4 md:p-6 rounded-lg">
                           <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-3 sm:mb-4">Ajouter des scores</h3>
-                          <ScoreForm raceId={currentRace.id.toString()} />
+                          <ScoreForm raceId={currentRace.id.toString()} disabled={actionsDisabled} />
                         </div>
                       </div>
                     ) : (
                       <div className="py-10 sm:py-16 md:py-20 text-center">
                         <p className="text-sm sm:text-base text-muted-foreground mb-4">Aucune course active</p>
-                        <Button onClick={() => createNewRace()} size="sm">Créer une nouvelle course</Button>
+                        <Button
+                          onClick={() => createNewRace()}
+                          size="sm"
+                          disabled={actionsDisabled}
+                          title={actionsDisabled ? "Cette partie n'est pas active aujourd'hui" : undefined}
+                        >
+                          Créer une nouvelle course
+                        </Button>
                       </div>
                     )}
                   </CardContent>
@@ -164,18 +190,6 @@ export function RaceManagement() {
               </div>
             </CardContent>
           </Card>
-        )}
-
-        {isAddParticipantsModalOpen && currentRace && (
-          <AddParticipantsModal
-            isOpen={isAddParticipantsModalOpen}
-            onClose={() => setIsAddParticipantsModalOpen(false)}
-            raceId={currentRace.id.toString()}
-            onParticipantsAdded={() => {
-              setIsAddParticipantsModalOpen(false)
-            }}
-            refresh={() => refetchRaces()}
-          />
         )}
 
       {isRaceDetailsModalOpen && selectedRace && (

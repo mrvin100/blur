@@ -5,12 +5,19 @@
 import { Car, CarAttribution } from "./car.types";
 import { Map } from "./map.types";
 
+export interface PartyUserMini {
+  id: number;
+  userName: string;
+}
+
 export interface Party {
   id: number;
   name?: string;
   datePlayed: string;
   createdAt?: string;
   updatedAt?: string;
+  creator?: PartyUserMini;
+  managers?: PartyUserMini[];
   racesPlayed?: Race[];
   participants?: Participant[];
 }

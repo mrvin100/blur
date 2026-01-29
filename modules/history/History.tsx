@@ -73,7 +73,7 @@ function PartyItem({ party }: Readonly<{ party: Party }>) {
           <span className="text-[10px] sm:text-xs text-muted-foreground">{new Date(party.datePlayed).toLocaleDateString()}</span>
           <div className="flex items-center gap-1 sm:gap-2 ml-auto">
             <Badge variant="outline" className="text-[10px] sm:text-xs px-1.5 sm:px-2">
-              {races?.length ?? party.racesPlayed?.length ?? 0} races
+              {races?.length ?? 0} races
             </Badge>
             {partyWinner && (
               <Badge variant="secondary" className="text-[10px] sm:text-xs px-1.5 sm:px-2 hidden xs:flex">

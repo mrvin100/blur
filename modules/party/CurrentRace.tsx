@@ -1,17 +1,32 @@
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useRace, useScoresByRace } from "@/hooks"
+import { Button } from "@/components/ui/button"
+import { useAddParticipant, useCurrentUser, useJoinParty, useParty, useRace, useRemoveParticipant, useScoresByRace, useStartRace } from "@/hooks"
 import Image from "next/image"
 import { useEffect } from "react"
 
 interface CurrentRaceProps {
   raceId: string | undefined
+  partyId: number
 }
 
-export function CurrentRace({ raceId }: CurrentRaceProps) {
+export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
   const { data: race, refetch: refetchRace } = useRace(raceId || "0")
   const { data: scores, refetch: refetchScores } = useScoresByRace(raceId || "0")
+
+  const { data: me } = useCurrentUser()
+  const { data: party } = useParty(partyId)
+  const joinParty = useJoinParty()
+  const addParticipant = useAddParticipant()
+  const removeParticipant = useRemoveParticipant()
+  const startRace = useStartRace()
+
+  const myId = me?.id
+  const hasJoinedRace = !!myId && !!race?.racers?.some((r) => r.id === myId)
+  const isCreator = !!myId && party?.creator?.id === myId
+  const isManager = !!myId && (party?.managers ?? []).some((m) => m.id === myId)
+  const canStart = isCreator || isManager
 
   useEffect(() => {
     if (raceId) {
@@ -40,12 +55,70 @@ export function CurrentRace({ raceId }: CurrentRaceProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
         <div>
           <h2 className="text-xl font-semibold">Course du {race?.createdAt && formatDate(race.createdAt)}</h2>
           {race?.createdAt && (
             <p className="text-sm text-muted-foreground">Créée le {formatDate(race.createdAt)}</p>
           )}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!myId || joinParty.isPending}
+            onClick={async () => {
+              if (!myId) return
+              await joinParty.mutateAsync(partyId)
+            }}
+            title={!myId ? 'Chargement utilisateur...' : undefined}
+          >
+            Rejoindre la partie
+          </Button>
+
+          {!hasJoinedRace ? (
+            <Button
+              size="sm"
+              disabled={!myId || !raceId || addParticipant.isPending}
+              onClick={async () => {
+                if (!myId || !raceId) return
+                await addParticipant.mutateAsync({ raceId, userId: myId })
+                await refetchRace()
+                await refetchScores()
+              }}
+            >
+              Rejoindre la course
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!myId || !raceId || removeParticipant.isPending}
+              onClick={async () => {
+                if (!myId || !raceId) return
+                await removeParticipant.mutateAsync({ raceId, userId: myId })
+                await refetchRace()
+                await refetchScores()
+              }}
+            >
+              Quitter la course
+            </Button>
+          )}
+
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={!canStart || !raceId || startRace.isPending}
+            onClick={async () => {
+              if (!raceId) return
+              await startRace.mutateAsync(raceId)
+              await refetchRace()
+            }}
+            title={!canStart ? "Seul l'hôte / party manager peut démarrer" : undefined}
+          >
+            Démarrer
+          </Button>
         </div>
       </div>
 

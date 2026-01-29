@@ -121,14 +121,6 @@ export const LazyStatsSection = dynamic(
 // Modal Components (lazy loaded on demand)
 // ============================================
 
-export const LazyAddParticipantsModal = dynamic(
-  () => import("@/modules/party/AddParticipantsModal").then((mod) => ({ default: mod.AddParticipantsModal })),
-  {
-    loading: () => <PageLoader message="Chargement..." />,
-    ssr: false,
-  }
-);
-
 export const LazyRaceDetailsModal = dynamic(
   () => import("@/modules/party/RaceDetailsModal").then((mod) => ({ default: mod.RaceDetailsModal })),
   {

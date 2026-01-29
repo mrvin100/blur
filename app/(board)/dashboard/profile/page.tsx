@@ -1,17 +1,15 @@
 'use client';
 
-import { useSession } from "@/lib/auth-client";
-import type { AuthUser } from "@/lib/auth";
+import { useCurrentUser } from "@/hooks";
 import { User, Mail, Shield, Calendar, Trophy, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 export default function ProfilePage() {
-  const { data: session, isPending } = useSession();
-  const user = session?.user as AuthUser | null;
+  const { data: user, isLoading } = useCurrentUser();
 
-  if (isPending) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -20,12 +18,15 @@ export default function ProfilePage() {
     );
   }
 
-  const userName = user?.name ?? "User";
+  const userName = user?.userName ?? "User";
   const userEmail = user?.email ?? "No email provided";
-  const userImage = user?.image ?? "";
+  const userImage = "";
   const userInitial = userName.charAt(0).toUpperCase();
-  const isAdmin = user?.permissions?.some((p) => p === "VIEW_ALL_USERS");
+  const isAdmin = user?.role === 'GREAT_ADMIN' || user?.roles?.includes('GREAT_ADMIN');
+  const roleLabel = (user?.role ?? user?.roles?.[0] ?? 'RACER') as string;
   const permissions = user?.permissions ?? [];
+  const createdAt = user?.createdAt;
+  const updatedAt = user?.updatedAt;
 
   return (
     <div className="p-4 md:p-6">
@@ -91,7 +92,7 @@ export default function ProfilePage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4 p-3 bg-muted/50 rounded-lg">
                   <span className="text-xs sm:text-sm font-medium">Role</span>
                   <Badge variant="outline" className="text-xs w-fit">
-                    {isAdmin ? "GREAT_ADMIN" : "USER"}
+                    {roleLabel}
                   </Badge>
                 </div>
               </div>
@@ -116,6 +117,33 @@ export default function ProfilePage() {
                     </Badge>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Meta */}
+          {(createdAt || updatedAt) && (
+            <Card>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                  Account Meta
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Informations techniques de votre compte</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
+                {createdAt && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4 p-3 bg-muted/50 rounded-lg">
+                    <span className="text-xs sm:text-sm font-medium">Created</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">{createdAt}</span>
+                  </div>
+                )}
+                {updatedAt && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4 p-3 bg-muted/50 rounded-lg">
+                    <span className="text-xs sm:text-sm font-medium">Updated</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">{updatedAt}</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

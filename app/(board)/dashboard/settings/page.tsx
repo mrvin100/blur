@@ -1,14 +1,61 @@
 'use client';
 
-import { Settings, User, Bell, Shield, Palette, Globe } from "lucide-react"
+import { useMemo, useState } from 'react';
+import { Settings, User, Bell, Shield, Palette, Globe, Eye, EyeOff } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
+import { useAuth } from '@/modules/auth/context/AuthContext';
+import { useCurrentUser, useUpdateUserProfile } from '@/hooks';
+import { toast } from 'sonner';
 
 export default function SettingsPage() {
+  const { isAdmin } = useAuth();
+  const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
+  const updateProfile = useUpdateUserProfile();
+
+  // Security form state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const canSubmitPasswordChange = useMemo(() => {
+    return !!currentUser?.id && !!currentPassword && !!newPassword && newPassword === confirmPassword;
+  }, [currentUser?.id, currentPassword, newPassword, confirmPassword]);
+
+  const handleChangePassword = async () => {
+    if (!currentUser?.id) return;
+
+    if (!canSubmitPasswordChange) {
+      toast.error('Veuillez vérifier les champs du mot de passe');
+      return;
+    }
+
+    try {
+      await updateProfile.mutateAsync({
+        id: currentUser.id,
+        data: {
+          currentPassword,
+          password: newPassword,
+        },
+      });
+
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      toast.success('Mot de passe modifié avec succès');
+    } catch {
+      // errors handled by handleApiError in hook
+    }
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
@@ -36,13 +83,37 @@ export default function SettingsPage() {
             <CardContent className="space-y-3 sm:space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="username" className="text-xs sm:text-sm">Username</Label>
-                <Input id="username" placeholder="admin" disabled className="h-9 sm:h-10" />
+                <Input
+                  id="username"
+                  placeholder={isLoadingUser ? 'Chargement...' : ''}
+                  value={currentUser?.userName ?? ''}
+                  disabled
+                  className="h-9 sm:h-10"
+                />
               </div>
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
-                <Input id="email" type="email" placeholder="admin@example.com" disabled className="h-9 sm:h-10" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder={isLoadingUser ? 'Chargement...' : ''}
+                  value={currentUser?.email ?? ''}
+                  disabled
+                  className="h-9 sm:h-10"
+                />
               </div>
-              <Button disabled className="w-full sm:w-auto" size="sm">Update Profile</Button>
+              <Button
+                disabled
+                className="w-full sm:w-auto"
+                size="sm"
+                title={
+                  isAdmin
+                    ? "Les champs email/username se gèrent via la page Utilisateurs"
+                    : "Vous ne pouvez pas modifier votre email/username ici"
+                }
+              >
+                Update Profile
+              </Button>
             </CardContent>
           </Card>
 
@@ -100,17 +171,99 @@ export default function SettingsPage() {
             <CardContent className="space-y-3 sm:space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="current-password" className="text-xs sm:text-sm">Current Password</Label>
-                <Input id="current-password" type="password" disabled className="h-9 sm:h-10" />
+                <div className="relative">
+                  <Input
+                    id="current-password"
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="h-9 sm:h-10 pr-10"
+                    disabled={isLoadingUser || updateProfile.isPending}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-9 w-9"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    disabled={isLoadingUser || updateProfile.isPending}
+                    aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
+                    title={showCurrentPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showCurrentPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
               </div>
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="new-password" className="text-xs sm:text-sm">New Password</Label>
-                <Input id="new-password" type="password" disabled className="h-9 sm:h-10" />
+                <div className="relative">
+                  <Input
+                    id="new-password"
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="h-9 sm:h-10 pr-10"
+                    disabled={isLoadingUser || updateProfile.isPending}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-9 w-9"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    disabled={isLoadingUser || updateProfile.isPending}
+                    aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                    title={showNewPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
               </div>
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="confirm-password" className="text-xs sm:text-sm">Confirm Password</Label>
-                <Input id="confirm-password" type="password" disabled className="h-9 sm:h-10" />
+                <div className="relative">
+                  <Input
+                    id="confirm-password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="h-9 sm:h-10 pr-10"
+                    disabled={isLoadingUser || updateProfile.isPending}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-9 w-9"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    disabled={isLoadingUser || updateProfile.isPending}
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
               </div>
-              <Button disabled className="w-full sm:w-auto" size="sm">Change Password</Button>
+              <Button
+                onClick={handleChangePassword}
+                disabled={!canSubmitPasswordChange || isLoadingUser || updateProfile.isPending}
+                className="w-full sm:w-auto"
+                size="sm"
+              >
+                Change Password
+              </Button>
             </CardContent>
           </Card>
 

@@ -14,9 +14,10 @@ import { AddScoreRequestData } from "@/types/score.types"
 
 interface ScoreFormProps {
   raceId: string | undefined
+  disabled?: boolean
 }
 
-export function ScoreForm({ raceId }: ScoreFormProps) {
+export function ScoreForm({ raceId, disabled = false }: ScoreFormProps) {
   const [selectedRacer, setSelectedRacer] = useState<string>("")
   const [score, setScore] = useState<string>("")
   const [loading, setLoading] = useState(false)
@@ -28,6 +29,11 @@ export function ScoreForm({ raceId }: ScoreFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (disabled) {
+      toast.error("Cette partie n'est pas active aujourd'hui. Action impossible.")
+      return
+    }
 
     if (!selectedRacer || !score || !raceId) {
       toast.error("Veuillez sélectionner un joueur et entrer un rang");
@@ -113,7 +119,7 @@ export function ScoreForm({ raceId }: ScoreFormProps) {
         </div>
       </div>
 
-      <Button type="submit" disabled={loading} className="w-full md:w-auto">
+      <Button type="submit" disabled={loading || disabled} className="w-full md:w-auto">
         {loading ? "Ajout en cours..." : "Ajouter le rang"}
       </Button>
     </form>

@@ -8,6 +8,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { partyService } from '@/services';
 import { queryKeys } from '@/lib/query-keys';
 import type { Party } from '@/types/party.types';
+import type { PartyActiveStatus } from '@/types/party-active.types';
+import type { PartyMember } from '@/types/party-member.types';
 import { toast } from 'sonner';
 import { handleApiError } from '@/lib/api-error-handler';
 
@@ -28,6 +30,26 @@ export const useParty = (id: number | string) => {
   return useQuery<Party, Error>({
     queryKey: queryKeys.parties.detail(id),
     queryFn: () => partyService.getById(id),
+    enabled: !!id,
+  });
+};
+
+/**
+ * Get party active/actionable status
+ */
+export const usePartyActiveStatus = (id: number | string) => {
+  return useQuery<PartyActiveStatus, Error>({
+    queryKey: [...queryKeys.parties.detail(id), 'active-status'],
+    queryFn: () => partyService.getActiveStatus(id),
+    enabled: !!id,
+    staleTime: 30_000,
+  });
+};
+
+export const usePartyMembers = (id: number | string) => {
+  return useQuery<PartyMember[], Error>({
+    queryKey: [...queryKeys.parties.detail(id), 'members'],
+    queryFn: () => partyService.getMembers(id),
     enabled: !!id,
   });
 };
