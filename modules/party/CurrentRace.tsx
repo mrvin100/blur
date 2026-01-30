@@ -2,6 +2,17 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useAddParticipant, useCurrentUser, useJoinParty, useParty, useRace, useRemoveParticipant, useScoresByRace, useStartRace } from "@/hooks"
 import Image from "next/image"
 import { useEffect } from "react"
@@ -106,19 +117,38 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
             </Button>
           )}
 
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={!canStart || !raceId || startRace.isPending}
-            onClick={async () => {
-              if (!raceId) return
-              await startRace.mutateAsync(raceId)
-              await refetchRace()
-            }}
-            title={!canStart ? "Seul l'hôte / party manager peut démarrer" : undefined}
-          >
-            Démarrer
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={!canStart || !raceId || startRace.isPending}
+                title={!canStart ? "Seul l'hôte / party manager peut démarrer" : undefined}
+              >
+                Démarrer
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Démarrer la course ?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Confirmez que tous les joueurs sont prêts. Cette action ne peut pas être annulée.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    if (!raceId) return
+                    await startRace.mutateAsync(raceId)
+                    await refetchRace()
+                  }}
+                >
+                  Continuer
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 

@@ -8,6 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
 const ALL_PERMISSIONS = [
@@ -103,20 +114,40 @@ export default function RolesPage() {
 >
   Save
 </Button>
-<Button
-  size="sm"
-  variant="destructive"
-  className="cursor-pointer"
-  disabled={isGreatAdmin}
-  title={isGreatAdmin ? 'GREAT_ADMIN is a protected system role' : undefined}
-  onClick={async () => {
-    try {
-      await deleteRole.mutateAsync(r.id);
-    } catch {}
-  }}
->
-  Delete
-</Button>
+<AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button
+      size="sm"
+      variant="destructive"
+      className="cursor-pointer"
+      disabled={isGreatAdmin}
+      title={isGreatAdmin ? 'GREAT_ADMIN is a protected system role' : undefined}
+    >
+      Delete
+    </Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete role "{r.name}"?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This action cannot be undone. Users currently assigned to this role will lose it.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction
+        className="bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
+        onClick={async () => {
+          try {
+            await deleteRole.mutateAsync(r.id);
+          } catch {}
+        }}
+      >
+        Delete
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">

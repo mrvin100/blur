@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useUsers, useCreateUser } from "@/hooks"
+import { useUsers, useCreateUser, useUpdateUser, useAvailableRoles } from "@/hooks"
 import { 
   Card, 
   CardContent, 
@@ -11,96 +11,36 @@ import {
   CardFooter
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter, 
-  DialogTrigger, 
-  DialogClose 
-} from "@/components/ui/dialog"
-import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Eye, EyeOff, UserPlus, Users as UsersIcon, Pencil } from "lucide-react"
-import { Checkbox } from "@/components/ui/checkbox"
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Eye, UserPlus, Users as UsersIcon, Pencil } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { toast } from "sonner"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
 import type { User } from "@/types/user.types"
-import UserDetailsModal from "./UserDetailsModal"
+import { UserFormDialog } from "./UserFormDialog"
 import PermissionGate from "@/components/ui/permission-gate"
 import { ApiErrorState } from "@/components/ui/error-states"
 
-const createUserSchema = z.object({
-  userName: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  roles: z.array(z.enum(["GREAT_ADMIN", "PARTY_MANAGER", "RACER"])).min(1, "At least one role is required"),
-})
-
-type FormValues = z.infer<typeof createUserSchema>
+// create/update form is handled by <UserFormDialog />
 
 export function Users() {
   const { data: users, isLoading, isError } = useUsers()
   const createUser = useCreateUser()
+  const updateUser = useUpdateUser()
+  const { data: availableRoles = [] } = useAvailableRoles()
+
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(createUserSchema),
-    defaultValues: {
-      userName: "",
-      password: "",
-      roles: ["RACER"], 
-      email: "",
-    },
-  })
-
-  const handleCreateUser = async (values: FormValues) => {
-    try {
-      await createUser.mutateAsync({
-        userName: values.userName,
-        password: values.password,
-        roles: values.roles,
-        email: values.email || undefined,
-      })
-      setIsCreateDialogOpen(false)
-      form.reset()
-    } catch {
-      toast.error("Failed to create user")
-    }
-  }
-
-  const handleViewUser = (user: User) => {
+  const handleOpenUpdate = (user: User) => {
     setSelectedUser(user)
-    setIsDetailsModalOpen(true)
+    setIsUpdateDialogOpen(true)
   }
 
   if (isLoading) {
@@ -128,134 +68,14 @@ export function Users() {
               Create and manage system users
             </CardDescription>
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="shrink-0 cursor-pointer w-full sm:w-auto" size="sm">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add User
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="w-[calc(100%-2rem)] sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create New User</DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleCreateUser)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="userName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter username" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input 
-                              type={showPassword ? "text" : "password"} 
-                              placeholder="Enter password" 
-                              className="pr-10"
-                              {...field} 
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                              onClick={() => setShowPassword(!showPassword)}
-                            >
-                              {showPassword ? (
-                                <EyeOff className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <Eye className="h-4 w-4 text-muted-foreground" />
-                              )}
-                              <span className="sr-only">
-                                {showPassword ? "Hide password" : "Show password"}
-                              </span>
-                            </Button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email (optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="roles"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>Roles (select one or more)</FormLabel>
-                        <div className="space-y-2">
-                          {(["RACER", "PARTY_MANAGER", "GREAT_ADMIN"] as const).map((role) => (
-                            <FormField
-                              key={role}
-                              control={form.control}
-                              name="roles"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(role)}
-                                      onCheckedChange={(checked) => {
-                                        const current = field.value || [];
-                                        if (checked) {
-                                          field.onChange([...current, role]);
-                                        } else {
-                                          field.onChange(current.filter((r) => r !== role));
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal cursor-pointer">
-                                    {role}
-                                  </FormLabel>
-                                </FormItem>
-                              )}
-                            />
-                          ))}
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button type="button" variant="outline" className="cursor-pointer">Cancel</Button>
-                    </DialogClose>
-                    <Button type="submit" disabled={createUser.isPending} className="cursor-pointer">
-                      {createUser.isPending ? "Creating..." : "Create User"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+          <Button
+            className="shrink-0 cursor-pointer w-full sm:w-auto"
+            size="sm"
+            onClick={() => setIsCreateDialogOpen(true)}
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add User
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -298,7 +118,7 @@ export function Users() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => handleViewUser(user)}
+                              onClick={() => handleOpenUpdate(user)}
                               className="cursor-pointer h-8 w-8"
                               title="Edit user"
                             >
@@ -309,12 +129,12 @@ export function Users() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleViewUser(user)}
+                            onClick={() => handleOpenUpdate(user)}
                             className="cursor-pointer h-8 w-8"
-                            title="View details"
+                            title="Update user"
                           >
                             <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            <span className="sr-only">View Details</span>
+                            <span className="sr-only">Update User</span>
                           </Button>
                         </div>
                       </TableCell>
@@ -331,13 +151,54 @@ export function Users() {
         <div>{new Date().toLocaleDateString()}</div>
       </CardFooter>
 
-      {selectedUser && (
-        <UserDetailsModal
-          isOpen={isDetailsModalOpen}
-          onClose={() => setIsDetailsModalOpen(false)}
-          userId={selectedUser.id.toString()}
-        />
-      )}
+      <UserFormDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        mode="create"
+        title="Create New User"
+        submitLabel={createUser.isPending ? "Creating..." : "Create"}
+        isSubmitting={createUser.isPending}
+        availableRoles={availableRoles}
+        onSubmit={async (values) => {
+          await createUser.mutateAsync({
+            userName: values.userName,
+            email: values.email,
+            password: values.password ?? "",
+            roles: values.roles,
+          })
+          setIsCreateDialogOpen(false)
+        }}
+      />
+
+      <UserFormDialog
+        open={isUpdateDialogOpen}
+        onOpenChange={(open) => {
+          setIsUpdateDialogOpen(open)
+          if (!open) setSelectedUser(null)
+        }}
+        mode="update"
+        title={selectedUser ? `Update ${selectedUser.userName}` : "Update User"}
+        submitLabel={updateUser.isPending ? "Saving..." : "Save"}
+        isSubmitting={updateUser.isPending}
+        availableRoles={availableRoles}
+        initialUser={selectedUser}
+        onSubmit={async (values) => {
+          if (!selectedUser) return
+          await updateUser.mutateAsync({
+            id: selectedUser.id,
+            data: {
+              userName: values.userName,
+              email: values.email,
+              password: values.password,
+              roles: values.roles,
+              enabled: values.enabled,
+              accountNonLocked: values.accountNonLocked,
+            },
+          })
+          setIsUpdateDialogOpen(false)
+          setSelectedUser(null)
+        }}
+      />
     </Card>
   )
 }

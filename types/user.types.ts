@@ -27,7 +27,17 @@ export interface CreateUserDto {
 export interface UpdateUserDto {
   userName?: string;
   email?: string;
+
+  /**
+   * New password (when changing password)
+   */
   password?: string;
+
+  /**
+   * Current password (required by backend to change password)
+   */
+  currentPassword?: string;
+
   roles?: string[];
   enabled?: boolean;
   accountNonLocked?: boolean;
