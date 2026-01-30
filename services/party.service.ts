@@ -17,8 +17,6 @@ const PARTY_ENDPOINTS = {
   BY_DATE: (date: string) => `parties/date/${date}`,
   ACTIVE_STATUS: (id: number | string) => `parties/${id}/active`,
   MEMBERS: (id: number | string) => `parties/${id}/members`,
-  JOIN: (partyId: number | string) => `parties/${partyId}/join`,
-  LEAVE: (partyId: number | string) => `parties/${partyId}/leave`,
   ASSIGN_MANAGER: (partyId: number | string, userId: number | string) => 
     `parties/${partyId}/managers/${userId}`,
 };
@@ -82,26 +80,6 @@ export const partyService = {
   getByDate: async (date: string): Promise<Party> => {
     const response = await apiClient
       .get(PARTY_ENDPOINTS.BY_DATE(date))
-      .json<ApiResponse<Party>>();
-    return response.data;
-  },
-
-  /**
-   * Join a party (current user joins)
-   */
-  join: async (partyId: number | string): Promise<Party> => {
-    const response = await apiClient
-      .post(PARTY_ENDPOINTS.JOIN(partyId))
-      .json<ApiResponse<Party>>();
-    return response.data;
-  },
-
-  /**
-   * Leave a party (current user leaves)
-   */
-  leave: async (partyId: number | string): Promise<Party> => {
-    const response = await apiClient
-      .post(PARTY_ENDPOINTS.LEAVE(partyId))
       .json<ApiResponse<Party>>();
     return response.data;
   },

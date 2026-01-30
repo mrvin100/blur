@@ -97,9 +97,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/dashboard/party/new">
+              <Link href="/dashboard/party">
                 <Plus className="mr-2 h-4 w-4" />
-                {isAdmin ? "Create New Party" : "View Parties"}
+                Today's Party
               </Link>
             </Button>
           </CardContent>

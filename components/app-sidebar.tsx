@@ -54,8 +54,8 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
       icon: LayoutDashboard,
     },
     {
-      title: "New Party",
-      url: "/dashboard/party/new",
+      title: "Today's Party",
+      url: "/dashboard/party",
       icon: Trophy,
     },
     // Admin / privileged entries are injected below via PermissionGate

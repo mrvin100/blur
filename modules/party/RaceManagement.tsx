@@ -32,14 +32,31 @@ export function RaceManagement() {
     }
   }, [races])
 
+  // New rule: if there is no race yet for today's party, auto-create one.
+  useEffect(() => {
+    if (!party) return
+    if (!races) return
+    if (races.length > 0) return
+    if (actionsDisabled) return
+    if (createRace.isPending) return
+
+    // fire-and-forget; errors are handled by mutation handler
+    createRace.mutate({ partyId: numericPartyId, attributionType: 'PER_USER' })
+  }, [party, races, actionsDisabled, createRace.isPending, numericPartyId])
+
   function getMostRecentRace(races: Race[]): Race | null {
     if (races.length === 0) return null;
+
+    const isActive = (r: Race) => r.status === 'PENDING' || r.status === 'IN_PROGRESS';
+
     const sorted = [...races].sort((a, b) => {
       const aTime = a.createdAt || '';
       const bTime = b.createdAt || '';
       return bTime.localeCompare(aTime);
     });
-    return sorted[0];
+
+    // Prefer active race (pending / in progress). Fallback to latest.
+    return sorted.find(isActive) ?? sorted[0];
   }
 
 

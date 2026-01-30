@@ -134,6 +134,24 @@ export type PartyResponse = z.infer<typeof partyResponseSchema>;
 export type PartiesResponse = z.infer<typeof partiesResponseSchema>;
 
 // ============================================
+// Race Parameters Schemas
+// ============================================
+
+export const raceParametersSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  isActive: z.boolean().nullable().optional(),
+  downloadUrl: z.string().nullable().optional(),
+});
+
+export const raceParametersResponseSchema = createApiResponseSchema(raceParametersSchema);
+export const raceParametersListResponseSchema = createApiResponseSchema(z.array(raceParametersSchema));
+
+export type RaceParameters = z.infer<typeof raceParametersSchema>;
+export type RaceParametersResponse = z.infer<typeof raceParametersResponseSchema>;
+export type RaceParametersListResponse = z.infer<typeof raceParametersListResponseSchema>;
+
+// ============================================
 // Race Schemas
 // ============================================
 
@@ -141,16 +159,24 @@ export const raceStatusSchema = z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', '
 
 export const raceSchema = z.object({
   id: z.number(),
-  partyId: z.number().optional(),
-  mapId: z.number().optional(),
-  map: mapSchema.optional(),
-  status: raceStatusSchema.optional(),
-  participants: z.array(userSchema).optional(),
-  scores: z.array(z.any()).optional(), // Will be refined with scoreSchema
+  party: z
+    .object({
+      id: z.number(),
+      datePlayed: z.string().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
+  createdAt: z.string().nullable().optional(),
   startedAt: z.string().nullable().optional(),
   completedAt: z.string().nullable().optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
+  status: raceStatusSchema.optional(),
+  attributionType: z.enum(['PER_USER', 'ALL_USERS']).nullable().optional(),
+  racers: z.array(userSchema).optional(),
+  raceParameters: z.array(raceParametersSchema).optional(),
+  card: mapSchema.nullable().optional(),
+  car: carSchema.nullable().optional(),
+  attributions: z.array(z.any()).optional(),
+  scores: z.array(z.any()).optional(),
 });
 
 export const raceResponseSchema = createApiResponseSchema(raceSchema);
@@ -160,25 +186,6 @@ export type Race = z.infer<typeof raceSchema>;
 export type RaceStatus = z.infer<typeof raceStatusSchema>;
 export type RaceResponse = z.infer<typeof raceResponseSchema>;
 export type RacesResponse = z.infer<typeof racesResponseSchema>;
-
-// ============================================
-// Race Parameters Schemas
-// ============================================
-
-export const raceParametersSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  pointsDistribution: z.record(z.string(), z.number()).optional(),
-  maxParticipants: z.number().optional(),
-  description: z.string().optional(),
-});
-
-export const raceParametersResponseSchema = createApiResponseSchema(raceParametersSchema);
-export const raceParametersListResponseSchema = createApiResponseSchema(z.array(raceParametersSchema));
-
-export type RaceParameters = z.infer<typeof raceParametersSchema>;
-export type RaceParametersResponse = z.infer<typeof raceParametersResponseSchema>;
-export type RaceParametersListResponse = z.infer<typeof raceParametersListResponseSchema>;
 
 // ============================================
 // Score Schemas
@@ -225,8 +232,7 @@ export const createPartySchema = z.object({
 
 export const createRaceSchema = z.object({
   partyId: z.number(),
-  mapId: z.number(),
-  raceParametersId: z.number().optional(),
+  attributionType: z.enum(['PER_USER', 'ALL_USERS']).optional(),
 });
 
 export const submitScoreSchema = z.object({

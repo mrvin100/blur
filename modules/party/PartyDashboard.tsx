@@ -39,10 +39,10 @@ export function PartyDashboard() {
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Blur Racing Dashboard</h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">Browse cars, maps, and race parameters for your next race</p>
         </div>
-        <Link href="/dashboard/party/new" className="w-full sm:w-auto self-start">
+        <Link href="/dashboard/party" className="w-full sm:w-auto self-start">
           <Button size="default" className="gap-2 w-full sm:w-auto">
             <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-            Launch a Party
+            Go to Today's Party
           </Button>
         </Link>
       </div>
@@ -120,10 +120,10 @@ export function PartyDashboard() {
       </Tabs>
 
       <div className="mt-8 sm:mt-12 text-center">
-        <Link href="/dashboard/party/new">
+        <Link href="/dashboard/party">
           <Button size="default" className="gap-2 w-full sm:w-auto">
             <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-            Launch a Party
+            Go to Today's Party
           </Button>
         </Link>
       </div>

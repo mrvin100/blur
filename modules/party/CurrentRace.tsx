@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useAddParticipant, useCurrentUser, useJoinParty, useParty, useRace, useRemoveParticipant, useScoresByRace, useStartRace } from "@/hooks"
+import { useAddParticipant, useCurrentUser, useParty, useRace, useRemoveParticipant, useScoresByRace, useStartRace } from "@/hooks"
 import Image from "next/image"
 import { useEffect } from "react"
 
@@ -28,16 +28,15 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
 
   const { data: me } = useCurrentUser()
   const { data: party } = useParty(partyId)
-  const joinParty = useJoinParty()
   const addParticipant = useAddParticipant()
   const removeParticipant = useRemoveParticipant()
   const startRace = useStartRace()
 
   const myId = me?.id
   const hasJoinedRace = !!myId && !!race?.racers?.some((r) => r.id === myId)
-  const isCreator = !!myId && party?.creator?.id === myId
-  const isManager = !!myId && (party?.managers ?? []).some((m) => m.id === myId)
-  const canStart = isCreator || isManager
+  // New rule: racers join a race (not the party).
+  // Any joined racer can start the race.
+  const canStart = hasJoinedRace
 
   useEffect(() => {
     if (raceId) {
@@ -75,19 +74,6 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!myId || joinParty.isPending}
-            onClick={async () => {
-              if (!myId) return
-              await joinParty.mutateAsync(partyId)
-            }}
-            title={!myId ? 'Chargement utilisateur...' : undefined}
-          >
-            Rejoindre la partie
-          </Button>
-
           {!hasJoinedRace ? (
             <Button
               size="sm"
@@ -123,7 +109,7 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
                 variant="secondary"
                 size="sm"
                 disabled={!canStart || !raceId || startRace.isPending}
-                title={!canStart ? "Seul l'hôte / party manager peut démarrer" : undefined}
+                title={!canStart ? "Rejoignez la course pour pouvoir démarrer" : undefined}
               >
                 Démarrer
               </Button>

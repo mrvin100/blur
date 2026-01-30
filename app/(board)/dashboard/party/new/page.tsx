@@ -1,7 +1,18 @@
-"use client";
+'use client';
 
-import { LazyNewParty } from "@/lib/lazy-modules";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
+/**
+ * Legacy route.
+ * Party creation is automatic via /dashboard/party (today's party).
+ */
 export default function NewPartyRoutePage() {
-  return <LazyNewParty />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/dashboard/party');
+  }, [router]);
+
+  return null;
 }

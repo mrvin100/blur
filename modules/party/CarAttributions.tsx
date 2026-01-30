@@ -5,9 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { Dices } from "lucide-react"
+import { Car } from "lucide-react"
 import { useRace, useCars } from "@/hooks"
-import { toast } from "sonner"
 
 interface CarAttributionProps {
   raceId: string
@@ -22,33 +21,19 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
   const hasCar = !!race?.car;
   const hasIndividualAttributions = (race?.attributions?.length || 0) > 0;
 
-  // Note: Car attribution endpoints not available in backend yet
-  // This is a placeholder that shows available cars
+  // Attributions are assigned automatically by the backend when the race starts.
+  // Manual overrides may be implemented later (UI intentionally read-only for now).
   const fetchGlobalCar = async () => {
-    try {
-      setLoadingGlobal(true);
-      // Backend attribution endpoint not implemented yet
-      toast.info("Attribution de voiture non disponible pour le moment");
-      await refetchRace();
-    } catch {
-      toast.error("Erreur lors de l'attribution");
-    } finally {
-      setLoadingGlobal(false);
-    }
-  };
+    setLoadingGlobal(true)
+    await refetchRace()
+    setLoadingGlobal(false)
+  }
 
   const fetchIndividualCars = async () => {
-    try {
-      setLoadingIndividual(true);
-      // Backend attribution endpoint not implemented yet
-      toast.info("Attribution individuelle non disponible pour le moment");
-      await refetchRace();
-    } catch {
-      toast.error("Erreur lors de l'attribution");
-    } finally {
-      setLoadingIndividual(false);
-    }
-  };
+    setLoadingIndividual(true)
+    await refetchRace()
+    setLoadingIndividual(false)
+  }
 
   return (
     <Card className="h-full border shadow-sm">
@@ -65,8 +50,8 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
           <TabsContent value="global" className="pt-4">
             <div className="flex justify-end mb-4">
               {!hasCar && <Button variant="outline" size="sm" onClick={fetchGlobalCar} disabled={loadingGlobal}>
-                <Dices className="h-4 w-4 mr-1" />
-                Attribuer une voiture
+                <Car className="h-4 w-4 mr-1" />
+                Refresh
               </Button>}
             </div>
 
@@ -96,8 +81,7 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
               !hasCar && <div className="py-16 text-center">
                 <p className="text-muted-foreground mb-4">Aucune voiture attribuée</p>
                 <Button variant="outline" onClick={fetchGlobalCar}>
-                  <Dices className="h-4 w-4 mr-2" />
-                  Attribuer une voiture
+                  Refresh
                 </Button>
               </div>
             )}
@@ -111,8 +95,8 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
                 onClick={fetchIndividualCars}
                 disabled={loadingIndividual || !race || !race.racers || race.racers.length === 0}
               >
-                <Dices className="h-4 w-4 mr-1" />
-                Attribuer des voitures
+                <Car className="h-4 w-4 mr-1" />
+                Refresh
               </Button>}
             </div>
 
@@ -146,8 +130,7 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
                 </p>
                 {race && race.racers && race.racers.length > 0 && !hasIndividualAttributions && (
                   <Button variant="outline" onClick={fetchIndividualCars}>
-                    <Dices className="h-4 w-4 mr-2" />
-                    Attribuer des voitures
+                    Refresh
                   </Button>
                 )}
               </div>

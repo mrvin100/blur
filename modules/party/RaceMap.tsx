@@ -3,32 +3,25 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { Dices, MapPin } from "lucide-react"
+import { MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRace, useMaps } from "@/hooks"
-import { toast } from "sonner"
 interface Props {
   raceId: string
 }
 export function RaceMap({ raceId }: Props) {
   const [loading, setLoading] = useState(false)
   const { data: race, refetch } = useRace(raceId)
-  const { data: maps } = useMaps()
+  // Maps list may be used for future manual override UI
+  useMaps()
   const hasMap = !!race?.card
 
-  // Note: Random map endpoint not available in backend yet
-  // This is a placeholder
+  // Map/card is assigned automatically by the backend when the race starts.
+  // Manual overrides may be implemented later (UI intentionally read-only for now).
   const fetchRandomMap = async () => {
-    try {
-      setLoading(true)
-      // Backend random map endpoint not implemented yet
-      toast.info("Attribution de circuit non disponible pour le moment")
-      await refetch()
-    } catch {
-      toast.error("Erreur lors de la récupération de la carte")
-    } finally {
-      setLoading(false)
-    }
+    setLoading(true)
+    await refetch()
+    setLoading(false)
   }
 
   return (
@@ -40,8 +33,7 @@ export function RaceMap({ raceId }: Props) {
             Circuit
           </div>
           <Button variant="outline" size="sm" onClick={fetchRandomMap} disabled={loading}>
-            <Dices className="h-4 w-4 mr-1" />
-            Tirer
+            Refresh
           </Button>
         </CardTitle>
       </CardHeader>
@@ -66,10 +58,7 @@ export function RaceMap({ raceId }: Props) {
         ) : (
           <div className="py-16 text-center">
             <p className="text-muted-foreground mb-4">Aucun circuit sélectionné</p>
-            <Button variant="outline" onClick={fetchRandomMap}>
-              <Dices className="h-4 w-4 mr-2" />
-              Tirer un circuit
-            </Button>
+            <Button variant="outline" onClick={fetchRandomMap}>Refresh</Button>
           </div>
         )}
       </CardContent>

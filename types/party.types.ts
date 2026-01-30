@@ -34,8 +34,8 @@ export interface Race {
   createdAt?: string;
   startedAt?: string;
   completedAt?: string;
-  status?: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
-  attributionType?: 'GLOBAL' | 'INDIVIDUAL';
+  status?: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  attributionType?: 'PER_USER' | 'ALL_USERS';
 }
 
 export interface Score {
@@ -85,9 +85,9 @@ export interface UpdatePartyDto {
 
 export interface CreateRaceDto {
   partyId: number;
-  cardId?: number;
-  attributionType?: 'GLOBAL' | 'INDIVIDUAL';
-  raceParameterIds?: number[];
+  // cardId is not configurable yet in backend (random card is selected)
+  attributionType?: 'PER_USER' | 'ALL_USERS';
+  // race parameters are auto-selected in backend during creation
 }
 
 export interface UpdateRaceDto {

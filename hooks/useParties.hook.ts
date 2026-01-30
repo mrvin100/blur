@@ -76,40 +76,6 @@ export const usePartyByDate = (date: string) => {
 };
 
 /**
- * Join party mutation
- */
-export const useJoinParty = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (partyId: number | string) => partyService.join(partyId),
-    onSuccess: (_, partyId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.parties.lists() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(partyId) });
-      toast.success('Vous avez rejoint la partie');
-    },
-    onError: (error: Error) => handleApiError(error),
-  });
-};
-
-/**
- * Leave party mutation
- */
-export const useLeaveParty = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (partyId: number | string) => partyService.leave(partyId),
-    onSuccess: (_, partyId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.parties.lists() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(partyId) });
-      toast.success('Vous avez quitté la partie');
-    },
-    onError: (error: Error) => handleApiError(error),
-  });
-};
-
-/**
  * Assign manager to party mutation
  */
 export const useAssignManager = () => {
