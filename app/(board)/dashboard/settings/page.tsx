@@ -1,11 +1,23 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
 import { Settings, User, Bell, Shield, Palette, Globe, Eye, EyeOff } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from '@/modules/auth/context/AuthContext';
@@ -16,6 +28,29 @@ export default function SettingsPage() {
   const { isAdmin } = useAuth();
   const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const updateProfile = useUpdateUserProfile();
+
+  const profileSchema = z.object({
+    userName: z.string().min(3, 'Username must be at least 3 characters'),
+    email: z.string().email('Invalid email').optional().or(z.literal('')),
+  });
+
+  type ProfileValues = z.infer<typeof profileSchema>;
+
+  const profileForm = useForm<ProfileValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      userName: '',
+      email: '',
+    },
+  });
+
+  useEffect(() => {
+    if (!currentUser) return;
+    profileForm.reset({
+      userName: currentUser.userName ?? '',
+      email: currentUser.email ?? '',
+    });
+  }, [currentUser, profileForm]);
 
   // Security form state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -82,7 +117,7 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-3 sm:space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="username" className="text-xs sm:text-sm">Username</Label>
+                <FieldLabel htmlFor="username" className="text-xs sm:text-sm">Username</FieldLabel>
                 <Input
                   id="username"
                   placeholder={isLoadingUser ? 'Chargement...' : ''}
@@ -92,7 +127,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
+                <FieldLabel htmlFor="email" className="text-xs sm:text-sm">Email</FieldLabel>
                 <Input
                   id="email"
                   type="email"
@@ -129,7 +164,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-3 sm:space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="flex items-center justify-between gap-3 sm:gap-4">
                 <div className="space-y-0.5 flex-1 min-w-0">
-                  <Label className="text-xs sm:text-sm md:text-base">Race Start Notifications</Label>
+                  <FieldLabel className="text-xs sm:text-sm md:text-base">Race Start Notifications</FieldLabel>
                   <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                     Get notified when a new race starts
                   </p>
@@ -139,7 +174,7 @@ export default function SettingsPage() {
               <Separator />
               <div className="flex items-center justify-between gap-3 sm:gap-4">
                 <div className="space-y-0.5 flex-1 min-w-0">
-                  <Label className="text-xs sm:text-sm md:text-base">Score Submission Alerts</Label>
+                  <FieldLabel className="text-xs sm:text-sm md:text-base">Score Submission Alerts</FieldLabel>
                   <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                     Alerts when scores are submitted
                   </p>
@@ -149,13 +184,95 @@ export default function SettingsPage() {
               <Separator />
               <div className="flex items-center justify-between gap-3 sm:gap-4">
                 <div className="space-y-0.5 flex-1 min-w-0">
-                  <Label className="text-xs sm:text-sm md:text-base">Party Invitations</Label>
+                  <FieldLabel className="text-xs sm:text-sm md:text-base">Party Invitations</FieldLabel>
                   <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                     Notifications for party invitations
                   </p>
                 </div>
                 <Switch defaultChecked className="shrink-0" />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Profile */}
+          <Card>
+            <CardHeader className="p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-sm sm:text-base md:text-lg flex items-center gap-2">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                Profile
+              </CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
+                View and update your account information.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
+              <form
+                className="space-y-4"
+                onSubmit={profileForm.handleSubmit(async (values) => {
+                  if (!currentUser?.id) return;
+                  try {
+                    await updateProfile.mutateAsync({
+                      id: currentUser.id,
+                      data: {
+                        userName: values.userName,
+                        email: values.email || undefined,
+                      },
+                    });
+                  } catch {
+                    toast.error('Failed to update profile');
+                  }
+                })}
+              >
+                <FieldSet>
+                  <FieldLegend variant="label">Account</FieldLegend>
+                  <FieldGroup className="@container/field-group flex flex-col gap-6">
+                    <Controller
+                      name="userName"
+                      control={profileForm.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Username</FieldLabel>
+                          <Input
+                            {...field}
+                            id={field.name}
+                            autoComplete="off"
+                            aria-invalid={fieldState.invalid}
+                          />
+                          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        </Field>
+                      )}
+                    />
+
+                    <Controller
+                      name="email"
+                      control={profileForm.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                          <Input
+                            {...field}
+                            id={field.name}
+                            type="email"
+                            aria-invalid={fieldState.invalid}
+                          />
+                          <FieldDescription>Optional.</FieldDescription>
+                          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        </Field>
+                      )}
+                    />
+                  </FieldGroup>
+                </FieldSet>
+
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    disabled={isLoadingUser || updateProfile.isPending}
+                    className="cursor-pointer"
+                  >
+                    {updateProfile.isPending ? 'Saving...' : 'Save profile'}
+                  </Button>
+                </div>
+              </form>
             </CardContent>
           </Card>
 
@@ -170,7 +287,7 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-3 sm:space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="current-password" className="text-xs sm:text-sm">Current Password</Label>
+                <FieldLabel htmlFor="current-password" className="text-xs sm:text-sm">Current Password</FieldLabel>
                 <div className="relative">
                   <Input
                     id="current-password"
@@ -199,7 +316,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="new-password" className="text-xs sm:text-sm">New Password</Label>
+                <FieldLabel htmlFor="new-password" className="text-xs sm:text-sm">New Password</FieldLabel>
                 <div className="relative">
                   <Input
                     id="new-password"
@@ -228,7 +345,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="confirm-password" className="text-xs sm:text-sm">Confirm Password</Label>
+                <FieldLabel htmlFor="confirm-password" className="text-xs sm:text-sm">Confirm Password</FieldLabel>
                 <div className="relative">
                   <Input
                     id="confirm-password"
@@ -279,7 +396,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-3 sm:space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="flex items-center justify-between gap-3 sm:gap-4">
                 <div className="space-y-0.5 flex-1 min-w-0">
-                  <Label className="text-xs sm:text-sm md:text-base">Dark Mode</Label>
+                  <FieldLabel className="text-xs sm:text-sm md:text-base">Dark Mode</FieldLabel>
                   <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                     Use system theme setting
                   </p>
@@ -301,7 +418,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-3 sm:space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="flex items-center justify-between gap-3 sm:gap-4">
                 <div className="space-y-0.5 flex-1 min-w-0">
-                  <Label className="text-xs sm:text-sm md:text-base">Auto-refresh Data</Label>
+                  <FieldLabel className="text-xs sm:text-sm md:text-base">Auto-refresh Data</FieldLabel>
                   <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                     Automatically refresh race data every 30 seconds
                   </p>
@@ -310,7 +427,7 @@ export default function SettingsPage() {
               </div>
               <Separator />
               <div className="space-y-1 sm:space-y-2">
-                <Label className="text-xs sm:text-sm md:text-base">Language</Label>
+                <FieldLabel className="text-xs sm:text-sm md:text-base">Language</FieldLabel>
                 <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                   Currently: Français
                 </p>

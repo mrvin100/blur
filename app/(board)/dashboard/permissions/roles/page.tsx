@@ -65,7 +65,7 @@ export default function RolesPage() {
               <h3 className="font-medium mb-2">Create Role</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Input
-  placeholder="Role name e.g., PARTY_MANAGER, SCORE_COLLECTOR"
+  placeholder="Role name e.g., RACER, SCORE_COLLECTOR"
   value={newRoleName}
   onChange={(e) => setNewRoleName(e.target.value.toUpperCase())}
 />

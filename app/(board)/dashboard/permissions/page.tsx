@@ -87,38 +87,20 @@ export default function PermissionsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="p-3 sm:p-4 md:p-6">
-              <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg">
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                PARTY_MANAGER
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Party and race management</CardDescription>
-            </CardHeader>
-            <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
-              <ul className="text-xs sm:text-sm space-y-1 text-muted-foreground">
-                <li>✓ Create/manage parties</li>
-                <li>✓ Create/start races</li>
-                <li>✓ Add participants</li>
-                <li>✓ Submit scores</li>
-                <li>✓ View history</li>
-              </ul>
-            </CardContent>
-          </Card>
-
           <Card className="sm:col-span-2 lg:col-span-1">
             <CardHeader className="p-3 sm:p-4 md:p-6">
               <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg">
                 <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 RACER
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Basic racing access</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Main app access</CardDescription>
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
               <ul className="text-xs sm:text-sm space-y-1 text-muted-foreground">
-                <li>✓ View own parties</li>
-                <li>✓ View own races</li>
-                <li>✓ View own scores</li>
+                <li>✓ Create/manage parties</li>
+                <li>✓ Create/start races</li>
+                <li>✓ Join races</li>
+                <li>✓ Submit/view scores</li>
                 <li>✓ View history</li>
               </ul>
             </CardContent>
@@ -140,7 +122,7 @@ export default function PermissionsPage() {
             <div>
               <h3 className="font-medium mb-1 sm:mb-2 text-xs sm:text-sm md:text-base">Role Hierarchy</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                GREAT_ADMIN → PARTY_MANAGER → RACER
+                GREAT_ADMIN → RACER
               </p>
             </div>
           </CardContent>

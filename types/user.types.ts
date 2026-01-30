@@ -44,9 +44,9 @@ export interface UpdateUserDto {
 }
 
 // Available role types
-export type RoleType = 'GREAT_ADMIN' | 'PARTY_MANAGER' | 'RACER';
+export type RoleType = 'GREAT_ADMIN' | 'RACER';
 
-export const AVAILABLE_ROLES: RoleType[] = ['GREAT_ADMIN', 'PARTY_MANAGER', 'RACER'];
+export const AVAILABLE_ROLES: RoleType[] = ['GREAT_ADMIN', 'RACER'];
 
 // Legacy alias for backward compatibility
 export type Users = User;

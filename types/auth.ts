@@ -31,6 +31,6 @@ export interface CreateUserDto {
   userName: string;
   email?: string;
   password: string;
-  role: 'GREAT_ADMIN' | 'PARTY_MANAGER' | 'RACER';
+  role: 'GREAT_ADMIN' | 'RACER';
 }
  
