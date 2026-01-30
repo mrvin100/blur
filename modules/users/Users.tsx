@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useUsers, useCreateUser, useUpdateUser, useAvailableRoles } from "@/hooks"
+import { useUsers, useCreateUser, useUpdateUser, useAvailableRoles, useDeleteUser, useCurrentUser } from "@/hooks"
 import { 
   Card, 
   CardContent, 
@@ -19,10 +19,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Eye, UserPlus, Users as UsersIcon, Pencil } from "lucide-react"
+import { Eye, UserPlus, Users as UsersIcon, Pencil, Trash2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { User } from "@/types/user.types"
 import { UserFormDialog } from "./UserFormDialog"
+import UserDetailsModal from "./UserDetailsModal"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import PermissionGate from "@/components/ui/permission-gate"
 import { ApiErrorState } from "@/components/ui/error-states"
 
@@ -32,15 +44,24 @@ export function Users() {
   const { data: users, isLoading, isError } = useUsers()
   const createUser = useCreateUser()
   const updateUser = useUpdateUser()
+  const deleteUser = useDeleteUser()
+  const { data: currentUser } = useCurrentUser()
   const { data: availableRoles = [] } = useAvailableRoles()
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [detailsUser, setDetailsUser] = useState<User | null>(null)
 
   const handleOpenUpdate = (user: User) => {
     setSelectedUser(user)
     setIsUpdateDialogOpen(true)
+  }
+
+  const handleOpenDetails = (user: User) => {
+    setDetailsUser(user)
+    setIsDetailsOpen(true)
   }
 
   if (isLoading) {
@@ -129,13 +150,53 @@ export function Users() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleOpenUpdate(user)}
+                            onClick={() => handleOpenDetails(user)}
                             className="cursor-pointer h-8 w-8"
-                            title="Update user"
+                            title="View details"
                           >
                             <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            <span className="sr-only">Update User</span>
+                            <span className="sr-only">View Details</span>
                           </Button>
+
+                          <PermissionGate any={["DELETE_USER", "ALL_PERMISSIONS"]}>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="cursor-pointer h-8 w-8"
+                                  disabled={currentUser?.id === user.id}
+                                  title={
+                                    currentUser?.id === user.id
+                                      ? "You cannot delete your own account"
+                                      : "Delete user"
+                                  }
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-destructive" />
+                                  <span className="sr-only">Delete User</span>
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete user "{user.userName}"?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the user.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
+                                    onClick={async () => {
+                                      await deleteUser.mutateAsync(user.id)
+                                    }}
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </PermissionGate>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -169,6 +230,18 @@ export function Users() {
           setIsCreateDialogOpen(false)
         }}
       />
+
+      {detailsUser && (
+        <UserDetailsModal
+          isOpen={isDetailsOpen}
+          onClose={() => {
+            setIsDetailsOpen(false)
+            setDetailsUser(null)
+          }}
+          userId={detailsUser.id.toString()}
+          readOnly
+        />
+      )}
 
       <UserFormDialog
         open={isUpdateDialogOpen}

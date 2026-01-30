@@ -22,15 +22,17 @@ interface UserDetailsModalProps {
   isOpen: boolean
   onClose: () => void
   userId: string
+  readOnly?: boolean
 }
 
-export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetailsModalProps) {
+export default function UserDetailsModal({ isOpen, onClose, userId, readOnly = false }: UserDetailsModalProps) {
   const { data: userData, isLoading, isError, refetch } = useUser(userId)
   const { data: currentUser } = useCurrentUser()
   const canManageRoles = useMemo(() => {
+    if (readOnly) return false;
     const perms = (currentUser?.permissions || []) as string[]
     return perms.includes('ALL_PERMISSIONS') || perms.includes('ASSIGN_ROLES') || perms.includes('UPDATE_USER') || (currentUser?.role === 'GREAT_ADMIN')
-  }, [currentUser])
+  }, [currentUser, readOnly])
 
   const user = userData as User | undefined
   const { data: availableRoles } = useAvailableRoles()
@@ -42,9 +44,10 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
   const [password, setPassword] = useState<string>("")
   const [confirmPassword, setConfirmPassword] = useState<string>("")
   const canEditDetails = useMemo(() => {
+    if (readOnly) return false;
     const perms = (currentUser?.permissions || []) as string[]
     return perms.includes('ALL_PERMISSIONS') || perms.includes('UPDATE_USER') || (currentUser?.role === 'GREAT_ADMIN')
-  }, [currentUser])
+  }, [currentUser, readOnly])
 
   const assignUserRoles = useAssignUserRoles()
   const removeUserRole = useRemoveUserRole()
