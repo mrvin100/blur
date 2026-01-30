@@ -33,7 +33,7 @@ export function RaceMap({ raceId }: Props) {
             Circuit
           </div>
           <Button variant="outline" size="sm" onClick={fetchRandomMap} disabled={loading}>
-            Refresh
+            Reload
           </Button>
         </CardTitle>
       </CardHeader>
@@ -42,7 +42,7 @@ export function RaceMap({ raceId }: Props) {
           <div className="py-16 text-center">
             <div className="flex justify-center items-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mr-3"></div>
-              <p>Tirage en cours...</p>
+              <p>Chargement...</p>
             </div>
           </div>
         ) : race && hasMap ? (
@@ -57,8 +57,8 @@ export function RaceMap({ raceId }: Props) {
           </div>
         ) : (
           <div className="py-16 text-center">
-            <p className="text-muted-foreground mb-4">Aucun circuit sélectionné</p>
-            <Button variant="outline" onClick={fetchRandomMap}>Refresh</Button>
+            <p className="text-muted-foreground mb-4">Aucun circuit sélectionné (la carte est fixée à la création de la course)</p>
+            <Button variant="outline" onClick={fetchRandomMap}>Reload</Button>
           </div>
         )}
       </CardContent>

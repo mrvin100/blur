@@ -19,6 +19,7 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
   useCars()
 
   const hasCar = !!race?.car
+  const isAllUsers = race?.attributionType === 'ALL_USERS'
   const hasIndividualAttributions = (race?.attributions?.length || 0) > 0
 
   // Default to the most relevant tab based on attribution type.
@@ -61,10 +62,12 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
 
           <TabsContent value="global" className="pt-4">
             <div className="flex justify-end mb-4">
-              {!hasCar && <Button variant="outline" size="sm" onClick={fetchGlobalCar} disabled={loadingGlobal}>
-                <Car className="h-4 w-4 mr-1" />
-                Refresh
-              </Button>}
+              {isAllUsers && !hasCar && (
+                <Button variant="outline" size="sm" onClick={fetchGlobalCar} disabled={loadingGlobal}>
+                  <Car className="h-4 w-4 mr-1" />
+                  Refresh
+                </Button>
+              )}
             </div>
 
             {loadingGlobal ? (
@@ -74,7 +77,7 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
                   <p>Chargement...</p>
                 </div>
               </div>
-            ) : race && hasCar ? (
+            ) : race && isAllUsers && hasCar ? (
               <div className="space-y-4">
                 <h3 className="font-medium text-lg text-center">{race.car?.name}</h3>
                 <div className="relative h-48 w-full overflow-hidden rounded-md shadow-md">
@@ -90,7 +93,15 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
                 </p>
               </div>
             ) : (
-              !hasCar && <div className="py-16 text-center">
+              !isAllUsers && <div className="py-16 text-center">
+                <p className="text-muted-foreground">
+                  Attribution globale indisponible en mode PER_USER (voir "Attribution Individuelle").
+                </p>
+              </div>
+            )}
+
+            {isAllUsers && !hasCar && (
+              <div className="py-16 text-center">
                 <p className="text-muted-foreground mb-4">Aucune voiture attribuée</p>
                 <Button variant="outline" onClick={fetchGlobalCar}>
                   Refresh
