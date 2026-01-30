@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -15,11 +15,23 @@ interface CarAttributionProps {
 export function CarAttributions({ raceId }: CarAttributionProps) {
   const [loadingGlobal, setLoadingGlobal] = useState(false)
   const [loadingIndividual, setLoadingIndividual] = useState(false)
-  const [activeTab, setActiveTab] = useState<string>("global")
   const { data: race, refetch: refetchRace } = useRace(raceId)
-  const { data: cars } = useCars()
-  const hasCar = !!race?.car;
-  const hasIndividualAttributions = (race?.attributions?.length || 0) > 0;
+  useCars()
+
+  const hasCar = !!race?.car
+  const hasIndividualAttributions = (race?.attributions?.length || 0) > 0
+
+  // Default to the most relevant tab based on attribution type.
+  // - ALL_USERS: global car
+  // - PER_USER: individual attributions
+  const preferredTab: 'global' | 'individual' =
+    race?.attributionType === 'ALL_USERS' ? 'global' : 'individual'
+
+  const [activeTab, setActiveTab] = useState<'global' | 'individual'>(preferredTab)
+
+  useEffect(() => {
+    setActiveTab(preferredTab)
+  }, [preferredTab])
 
   // Attributions are assigned automatically by the backend when the race starts.
   // Manual overrides may be implemented later (UI intentionally read-only for now).
@@ -41,7 +53,7 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
         <CardTitle>Attribution des Voitures</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        <Tabs defaultValue="global" className="w-full" onValueChange={setActiveTab} value={activeTab}>
+        <Tabs className="w-full" onValueChange={(v) => setActiveTab(v as 'global' | 'individual')} value={activeTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="global">Attribution Globale</TabsTrigger>
             <TabsTrigger value="individual">Attribution Individuelle</TabsTrigger>
