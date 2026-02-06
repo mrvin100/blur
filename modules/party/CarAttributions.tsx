@@ -147,9 +147,11 @@ export function CarAttributions({ raceId }: CarAttributionProps) {
             ) : (
               <div className="py-16 text-center">
                 <p className="text-muted-foreground mb-4">
-                  {race && (!race.racers || race.racers.length === 0)
-                    ? "Ajoutez des participants à la course pour pouvoir attribuer des voitures"
-                    : "Aucune voiture attribuée aux participants"}
+                  {race && race.status === 'PENDING'
+                    ? "Démarrez la course pour attribuer automatiquement les voitures"
+                    : race && (!race.racers || race.racers.length === 0)
+                      ? "Ajoutez des participants à la course"
+                      : "Aucune voiture attribuée aux participants"}
                 </p>
                 {race && race.racers && race.racers.length > 0 && !hasIndividualAttributions && (
                   <Button variant="outline" onClick={fetchIndividualCars}>

@@ -48,7 +48,7 @@ export function ScoreForm({ raceId, disabled = false }: ScoreFormProps) {
     }
 
     try {
-      const existingScore = race?.scores?.find((s) => s.user?.id == Number(selectedRacer))
+      const existingScore = scores?.find((s) => s.user?.id == Number(selectedRacer))
       
       if (existingScore) {
         await updateScore.mutateAsync({ 
