@@ -180,3 +180,41 @@ export const useCancelRace = () => {
     onError: (error: Error) => handleApiError(error),
   });
 };
+
+/**
+ * Change card/map for a race mutation
+ */
+export const useChangeCard = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number | string) => raceService.changeCard(id),
+    onSuccess: (race, id) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.races.detail(id) });
+      if (race.party?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.races.byParty(race.party.id) });
+      }
+      toast.success('Carte changée avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Assign cars to participants mutation
+ */
+export const useAssignCars = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number | string) => raceService.assignCars(id),
+    onSuccess: (race, id) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.races.detail(id) });
+      if (race.party?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.races.byParty(race.party.id) });
+      }
+      toast.success('Voitures attribuées avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};

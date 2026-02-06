@@ -18,6 +18,8 @@ const RACE_ENDPOINTS = {
   START: (id: number | string) => `races/${id}/start`,
   COMPLETE: (id: number | string) => `races/${id}/complete`,
   CANCEL: (id: number | string) => `races/${id}/cancel`,
+  CHANGE_CARD: (id: number | string) => `races/${id}/change-card`,
+  ASSIGN_CARS: (id: number | string) => `races/${id}/assign-cars`,
   ADD_PARTICIPANT: (raceId: number | string, userId: number | string) => 
     `races/${raceId}/participants/${userId}`,
 };
@@ -138,6 +140,26 @@ export const raceService = {
   cancel: async (id: number | string): Promise<Race> => {
     const response = await apiClient
       .post(RACE_ENDPOINTS.CANCEL(id))
+      .json<ApiResponse<Race>>();
+    return response.data;
+  },
+
+  /**
+   * Change card/map for a race
+   */
+  changeCard: async (id: number | string): Promise<Race> => {
+    const response = await apiClient
+      .post(RACE_ENDPOINTS.CHANGE_CARD(id))
+      .json<ApiResponse<Race>>();
+    return response.data;
+  },
+
+  /**
+   * Assign cars to participants
+   */
+  assignCars: async (id: number | string): Promise<Race> => {
+    const response = await apiClient
+      .post(RACE_ENDPOINTS.ASSIGN_CARS(id))
       .json<ApiResponse<Race>>();
     return response.data;
   },

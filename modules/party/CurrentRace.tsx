@@ -2,6 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,9 +14,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useAddParticipant, useCurrentUser, useParty, useRace, useRemoveParticipant, useScoresByRace, useStartRace } from "@/hooks"
+import { useAddParticipant, useCurrentUser, useParty, useRace, useRemoveParticipant, useScoresByRace, useStartRace, useCompleteRace } from "@/hooks"
 import Image from "next/image"
 import { useEffect } from "react"
+import { Play, Square } from "lucide-react"
 
 interface CurrentRaceProps {
   raceId: string | undefined
@@ -31,12 +33,22 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
   const addParticipant = useAddParticipant()
   const removeParticipant = useRemoveParticipant()
   const startRace = useStartRace()
+  const completeRace = useCompleteRace()
 
   const myId = me?.id
   const hasJoinedRace = !!myId && !!race?.racers?.some((r) => r.id === myId)
-  // New rule: racers join a race (not the party).
-  // Any joined racer can start the race.
-  const canStart = hasJoinedRace
+  
+  // Race status checks
+  const isPending = race?.status === "PENDING"
+  const isInProgress = race?.status === "IN_PROGRESS"
+  const isCompleted = race?.status === "COMPLETED"
+  const isCancelled = race?.status === "CANCELLED"
+  
+  // Any joined racer can start/stop the race
+  const canStart = hasJoinedRace && isPending
+  const canStop = hasJoinedRace && isInProgress
+  // Can only join/leave when race is pending
+  const canJoinLeave = isPending
 
   useEffect(() => {
     if (raceId) {
@@ -48,6 +60,7 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
     await refetchScores()
     await refetchRace()
   }
+  
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("fr-FR", {
@@ -59,6 +72,21 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
     }).format(date)
   }
 
+  const getStatusBadge = () => {
+    switch (race?.status) {
+      case "PENDING":
+        return <Badge variant="secondary">En attente</Badge>
+      case "IN_PROGRESS":
+        return <Badge variant="default" className="bg-green-500">En cours</Badge>
+      case "COMPLETED":
+        return <Badge variant="outline">Terminée</Badge>
+      case "CANCELLED":
+        return <Badge variant="destructive">Annulée</Badge>
+      default:
+        return null
+    }
+  }
+
   if (!raceId) {
     return <p>Aucune course sélectionnée</p>
   }
@@ -67,74 +95,134 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
         <div>
-          <h2 className="text-xl font-semibold">Course du {race?.createdAt && formatDate(race.createdAt)}</h2>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-xl font-semibold">Course du {race?.createdAt && formatDate(race.createdAt)}</h2>
+            {getStatusBadge()}
+          </div>
           {race?.createdAt && (
             <p className="text-sm text-muted-foreground">Créée le {formatDate(race.createdAt)}</p>
           )}
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {!hasJoinedRace ? (
-            <Button
-              size="sm"
-              disabled={!myId || !raceId || addParticipant.isPending}
-              onClick={async () => {
-                if (!myId || !raceId) return
-                await addParticipant.mutateAsync({ raceId, userId: myId })
-                await refetchRace()
-                await refetchScores()
-              }}
-            >
-              Rejoindre la course
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!myId || !raceId || removeParticipant.isPending}
-              onClick={async () => {
-                if (!myId || !raceId) return
-                await removeParticipant.mutateAsync({ raceId, userId: myId })
-                await refetchRace()
-                await refetchScores()
-              }}
-            >
-              Quitter la course
-            </Button>
-          )}
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={!canStart || !raceId || startRace.isPending}
-                title={!canStart ? "Rejoignez la course pour pouvoir démarrer" : undefined}
-              >
-                Démarrer
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Démarrer la course ?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Confirmez que tous les joueurs sont prêts. Cette action ne peut pas être annulée.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction
+          {/* Join/Leave buttons - only show when race is pending */}
+          {canJoinLeave && (
+            <>
+              {!hasJoinedRace ? (
+                <Button
+                  size="sm"
+                  disabled={!myId || !raceId || addParticipant.isPending}
                   onClick={async () => {
-                    if (!raceId) return
-                    await startRace.mutateAsync(raceId)
+                    if (!myId || !raceId) return
+                    await addParticipant.mutateAsync({ raceId, userId: myId })
                     await refetchRace()
+                    await refetchScores()
                   }}
                 >
-                  Continuer
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                  Rejoindre la course
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!myId || !raceId || removeParticipant.isPending}
+                  onClick={async () => {
+                    if (!myId || !raceId) return
+                    await removeParticipant.mutateAsync({ raceId, userId: myId })
+                    await refetchRace()
+                    await refetchScores()
+                  }}
+                >
+                  Quitter la course
+                </Button>
+              )}
+            </>
+          )}
+
+          {/* Start button - only show when race is pending */}
+          {isPending && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="default"
+                  size="sm"
+                  disabled={!canStart || !raceId || startRace.isPending}
+                  title={!canStart ? "Rejoignez la course pour pouvoir démarrer" : undefined}
+                  className="gap-2 bg-green-600 hover:bg-green-700"
+                >
+                  <Play className="h-4 w-4" />
+                  Démarrer
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Démarrer la course ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Confirmez que tous les joueurs sont prêts. Cette action ne peut pas être annulée.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => {
+                      if (!raceId) return
+                      await startRace.mutateAsync(raceId)
+                      await refetchRace()
+                    }}
+                  >
+                    Continuer
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
+          {/* Stop button - only show when race is in progress */}
+          {isInProgress && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={!canStop || !raceId || completeRace.isPending}
+                  title={!canStop ? "Rejoignez la course pour pouvoir l'arrêter" : undefined}
+                  className="gap-2"
+                >
+                  <Square className="h-4 w-4" />
+                  Arrêter la course
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Arrêter la course ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Cette action terminera la course et enregistrera les scores. Assurez-vous que tous les scores ont été soumis.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => {
+                      if (!raceId) return
+                      await completeRace.mutateAsync(raceId)
+                      await refetchRace()
+                      await refetchScores()
+                    }}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Arrêter et enregistrer
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
+          {/* Show status message for completed/cancelled races */}
+          {(isCompleted || isCancelled) && (
+            <p className="text-sm text-muted-foreground self-center">
+              {isCompleted ? "Course terminée" : "Course annulée"}
+            </p>
+          )}
         </div>
       </div>
 

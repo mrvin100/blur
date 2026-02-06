@@ -1,27 +1,27 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { MapPin } from "lucide-react"
+import { MapPin, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useRace, useMaps } from "@/hooks"
+import { useRace, useChangeCard } from "@/hooks"
+
 interface Props {
   raceId: string
+  canChangeCard?: boolean
 }
-export function RaceMap({ raceId }: Props) {
-  const [loading, setLoading] = useState(false)
-  const { data: race, refetch } = useRace(raceId)
-  // Maps list may be used for future manual override UI
-  useMaps()
-  const hasMap = !!race?.card
 
-  // Map/card is assigned automatically by the backend when the race starts.
-  // Manual overrides may be implemented later (UI intentionally read-only for now).
-  const fetchRandomMap = async () => {
-    setLoading(true)
-    await refetch()
-    setLoading(false)
+export function RaceMap({ raceId, canChangeCard = true }: Props) {
+  const { data: race } = useRace(raceId)
+  const changeCard = useChangeCard()
+  
+  const hasMap = !!race?.card
+  const isPending = race?.status === "PENDING"
+  const canChange = canChangeCard && isPending
+
+  const handleChangeCard = () => {
+    if (!canChange) return
+    changeCard.mutate(raceId)
   }
 
   return (
@@ -32,17 +32,26 @@ export function RaceMap({ raceId }: Props) {
             <MapPin className="h-5 w-5 mr-2" />
             Circuit
           </div>
-          <Button variant="outline" size="sm" onClick={fetchRandomMap} disabled={loading}>
-            Reload
-          </Button>
+          {canChange && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleChangeCard} 
+              disabled={changeCard.isPending}
+              className="gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${changeCard.isPending ? 'animate-spin' : ''}`} />
+              Changer la carte
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        {loading ? (
+        {changeCard.isPending ? (
           <div className="py-16 text-center">
             <div className="flex justify-center items-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mr-3"></div>
-              <p>Chargement...</p>
+              <p>Changement de carte...</p>
             </div>
           </div>
         ) : race && hasMap ? (
@@ -57,8 +66,18 @@ export function RaceMap({ raceId }: Props) {
           </div>
         ) : (
           <div className="py-16 text-center">
-            <p className="text-muted-foreground mb-4">Aucun circuit sélectionné (la carte est fixée à la création de la course)</p>
-            <Button variant="outline" onClick={fetchRandomMap}>Reload</Button>
+            <p className="text-muted-foreground mb-4">Aucun circuit sélectionné</p>
+            {canChange && (
+              <Button 
+                variant="outline" 
+                onClick={handleChangeCard}
+                disabled={changeCard.isPending}
+                className="gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Attribuer une carte
+              </Button>
+            )}
           </div>
         )}
       </CardContent>

@@ -2,13 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RaceDetailsModal, CarAttributions, RacesList, CurrentRace, ScoreForm, RaceMap } from "@/modules/party"
@@ -29,7 +22,6 @@ export function RaceManagement() {
   const { data: races, refetch: refetchRaces, isError: isRacesError, error: racesError } = useRacesByParty(numericPartyId)
   const partyActionability = usePartyActionability(numericPartyId)
   const createRace = useCreateRace()
-  const [defaultAttributionType, setDefaultAttributionType] = useState<'PER_USER' | 'ALL_USERS'>('PER_USER')
 
   const actionsDisabled = partyActionability.isLoading || !partyActionability.isActionable
   const actionsDisabledReason = partyActionability.reason
@@ -49,7 +41,7 @@ export function RaceManagement() {
     if (createRace.isPending) return
 
     // fire-and-forget; errors are handled by mutation handler
-    createRace.mutate({ partyId: numericPartyId, attributionType: defaultAttributionType })
+    createRace.mutate({ partyId: numericPartyId })
   }, [party, races, actionsDisabled, createRace.isPending, numericPartyId])
 
   function getMostRecentRace(races: Race[]): Race | null {
@@ -78,7 +70,6 @@ export function RaceManagement() {
     try {
       await createRace.mutateAsync({
         partyId: numericPartyId,
-        attributionType: defaultAttributionType,
       })
       await refetchParty()
       await refetchRaces()
@@ -131,31 +122,15 @@ export function RaceManagement() {
                   <h2 className="text-lg sm:text-xl md:text-2xl font-semibold">Partie #{party.id}</h2>
                   <p className="text-xs sm:text-sm text-muted-foreground">Date: {formatDate(party.datePlayed)}</p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <Select
-                    value={defaultAttributionType}
-                    onValueChange={(v) => setDefaultAttributionType(v as 'PER_USER' | 'ALL_USERS')}
-                    disabled={actionsDisabled}
-                  >
-                    <SelectTrigger className="w-full sm:w-[220px]" aria-label="Attribution type">
-                      <SelectValue placeholder="Type d'attribution" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PER_USER">PER_USER (voiture par joueur)</SelectItem>
-                      <SelectItem value="ALL_USERS">ALL_USERS (même voiture pour tous)</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    onClick={() => createNewRace()}
-                    className="w-full sm:w-auto cursor-pointer"
-                    size="sm"
-                    disabled={actionsDisabled}
-                    title={actionsDisabled ? "Cette partie n'est pas active aujourd'hui" : undefined}
-                  >
-                    Créer une nouvelle course
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => createNewRace()}
+                  className="w-full sm:w-auto cursor-pointer"
+                  size="sm"
+                  disabled={actionsDisabled}
+                  title={actionsDisabled ? "Cette partie n'est pas active aujourd'hui" : undefined}
+                >
+                  Créer une nouvelle course
+                </Button>
               </div>
             </div>
 
