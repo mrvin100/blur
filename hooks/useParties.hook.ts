@@ -7,7 +7,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { partyService } from '@/services';
 import { queryKeys } from '@/lib/query-keys';
-import type { Party } from '@/types/party.types';
+import type { Party, PartyMemberInfo, AddPartyMemberDto, UpdatePartyMemberRoleDto, PartyRole } from '@/types/party.types';
 import type { PartyActiveStatus } from '@/types/party-active.types';
 import type { PartyMember } from '@/types/party-member.types';
 import { toast } from 'sonner';
@@ -120,6 +120,143 @@ export const useDeactivateParty = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.parties.lists() });
       toast.success('Partie désactivée avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+// ==================== PARTY MEMBER MANAGEMENT HOOKS ====================
+
+/**
+ * Get party members with their roles
+ */
+export const usePartyMembersWithRoles = (partyId: number | string) => {
+  return useQuery<PartyMemberInfo[], Error>({
+    queryKey: [...queryKeys.parties.detail(partyId), 'members-roles'],
+    queryFn: () => partyService.getMembersWithRoles(partyId),
+    enabled: !!partyId,
+  });
+};
+
+/**
+ * Check if current user can manage the party
+ */
+export const useCanManageParty = (partyId: number | string) => {
+  return useQuery<boolean, Error>({
+    queryKey: [...queryKeys.parties.detail(partyId), 'can-manage'],
+    queryFn: () => partyService.canManage(partyId),
+    enabled: !!partyId,
+  });
+};
+
+/**
+ * Get current user's role in the party
+ */
+export const useMyPartyRole = (partyId: number | string) => {
+  return useQuery<PartyRole | 'NOT_MEMBER', Error>({
+    queryKey: [...queryKeys.parties.detail(partyId), 'my-role'],
+    queryFn: () => partyService.getMyRole(partyId),
+    enabled: !!partyId,
+  });
+};
+
+/**
+ * Add member to party mutation
+ */
+export const useAddPartyMember = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ partyId, dto }: { partyId: number | string; dto: AddPartyMemberDto }) =>
+      partyService.addMember(partyId, dto),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.partyId) });
+      toast.success('Membre ajouté avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Update member role mutation
+ */
+export const useUpdateMemberRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ partyId, userId, dto }: { partyId: number | string; userId: number | string; dto: UpdatePartyMemberRoleDto }) =>
+      partyService.updateMemberRole(partyId, userId, dto),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.partyId) });
+      toast.success('Rôle mis à jour avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Remove member from party mutation
+ */
+export const useRemovePartyMember = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ partyId, userId }: { partyId: number | string; userId: number | string }) =>
+      partyService.removeMember(partyId, userId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.partyId) });
+      toast.success('Membre retiré avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Promote member to co-host mutation
+ */
+export const usePromoteToCoHost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ partyId, userId }: { partyId: number | string; userId: number | string }) =>
+      partyService.promoteToCoHost(partyId, userId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.partyId) });
+      toast.success('Membre promu co-hôte avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Demote co-host to participant mutation
+ */
+export const useDemoteCoHost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ partyId, userId }: { partyId: number | string; userId: number | string }) =>
+      partyService.demoteCoHost(partyId, userId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.partyId) });
+      toast.success('Co-hôte rétrogradé avec succès');
+    },
+    onError: (error: Error) => handleApiError(error),
+  });
+};
+
+/**
+ * Transfer party ownership mutation
+ */
+export const useTransferOwnership = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ partyId, newHostId }: { partyId: number | string; newHostId: number | string }) =>
+      partyService.transferOwnership(partyId, newHostId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.parties.detail(variables.partyId) });
+      toast.success('Propriété transférée avec succès');
     },
     onError: (error: Error) => handleApiError(error),
   });
