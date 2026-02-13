@@ -26,6 +26,18 @@ export function ScoreForm({ raceId, disabled = false }: ScoreFormProps) {
   const submitScore = useSubmitScore()
   const updateScore = useUpdateScore()
 
+  // When a racer is selected, pre-fill the rank field if they already have a score
+  useEffect(() => {
+    if (selectedRacer && scores) {
+      const existingScore = scores.find((s) => s.user?.id === Number(selectedRacer))
+      if (existingScore) {
+        setScore(existingScore.rank.toString())
+      } else {
+        setScore("")
+      }
+    }
+  }, [selectedRacer, scores])
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,6 +49,20 @@ export function ScoreForm({ raceId, disabled = false }: ScoreFormProps) {
 
     if (!selectedRacer || !score || !raceId) {
       toast.error("Veuillez sélectionner un joueur et entrer un rang");
+      return
+    }
+
+    // Validate rank is within valid bounds (1 to maxParticipants)
+    const rankValue = Number(score)
+    const maxParticipants = race?.racers?.length || 0
+    
+    if (rankValue < 1) {
+      toast.error("Le rang doit être au minimum 1")
+      return
+    }
+    
+    if (maxParticipants > 0 && rankValue > maxParticipants) {
+      toast.error(`Le rang doit être au maximum ${maxParticipants} (nombre de participants)`)
       return
     }
 
@@ -107,10 +133,12 @@ export function ScoreForm({ raceId, disabled = false }: ScoreFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="score">Rang</Label>
+          <Label htmlFor="score">Rang {race?.racers?.length ? `(1 à ${race.racers.length})` : ''}</Label>
           <Input
             id="score"
             type="number"
+            min={1}
+            max={race?.racers?.length || undefined}
             value={score}
             onChange={(e) => setScore(e.target.value)}
             placeholder="Entrer le rang"
@@ -120,7 +148,11 @@ export function ScoreForm({ raceId, disabled = false }: ScoreFormProps) {
       </div>
 
       <Button type="submit" disabled={loading || disabled} className="w-full md:w-auto">
-        {loading ? "Ajout en cours..." : "Ajouter le rang"}
+        {loading 
+          ? "Enregistrement en cours..." 
+          : (selectedRacer && scores?.find((s) => s.user?.id === Number(selectedRacer)) 
+              ? "Modifier le rang" 
+              : "Ajouter le rang")}
       </Button>
     </form>
   )

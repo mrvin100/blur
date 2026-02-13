@@ -5,6 +5,7 @@
 export interface Score {
   id: number;
   value: number;
+  rank: number;
   user?: {
     id: number;
     userName: string;
