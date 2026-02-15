@@ -79,12 +79,6 @@ export interface Racer {
   email?: string;
 }
 
-export interface Participant {
-  id: number;
-  userName: string;
-  email?: string;
-}
-
 export interface RaceParameter {
   id: number;
   name: string;
