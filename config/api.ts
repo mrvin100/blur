@@ -4,9 +4,9 @@ export const API_CONFIG: APIConfig = {
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080',
   endpoints: {
     auth: {
-      login: '/auth/login',
-      logout: '/auth/logout',
-      session: '/auth/session',
+      login: '/v1/auth/login',
+      logout: '/v1/auth/logout',
+      session: '/v1/auth/session',
     },
   },
 };
@@ -18,9 +18,9 @@ const getEnvironmentConfig = () => {
   return {
     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? (isDevelopment ? 'http://localhost:3000' : ''),
     auth: {
-      login: process.env.NEXT_PUBLIC_AUTH_API_LOGIN ?? '/auth/login',
-      logout: process.env.NEXT_PUBLIC_AUTH_API_LOGOUT ?? '/auth/logout',
-      session: process.env.NEXT_PUBLIC_AUTH_API_SESSION ?? '/auth/session',
+      login: process.env.NEXT_PUBLIC_AUTH_API_LOGIN ?? '/v1/auth/login',
+      logout: process.env.NEXT_PUBLIC_AUTH_API_LOGOUT ?? '/v1/auth/logout',
+      session: process.env.NEXT_PUBLIC_AUTH_API_SESSION ?? '/v1/auth/session',
     }
   };
 };

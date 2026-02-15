@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useTheme } from 'next-themes';
 import { Settings, User, Bell, Shield, Palette, Globe, Eye, EyeOff } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,19 @@ export default function SettingsPage() {
   const { isAdmin } = useAuth();
   const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const updateProfile = useUpdateUserProfile();
+  const { theme, setTheme } = useTheme();
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Initialize dark mode state based on current theme
+  useEffect(() => {
+    setIsDarkMode(theme === 'dark');
+  }, [theme]);
+
+  // Handle dark mode toggle
+  const handleDarkModeToggle = (checked: boolean) => {
+    setIsDarkMode(checked);
+    setTheme(checked ? 'dark' : 'light');
+  };
 
   const profileSchema = z.object({
     userName: z.string().min(3, 'Username must be at least 3 characters'),
@@ -398,10 +412,14 @@ export default function SettingsPage() {
                 <div className="space-y-0.5 flex-1 min-w-0">
                   <FieldLabel className="text-xs sm:text-sm md:text-base">Dark Mode</FieldLabel>
                   <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
-                    Use system theme setting
+                    Enable dark mode theme
                   </p>
                 </div>
-                <Switch defaultChecked className="shrink-0" />
+                <Switch 
+                  checked={isDarkMode} 
+                  onCheckedChange={handleDarkModeToggle}
+                  className="shrink-0" 
+                />
               </div>
             </CardContent>
           </Card>

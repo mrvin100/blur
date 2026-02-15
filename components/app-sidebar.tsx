@@ -69,11 +69,6 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
 
   const secondaryItems = [
     {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: Settings,
-    },
-    {
       title: "Help",
       url: "#",
       icon: HelpCircle,

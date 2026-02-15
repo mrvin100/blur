@@ -42,7 +42,7 @@ export function SignInForm({
     try {
       // Call Spring Boot backend directly using centralized auth API client
       const response = await authApiClient
-        .post("api/auth/login", {
+        .post("api/v1/auth/login", {
           json: {
             userName: data.username,
             password: data.password,

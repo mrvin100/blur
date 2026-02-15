@@ -50,7 +50,7 @@ export function SignUpForm({
   const onSubmit = async (data: SignUpFormData) => {
     try {
       const response = await authApiClient
-        .post('api/auth/register', {
+        .post('api/v1/auth/register', {
           json: {
             userName: data.username,
             email: data.email,
