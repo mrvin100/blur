@@ -26,6 +26,7 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field"
+import { Eye, EyeOff } from "lucide-react"
 
 export type UserFormDialogMode = "create" | "update"
 
@@ -176,27 +177,46 @@ export function UserFormDialog({
               <Controller
                 name="password"
                 control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>
-                      {mode === "create" ? "Password" : "New password"}
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id={field.name}
-                      type="password"
-                      aria-invalid={fieldState.invalid}
-                      placeholder={mode === "create" ? "********" : "Leave empty to keep"}
-                      autoComplete="new-password"
-                    />
-                    <FieldDescription>
-                      {mode === "create"
-                        ? "Minimum 6 characters."
-                        : "Leave empty to keep current password."}
-                    </FieldDescription>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
+                render={({ field, fieldState }) => {
+                  const [showPassword, setShowPassword] = React.useState(false);
+                  
+                  return (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        {mode === "create" ? "Password" : "New password"}
+                      </FieldLabel>
+                      <div className="relative">
+                        <Input
+                          {...field}
+                          id={field.name}
+                          type={showPassword ? "text" : "password"}
+                          aria-invalid={fieldState.invalid}
+                          placeholder={mode === "create" ? "********" : "Leave empty to keep"}
+                          autoComplete="new-password"
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? (
+                            <Eye className="h-4 w-4" />
+                          ) : (
+                            <EyeOff className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                      <FieldDescription>
+                        {mode === "create"
+                          ? "Minimum 6 characters."
+                          : "Leave empty to keep current password."}
+                      </FieldDescription>
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  );
+                }}
               />
 
               <Controller

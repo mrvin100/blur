@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RaceDetailsModal, CarAttributions, RacesList, CurrentRace, ScoreForm, RaceMap } from "@/modules/party"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useParty, useRacesByParty, useCreateRace, usePartyActionability } from "@/hooks"
 import { Race } from "@/types/party.types"
 import { toast } from "sonner"
@@ -16,6 +16,7 @@ export function RaceManagement() {
   const [selectedRace, setSelectedRace] = useState<string | null>(null)
   const [isRaceDetailsModalOpen, setIsRaceDetailsModalOpen] = useState(false)
   const { partyId } = useParams()
+  const router = useRouter()
   const numericPartyId = Number(partyId)
 
   const { data: party, refetch: refetchParty, isError: isPartyError, error: partyError } = useParty(numericPartyId)
@@ -25,6 +26,18 @@ export function RaceManagement() {
 
   const actionsDisabled = partyActionability.isLoading || !partyActionability.isActionable
   const actionsDisabledReason = partyActionability.reason
+  
+  // Redirect to today's party if this party doesn't exist
+  useEffect(() => {
+    if (isPartyError && partyError) {
+      // Check if it's a 404 error (party not found)
+      const errorMessage = partyError?.message?.toLowerCase() || '';
+      if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+        toast.error("Cette partie n'existe pas. Redirection vers la partie du jour...");
+        router.replace('/dashboard/party');
+      }
+    }
+  }, [isPartyError, partyError, router])
   
   useEffect(() => {
     if (races && races.length > 0) {
