@@ -1,4 +1,4 @@
-import { HeroSection, StatsSection } from "@/modules/home";
+import { HeroSection, StatsSection, ContributorsSection } from "@/modules/home";
 
 export default function Page() {
   return (
@@ -6,6 +6,7 @@ export default function Page() {
       <div className="flex-1 pb-16">
         <HeroSection />
         <StatsSection />
+        <ContributorsSection />
       </div>
     </main>
   );

@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Loader2, Check, X } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Eye, EyeOff, Loader2, Check, X, MessageCircle } from "lucide-react";
 
 export function SignUpForm({
   className,
@@ -135,6 +136,24 @@ export function SignUpForm({
                   Enter your details to get started with Blur
                 </p>
               </div>
+              
+              <Alert className="bg-primary/5 border-primary/20">
+                <MessageCircle className="h-4 w-4" />
+                <AlertTitle>Self-registration is currently disabled</AlertTitle>
+                <AlertDescription className="text-sm">
+                  To create an account, please{" "}
+                  <a 
+                    href="https://t.me/+b7cUePP1Q8BlMTlk" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="font-medium underline underline-offset-4 hover:text-primary"
+                  >
+                    join our Telegram group
+                  </a>
+                  {" "}and an admin will add you to the app.
+                </AlertDescription>
+              </Alert>
+              
               <div className="grid gap-2">
                 <Label htmlFor="username">Username</Label>
                 <Input

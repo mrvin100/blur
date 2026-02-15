@@ -167,7 +167,7 @@ export function RaceManagement() {
                 <Card className="border shadow-md">
                   <CardHeader className="bg-muted/30 p-3 sm:p-4 md:p-6">
                     <CardTitle className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 sm:gap-4">
-                      <span className="text-base sm:text-lg md:text-xl">Course {party?.id ? `#${party.id}` : ""}</span>
+                      <span className="text-base sm:text-lg md:text-xl">Course {currentRace?.id.toString() ? `#${currentRace?.id.toString()}` : "N/A"}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 sm:p-4 md:p-6">

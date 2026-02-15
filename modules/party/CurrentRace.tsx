@@ -96,7 +96,7 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-xl font-semibold">Course du {race?.createdAt && formatDate(race.createdAt)}</h2>
+            <h2 className="text-xl font-semibold">Course #{race?.id} - {race?.createdAt && formatDate(race.createdAt)}</h2>
             {getStatusBadge()}
           </div>
           {race?.createdAt && (
