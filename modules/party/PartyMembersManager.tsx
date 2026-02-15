@@ -153,6 +153,13 @@ export function PartyMembersManager({ partyId }: PartyMembersManagerProps) {
           </CardTitle>
           <CardDescription>
             {members?.length || 0} membre{(members?.length || 0) > 1 ? 's' : ''} dans cette partie
+            {canManage && (
+              <span className="block mt-1 text-xs">
+                {isHost 
+                  ? "En tant qu'hôte, vous pouvez promouvoir, rétrograder, transférer la propriété et retirer des membres" 
+                  : "En tant que co-hôte, vous pouvez retirer les participants"}
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -182,8 +189,13 @@ export function PartyMembersManager({ partyId }: PartyMembersManagerProps) {
                   {canManage && member.role !== 'HOST' && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8 px-2 gap-1"
+                        >
                           <MoreHorizontal className="h-4 w-4" />
+                          <span className="text-xs hidden sm:inline">Actions</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">

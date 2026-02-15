@@ -261,15 +261,25 @@ export function CurrentRace({ raceId, partyId }: CurrentRaceProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {race?.racers?.map((racer) => {
-                  const score = scores?.find((s) => s.user?.id === racer.id)
-                  return (
+                {race?.racers
+                  ?.map((racer) => ({
+                    racer,
+                    score: scores?.find((s) => s.user?.id === racer.id)
+                  }))
+                  .sort((a, b) => {
+                    // Sort by rank (ascending: 1st, 2nd, 3rd...)
+                    // Put racers without scores at the end
+                    if (!a.score && !b.score) return 0
+                    if (!a.score) return 1
+                    if (!b.score) return -1
+                    return a.score.value - b.score.value
+                  })
+                  .map(({ racer, score }) => (
                     <TableRow key={racer.id.toString()}>
                       <TableCell className="font-medium">{racer.userName}</TableCell>
                       <TableCell>{score ? score.value : "-"}</TableCell>
                     </TableRow>
-                  )
-                })}
+                  ))}
               </TableBody>
             </Table>
           </div>

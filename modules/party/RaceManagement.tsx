@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { RaceDetailsModal, CarAttributions, RacesList, CurrentRace, ScoreForm, RaceMap } from "@/modules/party"
+import { RaceDetailsModal, CarAttributions, RacesList, CurrentRace, ScoreForm, RaceMap, PartyMembersManager } from "@/modules/party"
 import { useParams, useRouter } from "next/navigation"
 import { useParty, useRacesByParty, useCreateRace, usePartyActionability } from "@/hooks"
 import { Race } from "@/types/party.types"
@@ -148,7 +148,7 @@ export function RaceManagement() {
             </div>
 
             <Tabs defaultValue="current" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 h-auto">
+              <TabsList className="grid w-full grid-cols-3 h-auto">
                 <TabsTrigger value="current" className="cursor-pointer text-xs sm:text-sm py-2 px-2 sm:px-4">
                   <span className="hidden sm:inline">Course Actuelle</span>
                   <span className="sm:hidden">Actuelle</span>
@@ -156,6 +156,10 @@ export function RaceManagement() {
                 <TabsTrigger value="history" className="cursor-pointer text-xs sm:text-sm py-2 px-2 sm:px-4">
                   <span className="hidden sm:inline">Historique des Courses</span>
                   <span className="sm:hidden">Historique</span>
+                </TabsTrigger>
+                <TabsTrigger value="members" className="cursor-pointer text-xs sm:text-sm py-2 px-2 sm:px-4">
+                  <span className="hidden sm:inline">Membres</span>
+                  <span className="sm:hidden">Membres</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -207,6 +211,10 @@ export function RaceManagement() {
                     <RacesList races={races || []} onRaceSelect={handleRaceSelect} />
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="members">
+                <PartyMembersManager partyId={numericPartyId} />
               </TabsContent>
             </Tabs>
           </div>
