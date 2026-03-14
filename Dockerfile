@@ -24,8 +24,9 @@ COPY . .
 RUN pnpm build
 
 # Fix permissions for Next.js cache directory (avoids EACCES errors)
+# Limit chown scope to .next to keep builds fast
 RUN mkdir -p .next/cache/images && \
-    chown -R node:node .next .next/cache /app
+    chown -R node:node .next .next/cache
 
 # ---- Runtime ----
 # Use non-root user for better security
